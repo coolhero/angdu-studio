@@ -1,9 +1,0 @@
-{
-  "extends": "../../tsconfig.json",
-  "compilerOptions": {
-    "composite": true,
-    "outDir": "../../dist-electron/shared",
-    "lib": ["ESNext"]
-  },
-  "include": ["**/*.ts"]
-}
