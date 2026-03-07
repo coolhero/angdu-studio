@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(reverse-spec)",
+      "Skill(smart-sdd)",
+      "Bash(git fetch:*)",
+      "Bash(grep:*)",
+      "Bash(.specify/scripts/bash/create-new-feature.sh:*)",
+      "Bash(.specify/scripts/bash/setup-plan.sh:*)",
+      "Bash(.specify/scripts/bash/update-agent-context.sh claude:*)",
+      "Bash(.specify/scripts/bash/check-prerequisites.sh:*)",
+      "Bash(mkdir:*)",
+      "Bash(npm:*)",
+      "Bash(pnpm create:*)",
+      "Read(//private/tmp/**)",
+      "Bash(npx create-electron-vite@latest test-ev --template react-ts)",
+      "Bash(pnpm install:*)",
+      "Bash(pnpm approve-builds:*)",
+      "Bash(python3:*)",
+      "Bash(npx vitest:*)",
+      "Bash(npx electron-vite:*)",
+      "Bash(npx tsc:*)",
+      "Bash(chmod +x:*)",
+      "Bash(bash:*)",
+      "Bash(git add:*)"
+    ]
+  }
+}
