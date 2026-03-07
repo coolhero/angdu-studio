@@ -1,0 +1,69 @@
+{
+  "common": {
+    "ok": "OK",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "close": "Fechar",
+    "confirm": "Confirmar",
+    "loading": "A carregar...",
+    "error": "Erro",
+    "success": "Sucesso",
+    "settings": "Definições",
+    "search": "Pesquisar",
+    "copy": "Copiar",
+    "paste": "Colar",
+    "cut": "Cortar",
+    "selectAll": "Selecionar tudo",
+    "undo": "Desfazer",
+    "redo": "Refazer"
+  },
+  "app": {
+    "name": "Cherry Studio",
+    "description": "Assistente de IA para computador",
+    "quit": "Sair",
+    "about": "Sobre o Cherry Studio",
+    "preferences": "Preferências",
+    "checkForUpdates": "Procurar atualizações"
+  },
+  "menu": {
+    "file": "Ficheiro",
+    "edit": "Editar",
+    "view": "Ver",
+    "window": "Janela",
+    "help": "Ajuda",
+    "minimize": "Minimizar",
+    "zoom": "Zoom",
+    "front": "Trazer tudo para a frente",
+    "toggleDevTools": "Alternar ferramentas de programador",
+    "reload": "Recarregar",
+    "fullscreen": "Alternar ecrã inteiro",
+    "zoomIn": "Ampliar",
+    "zoomOut": "Reduzir",
+    "resetZoom": "Tamanho real"
+  },
+  "tray": {
+    "show": "Mostrar",
+    "miniWindow": "Assistente rápido",
+    "quit": "Sair"
+  },
+  "settings": {
+    "title": "Definições",
+    "general": "Geral",
+    "appearance": "Aparência",
+    "language": "Idioma",
+    "theme": "Tema",
+    "themeLight": "Claro",
+    "themeDark": "Escuro",
+    "themeSystem": "Sistema",
+    "proxy": "Proxy",
+    "proxySystem": "Proxy do sistema",
+    "proxyFixed": "Proxy fixo",
+    "proxyDirect": "Ligação direta",
+    "shortcuts": "Atalhos de teclado",
+    "advanced": "Avançado",
+    "hardwareAcceleration": "Aceleração de hardware",
+    "hardwareAccelerationDesc": "Requer reinício para ter efeito"
+  }
+}

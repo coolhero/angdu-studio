@@ -1,0 +1,69 @@
+{
+  "common": {
+    "ok": "ОК",
+    "cancel": "Отмена",
+    "save": "Сохранить",
+    "delete": "Удалить",
+    "edit": "Редактировать",
+    "close": "Закрыть",
+    "confirm": "Подтвердить",
+    "loading": "Загрузка...",
+    "error": "Ошибка",
+    "success": "Успешно",
+    "settings": "Настройки",
+    "search": "Поиск",
+    "copy": "Копировать",
+    "paste": "Вставить",
+    "cut": "Вырезать",
+    "selectAll": "Выделить всё",
+    "undo": "Отменить",
+    "redo": "Повторить"
+  },
+  "app": {
+    "name": "Cherry Studio",
+    "description": "Настольный ИИ-ассистент",
+    "quit": "Выход",
+    "about": "О Cherry Studio",
+    "preferences": "Настройки",
+    "checkForUpdates": "Проверить обновления"
+  },
+  "menu": {
+    "file": "Файл",
+    "edit": "Редактирование",
+    "view": "Вид",
+    "window": "Окно",
+    "help": "Справка",
+    "minimize": "Свернуть",
+    "zoom": "Масштаб",
+    "front": "Все окна на передний план",
+    "toggleDevTools": "Инструменты разработчика",
+    "reload": "Перезагрузить",
+    "fullscreen": "Полноэкранный режим",
+    "zoomIn": "Увеличить",
+    "zoomOut": "Уменьшить",
+    "resetZoom": "Исходный размер"
+  },
+  "tray": {
+    "show": "Показать",
+    "miniWindow": "Быстрый ассистент",
+    "quit": "Выход"
+  },
+  "settings": {
+    "title": "Настройки",
+    "general": "Общие",
+    "appearance": "Внешний вид",
+    "language": "Язык",
+    "theme": "Тема",
+    "themeLight": "Светлая",
+    "themeDark": "Тёмная",
+    "themeSystem": "Системная",
+    "proxy": "Прокси",
+    "proxySystem": "Системный прокси",
+    "proxyFixed": "Фиксированный прокси",
+    "proxyDirect": "Прямое подключение",
+    "shortcuts": "Сочетания клавиш",
+    "advanced": "Дополнительно",
+    "hardwareAcceleration": "Аппаратное ускорение",
+    "hardwareAccelerationDesc": "Требуется перезапуск для применения"
+  }
+}

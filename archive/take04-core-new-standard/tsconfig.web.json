@@ -1,0 +1,24 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "composite": true,
+    "outDir": "./out",
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
+    "paths": {
+      "@renderer/*": ["./src/renderer/src/*"],
+      "@shared/*": ["./packages/shared/*"],
+      "@aiCore/*": ["./packages/aiCore/src/*"],
+      "@ai-sdk-provider/*": ["./packages/ai-sdk-provider/src/*"]
+    },
+    "resolveJsonModule": true
+  },
+  "include": [
+    "src/renderer/src/**/*.ts",
+    "src/renderer/src/**/*.tsx",
+    "src/renderer/src/**/*.json",
+    "packages/shared/**/*.ts",
+    "packages/aiCore/src/**/*.ts",
+    "packages/ai-sdk-provider/src/**/*.ts"
+  ]
+}

@@ -1,0 +1,69 @@
+{
+  "common": {
+    "ok": "OK",
+    "cancel": "Abbrechen",
+    "save": "Speichern",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "close": "Schließen",
+    "confirm": "Bestätigen",
+    "loading": "Laden...",
+    "error": "Fehler",
+    "success": "Erfolg",
+    "settings": "Einstellungen",
+    "search": "Suchen",
+    "copy": "Kopieren",
+    "paste": "Einfügen",
+    "cut": "Ausschneiden",
+    "selectAll": "Alles auswählen",
+    "undo": "Rückgängig",
+    "redo": "Wiederherstellen"
+  },
+  "app": {
+    "name": "Cherry Studio",
+    "description": "Desktop-KI-Assistent",
+    "quit": "Beenden",
+    "about": "Über Cherry Studio",
+    "preferences": "Einstellungen",
+    "checkForUpdates": "Nach Updates suchen"
+  },
+  "menu": {
+    "file": "Datei",
+    "edit": "Bearbeiten",
+    "view": "Ansicht",
+    "window": "Fenster",
+    "help": "Hilfe",
+    "minimize": "Minimieren",
+    "zoom": "Zoomen",
+    "front": "Alle nach vorne bringen",
+    "toggleDevTools": "Entwicklerwerkzeuge umschalten",
+    "reload": "Neu laden",
+    "fullscreen": "Vollbild umschalten",
+    "zoomIn": "Vergrößern",
+    "zoomOut": "Verkleinern",
+    "resetZoom": "Tatsächliche Größe"
+  },
+  "tray": {
+    "show": "Anzeigen",
+    "miniWindow": "Schnellassistent",
+    "quit": "Beenden"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "general": "Allgemein",
+    "appearance": "Erscheinungsbild",
+    "language": "Sprache",
+    "theme": "Design",
+    "themeLight": "Hell",
+    "themeDark": "Dunkel",
+    "themeSystem": "System",
+    "proxy": "Proxy",
+    "proxySystem": "System-Proxy",
+    "proxyFixed": "Fester Proxy",
+    "proxyDirect": "Direkte Verbindung",
+    "shortcuts": "Tastenkombinationen",
+    "advanced": "Erweitert",
+    "hardwareAcceleration": "Hardwarebeschleunigung",
+    "hardwareAccelerationDesc": "Neustart erforderlich, um wirksam zu werden"
+  }
+}

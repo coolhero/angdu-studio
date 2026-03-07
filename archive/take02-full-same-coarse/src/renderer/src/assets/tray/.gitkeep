@@ -1,0 +1,8 @@
+# Tray icon placeholder directory
+# Required icon files:
+# - trayTemplate.png    (macOS template icon, auto-inverts for light/dark)
+# - trayTemplate@2x.png (macOS Retina template icon)
+# - tray.ico             (Windows icon)
+# - tray.png             (Linux icon)
+#
+# Replace this file with actual icon assets before packaging.

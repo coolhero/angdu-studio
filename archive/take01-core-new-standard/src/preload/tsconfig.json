@@ -1,0 +1,10 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "composite": true,
+    "outDir": "../../dist-electron/preload",
+    "lib": ["ESNext", "DOM"],
+    "types": ["node"]
+  },
+  "include": ["**/*.ts"]
+}

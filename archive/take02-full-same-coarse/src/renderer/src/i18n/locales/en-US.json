@@ -1,0 +1,52 @@
+{
+  "app": {
+    "name": "Cherry Studio",
+    "description": "Multi-LLM AI Assistant Desktop Client"
+  },
+  "common": {
+    "ok": "OK",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "close": "Close",
+    "reload": "Reload",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "warning": "Warning",
+    "retry": "Retry"
+  },
+  "settings": {
+    "title": "Settings",
+    "general": "General",
+    "display": "Display",
+    "shortcuts": "Shortcuts",
+    "data": "Data",
+    "about": "About",
+    "language": "Language",
+    "theme": "Theme",
+    "theme_light": "Light",
+    "theme_dark": "Dark",
+    "theme_system": "System",
+    "launch_at_login": "Launch at Login",
+    "minimize_to_tray": "Minimize to Tray",
+    "send_with_enter": "Send with Enter",
+    "proxy": "Proxy",
+    "proxy_direct": "Direct",
+    "proxy_system": "System",
+    "proxy_manual": "Manual",
+    "data_path": "Data Path",
+    "change_data_path": "Change",
+    "clear_cache": "Clear Cache",
+    "check_update": "Check for Updates",
+    "version": "Version",
+    "font_size": "Font Size",
+    "window_opacity": "Window Opacity"
+  },
+  "error": {
+    "something_went_wrong": "Something went wrong",
+    "unexpected_error": "An unexpected error occurred. Please try reloading the application.",
+    "reload_app": "Reload Application"
+  }
+}
