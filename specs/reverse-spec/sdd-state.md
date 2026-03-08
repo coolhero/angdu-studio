@@ -7,7 +7,7 @@
 **Scope**: core
 **Active Tiers**: T1
 **Created**: 2026-03-08T00:00:00
-**Last Updated**: 2026-03-08T00:02:00
+**Last Updated**: 2026-03-09T00:01:00
 **Constitution Version**: 1.0.0
 
 ---
@@ -29,7 +29,7 @@
 |------------|-------------|------|---------|------|-------|---------|-----------|--------|-------|--------|
 | F001 | app-core | T1 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | completed |
 | F002 | ai-provider | T1 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | completed |
-| F003 | chat-core | T1 | | | | | | | | pending |
+| F003 | chat-core | T1 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | | in_progress |
 | F005 | chat-ui | T1 | | | | | | | | pending |
 | F004 | settings-data | T2 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | deferred |
 | F006 | mcp-tools | T2 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | deferred |
@@ -72,6 +72,12 @@
 
 | Step | Status | Started | Completed | Notes |
 |------|--------|---------|-----------|-------|
+| specify | ✅ | 03-09 | 03-09 | 8 US, 24 FR, 10 SC, SBI 20/20 P1/P2 mapped |
+| plan | ✅ | 03-09 | 03-09 | 10 phases, 3 stores, 6 services, 9 entity types, Dexie 4-table schema |
+| tasks | ✅ | 03-09 | 03-09 | 42 tasks, 11 phases, 8 user stories, 4 parallel groups |
+| analyze | ✅ | 03-09 | 03-09 | 0 CRITICAL, 0 HIGH, 3 MEDIUM, 3 LOW. 24/24 FR coverage (100%). Constitution 8/8 pass |
+| implement | ✅ | 03-09 | 03-09 | 17 files created, 4 modified. Tests: 126/126 pass (45 new). Types: OK. 4 types, 6 services, 3 stores, 1 database, 1 migration, 3 test files, i18n keys, demo script |
+| verify | ✅ | 03-09 | 03-09 | Tests: 126/126 pass, Build: OK, Lint: 0 errors, SBI: 20/20 (100%), Cross-feature: 5/5 pass, Demo CI: OK |
 
 ### F005-chat-ui
 
@@ -86,7 +92,7 @@
 |------------|---------------|---------------|--------|--------|
 | F001 | 001-app-core | specs/001-app-core/ | 001-app-core | |
 | F002 | 002-ai-provider | specs/002-ai-provider/ | 002-ai-provider | |
-| F003 | | | | |
+| F003 | 003-chat-core | specs/003-chat-core/ | 003-chat-core | |
 | F005 | | | | |
 | F004 | | | | |
 | F006 | | | | |
