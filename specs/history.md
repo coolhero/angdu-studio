@@ -48,3 +48,14 @@
 | Feature Granularity | Standard | 12 Features |
 | Tier Adjustments | None — accepted AI recommendation as-is | T1: app-core, ai-provider, chat-core, chat-ui; T2: mcp-tools, knowledge, settings-data; T3: agents, memory, notes, translate, paintings |
 | Demo Groups | 4 groups defined | DG-01 Basic Chat, DG-02 Knowledge-Enhanced Chat, DG-03 Agent Workflow, DG-04 Productivity Tools |
+
+---
+
+## [2026-03-08] /smart-sdd pipeline — Constitution
+
+### Constitution
+
+| Decision | Details |
+|----------|---------|
+| Constitution Version | 1.0.0 |
+| Key Modifications | Added Principle VIII: Internationalization (i18n) — Korean (ko) default, English (en) only |

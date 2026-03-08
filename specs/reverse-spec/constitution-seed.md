@@ -95,7 +95,14 @@ Cherry Studio uses Redux Toolkit with ~25 slices, redux-persist for hydration, a
 - Schema migrations must be forward-compatible and non-destructive
 - Drizzle schema changes require migration files
 
-### 3.5 Streaming Requirements
+### 3.5 Internationalization (i18n)
+
+- **Supported languages**: Korean (ko), English (en) — no other locales
+- **Default language**: Korean (ko)
+- All user-facing text must use i18next translation keys
+- Locale files: `ko.json` and `en.json` only
+
+### 3.6 Streaming Requirements
 
 - LLM responses are streamed token-by-token using the Vercel AI SDK
 - UI must handle incremental rendering without full re-renders
