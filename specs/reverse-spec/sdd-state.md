@@ -27,7 +27,7 @@
 
 | Feature ID | Feature Name | Tier | specify | plan | tasks | analyze | implement | verify | merge | Status |
 |------------|-------------|------|---------|------|-------|---------|-----------|--------|-------|--------|
-| F001 | app-core | T1 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | | verified |
+| F001 | app-core | T1 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | completed |
 | F002 | ai-provider | T1 | | | | | | | | pending |
 | F003 | chat-core | T1 | | | | | | | | pending |
 | F005 | chat-ui | T1 | | | | | | | | pending |
@@ -54,6 +54,7 @@
 | analyze | ✅ | 03-08 | 03-08 | 3 HIGH issues fixed |
 | implement | ✅ | 03-08 | 03-08 | 33 files, 11 services, 57 IPC channels |
 | verify | ✅ | 03-08 | 03-08 | Tests: 32/32 pass, Build: OK, SBI: 15/15 (100%), Demo: stable 15s |
+| merge | ✅ | 03-08 | 03-08 | Merged to main via --no-ff |
 
 ### F002-ai-provider
 
