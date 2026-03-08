@@ -136,6 +136,92 @@ const api = {
   // Dev
   devTools: {
     toggle: (): Promise<void> => ipcRenderer.invoke(IpcChannel.System_ToggleDevTools)
+  },
+
+  // ── F002: Anthropic OAuth ──
+  anthropic: {
+    startOAuthFlow: (): Promise<{ url: string }> =>
+      ipcRenderer.invoke(IpcChannel.Anthropic_StartOAuthFlow),
+    completeOAuthWithCode: (code: string): Promise<{ accessToken: string; refreshToken: string }> =>
+      ipcRenderer.invoke(IpcChannel.Anthropic_CompleteOAuthWithCode, code),
+    cancelOAuthFlow: (): Promise<void> =>
+      ipcRenderer.invoke(IpcChannel.Anthropic_CancelOAuthFlow),
+    getAccessToken: (): Promise<string> =>
+      ipcRenderer.invoke(IpcChannel.Anthropic_GetAccessToken),
+    hasCredentials: (): Promise<boolean> =>
+      ipcRenderer.invoke(IpcChannel.Anthropic_HasCredentials),
+    clearCredentials: (): Promise<void> =>
+      ipcRenderer.invoke(IpcChannel.Anthropic_ClearCredentials)
+  },
+
+  // ── F002: GitHub Copilot ──
+  copilot: {
+    getAuthMessage: (): Promise<{ userCode: string; verificationUri: string }> =>
+      ipcRenderer.invoke(IpcChannel.Copilot_GetAuthMessage),
+    getCopilotToken: (): Promise<string> =>
+      ipcRenderer.invoke(IpcChannel.Copilot_GetCopilotToken),
+    saveCopilotToken: (token: string, expiresAt: number): Promise<void> =>
+      ipcRenderer.invoke(IpcChannel.Copilot_SaveCopilotToken, { token, expiresAt }),
+    getToken: (): Promise<string | null> =>
+      ipcRenderer.invoke(IpcChannel.Copilot_GetToken),
+    logout: (): Promise<void> =>
+      ipcRenderer.invoke(IpcChannel.Copilot_Logout),
+    getUser: (): Promise<{ login: string; name?: string } | null> =>
+      ipcRenderer.invoke(IpcChannel.Copilot_GetUser)
+  },
+
+  // ── F002: AngduIN OAuth ──
+  angduin: {
+    saveToken: (accessToken: string, refreshToken: string): Promise<void> =>
+      ipcRenderer.invoke(IpcChannel.AngduIN_SaveToken, { accessToken, refreshToken }),
+    hasToken: (): Promise<boolean> =>
+      ipcRenderer.invoke(IpcChannel.AngduIN_HasToken),
+    getBalance: (): Promise<{ credits: number; plan: string }> =>
+      ipcRenderer.invoke(IpcChannel.AngduIN_GetBalance),
+    logout: (): Promise<void> =>
+      ipcRenderer.invoke(IpcChannel.AngduIN_Logout),
+    startOAuthFlow: (): Promise<void> =>
+      ipcRenderer.invoke(IpcChannel.AngduIN_StartOAuthFlow),
+    exchangeToken: (code: string): Promise<{ accessToken: string; refreshToken: string }> =>
+      ipcRenderer.invoke(IpcChannel.AngduIN_ExchangeToken, code)
+  },
+
+  // ── F002: Gemini Files ──
+  gemini: {
+    uploadFile: (filePath: string, mimeType: string, apiKey: string): Promise<{ name: string; uri: string }> =>
+      ipcRenderer.invoke(IpcChannel.Gemini_UploadFile, { filePath, mimeType, apiKey }),
+    base64File: (name: string, apiKey: string): Promise<string> =>
+      ipcRenderer.invoke(IpcChannel.Gemini_Base64File, { name, apiKey }),
+    retrieveFile: (name: string, apiKey: string): Promise<{ state: string; uri: string }> =>
+      ipcRenderer.invoke(IpcChannel.Gemini_RetrieveFile, { name, apiKey }),
+    listFiles: (apiKey: string): Promise<Array<{ name: string; uri: string; state: string }>> =>
+      ipcRenderer.invoke(IpcChannel.Gemini_ListFiles, { apiKey }),
+    deleteFile: (name: string, apiKey: string): Promise<void> =>
+      ipcRenderer.invoke(IpcChannel.Gemini_DeleteFile, { name, apiKey })
+  },
+
+  // ── F002: Vertex AI ──
+  vertexai: {
+    getAuthHeaders: (projectId: string, clientEmail: string, privateKey: string): Promise<Record<string, string>> =>
+      ipcRenderer.invoke(IpcChannel.VertexAI_GetAuthHeaders, { projectId, clientEmail, privateKey }),
+    getAccessToken: (projectId: string, clientEmail: string, privateKey: string): Promise<string> =>
+      ipcRenderer.invoke(IpcChannel.VertexAI_GetAccessToken, { projectId, clientEmail, privateKey }),
+    clearAuthCache: (projectId: string, clientEmail?: string): Promise<void> =>
+      ipcRenderer.invoke(IpcChannel.VertexAI_ClearAuthCache, { projectId, clientEmail })
+  },
+
+  // ── F002: AES Encryption ──
+  aes: {
+    encrypt: (text: string, secretKey: string, iv: string): Promise<string> =>
+      ipcRenderer.invoke(IpcChannel.Aes_Encrypt, { text, secretKey, iv }),
+    decrypt: (encryptedData: string, secretKey: string, iv: string): Promise<string> =>
+      ipcRenderer.invoke(IpcChannel.Aes_Decrypt, { encryptedData, secretKey, iv })
+  },
+
+  // ── F002: AngduAI Signature ──
+  angduai: {
+    getSignature: (params: Record<string, string>): Promise<{ signature: string; timestamp: number }> =>
+      ipcRenderer.invoke(IpcChannel.Angduai_GetSignature, params)
   }
 }
 

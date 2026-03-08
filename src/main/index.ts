@@ -3,6 +3,7 @@ import { join } from 'path'
 import { existsSync, mkdirSync, writeFileSync } from 'fs'
 import process from 'node:process'
 import { registerIpc } from './ipc'
+import { registerProviderIpc } from './ipc/provider-ipc'
 import { configManager } from './services/ConfigManager'
 import { windowService } from './services/WindowService'
 import { themeService } from './services/ThemeService'
@@ -157,6 +158,7 @@ if (!gotTheLock) {
 
     // Register IPC handlers
     registerIpc(mainWindow)
+    registerProviderIpc()
 
     // Initialize services
     appMenuService.init()
