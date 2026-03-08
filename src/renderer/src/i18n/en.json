@@ -25,5 +25,11 @@
   "update.install": "Install Now",
   "update.later": "Later",
   "proxy.error": "Proxy configuration error",
-  "proxy.directFallback": "Falling back to direct connection"
+  "proxy.directFallback": "Falling back to direct connection",
+  "chat.rateLimit": "Please wait {{seconds}} seconds before sending again",
+  "chat.error.noModel": "No model configured",
+  "chat.error.streamFailed": "Streaming response failed",
+  "chat.defaultAssistant": "Default Assistant",
+  "chat.newTopic": "New Topic",
+  "chat.error.migrationFailed": "Database migration failed"
 }

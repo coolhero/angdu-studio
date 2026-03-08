@@ -25,5 +25,11 @@
   "update.install": "지금 설치",
   "update.later": "나중에",
   "proxy.error": "프록시 설정 오류",
-  "proxy.directFallback": "직접 연결로 전환됩니다"
+  "proxy.directFallback": "직접 연결로 전환됩니다",
+  "chat.rateLimit": "{{seconds}}초 후에 다시 시도해 주세요",
+  "chat.error.noModel": "모델이 설정되지 않았습니다",
+  "chat.error.streamFailed": "스트리밍 응답 실패",
+  "chat.defaultAssistant": "기본 어시스턴트",
+  "chat.newTopic": "새 대화",
+  "chat.error.migrationFailed": "데이터베이스 마이그레이션 실패"
 }
