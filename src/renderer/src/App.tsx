@@ -41,11 +41,10 @@ function App(): JSX.Element {
     setResolvedTheme(prefersDark ? 'dark' : 'light')
 
     // Listen for theme updates from main
-    const handler = (_event: unknown, resolved: 'dark' | 'light') => {
+    const cleanup = window.api.onThemeUpdated((resolved) => {
       setResolvedTheme(resolved)
-    }
-    // @ts-expect-error — accessing electron IPC directly for theme events
-    window.api._onThemeUpdated = handler
+    })
+    return cleanup
   }, [setResolvedTheme])
 
   if (!hydrated) {

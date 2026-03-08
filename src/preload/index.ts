@@ -53,6 +53,11 @@ const api = {
 
   // Theme
   setTheme: (theme: string): Promise<void> => ipcRenderer.invoke(IpcChannel.Theme_Set, theme),
+  onThemeUpdated: (cb: (resolved: 'dark' | 'light') => void): (() => void) => {
+    const handler = (_event: Electron.IpcRendererEvent, resolved: 'dark' | 'light') => cb(resolved)
+    ipcRenderer.on(IpcChannel.Theme_Updated, handler)
+    return () => ipcRenderer.removeListener(IpcChannel.Theme_Updated, handler)
+  },
 
   // Proxy
   setProxy: (url: string | undefined, bypassRules?: string): Promise<void> =>
