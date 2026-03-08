@@ -28,7 +28,7 @@
 | Feature ID | Feature Name | Tier | specify | plan | tasks | analyze | implement | verify | merge | Status |
 |------------|-------------|------|---------|------|-------|---------|-----------|--------|-------|--------|
 | F001 | app-core | T1 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | completed |
-| F002 | ai-provider | T1 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | | in_progress |
+| F002 | ai-provider | T1 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | completed |
 | F003 | chat-core | T1 | | | | | | | | pending |
 | F005 | chat-ui | T1 | | | | | | | | pending |
 | F004 | settings-data | T2 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | deferred |
@@ -66,6 +66,7 @@
 | analyze | ✅ | 03-08 | 03-08 | 0 CRITICAL, 1 HIGH (resolved), 2 MEDIUM (resolved), 2 LOW (resolved). Constitution updated v1.0.0→v1.0.1 |
 | implement | ✅ | 03-08 | 03-08 | 58/58 tasks, 27 files created, 3 files modified. Tests: 81/81 pass. Build: OK. |
 | verify | ✅ | 03-08 | 03-08 | Tests: 81/81 pass, Build: OK, Types: OK. SBI: 19/20 (95%, B025 partial). Cross-feature: 3/5 ready, 2/5 partial (deferred to F003/F006). Demo CI: pass. |
+| merge | ✅ | 03-08 | 03-08 | Merged to main via --no-ff |
 
 ### F003-chat-core
 
