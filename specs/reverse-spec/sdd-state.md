@@ -7,7 +7,7 @@
 **Scope**: core
 **Active Tiers**: T1
 **Created**: 2026-03-08T00:00:00
-**Last Updated**: 2026-03-09T00:01:00
+**Last Updated**: 2026-03-09T00:02:00
 **Constitution Version**: 1.0.0
 
 ---
@@ -29,7 +29,7 @@
 |------------|-------------|------|---------|------|-------|---------|-----------|--------|-------|--------|
 | F001 | app-core | T1 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | completed |
 | F002 | ai-provider | T1 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | completed |
-| F003 | chat-core | T1 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | | in_progress |
+| F003 | chat-core | T1 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | completed |
 | F005 | chat-ui | T1 | | | | | | | | pending |
 | F004 | settings-data | T2 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | deferred |
 | F006 | mcp-tools | T2 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | deferred |
@@ -78,6 +78,7 @@
 | analyze | ✅ | 03-09 | 03-09 | 0 CRITICAL, 0 HIGH, 3 MEDIUM, 3 LOW. 24/24 FR coverage (100%). Constitution 8/8 pass |
 | implement | ✅ | 03-09 | 03-09 | 17 files created, 4 modified. Tests: 126/126 pass (45 new). Types: OK. 4 types, 6 services, 3 stores, 1 database, 1 migration, 3 test files, i18n keys, demo script |
 | verify | ✅ | 03-09 | 03-09 | Tests: 126/126 pass, Build: OK, Lint: 0 errors, SBI: 20/20 (100%), Cross-feature: 5/5 pass, Demo CI: OK |
+| merge | ✅ | 03-09 | 03-09 | Merged to main via --no-ff |
 
 ### F005-chat-ui
 
