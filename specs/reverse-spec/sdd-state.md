@@ -7,7 +7,7 @@
 **Scope**: core
 **Active Tiers**: T1
 **Created**: 2026-03-08T00:00:00
-**Last Updated**: 2026-03-08T00:01:00
+**Last Updated**: 2026-03-08T00:02:00
 **Constitution Version**: 1.0.0
 
 ---
@@ -27,7 +27,7 @@
 
 | Feature ID | Feature Name | Tier | specify | plan | tasks | analyze | implement | verify | merge | Status |
 |------------|-------------|------|---------|------|-------|---------|-----------|--------|-------|--------|
-| F001 | app-core | T1 | | | | | | | | pending |
+| F001 | app-core | T1 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | | verified |
 | F002 | ai-provider | T1 | | | | | | | | pending |
 | F003 | chat-core | T1 | | | | | | | | pending |
 | F005 | chat-ui | T1 | | | | | | | | pending |
@@ -48,6 +48,12 @@
 
 | Step | Status | Started | Completed | Notes |
 |------|--------|---------|-----------|-------|
+| specify | ✅ | 03-08 | 03-08 | 8 US, 19 FR, 10 SC |
+| plan | ✅ | 03-08 | 03-08 | 12 phases, 15 services |
+| tasks | ✅ | 03-08 | 03-08 | 108 tasks |
+| analyze | ✅ | 03-08 | 03-08 | 3 HIGH issues fixed |
+| implement | ✅ | 03-08 | 03-08 | 33 files, 11 services, 57 IPC channels |
+| verify | ✅ | 03-08 | 03-08 | Tests: 32/32 pass, Build: OK, SBI: 15/15 (100%), Demo: stable 15s |
 
 ### F002-ai-provider
 
@@ -70,7 +76,7 @@
 
 | Feature ID | spec-kit Name | spec-kit Path | Branch | Merged |
 |------------|---------------|---------------|--------|--------|
-| F001 | | | | |
+| F001 | 001-app-core | specs/001-app-core/ | 001-app-core | |
 | F002 | | | | |
 | F003 | | | | |
 | F005 | | | | |
