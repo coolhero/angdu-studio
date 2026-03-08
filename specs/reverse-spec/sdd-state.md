@@ -28,7 +28,7 @@
 | Feature ID | Feature Name | Tier | specify | plan | tasks | analyze | implement | verify | merge | Status |
 |------------|-------------|------|---------|------|-------|---------|-----------|--------|-------|--------|
 | F001 | app-core | T1 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | completed |
-| F002 | ai-provider | T1 | | | | | | | | pending |
+| F002 | ai-provider | T1 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | | in_progress |
 | F003 | chat-core | T1 | | | | | | | | pending |
 | F005 | chat-ui | T1 | | | | | | | | pending |
 | F004 | settings-data | T2 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | deferred |
@@ -60,6 +60,12 @@
 
 | Step | Status | Started | Completed | Notes |
 |------|--------|---------|-----------|-------|
+| specify | ✅ | 03-08 | 03-08 | 8 US, 20 FR, 10 SC, SBI 20/20 (100%) |
+| plan | ✅ | 03-08 | 03-08 | 7 phases, 11 data models, 25 IPC channels |
+| tasks | ✅ | 03-08 | 03-08 | 58 tasks, 11 phases, 8 user stories |
+| analyze | ✅ | 03-08 | 03-08 | 0 CRITICAL, 1 HIGH (resolved), 2 MEDIUM (resolved), 2 LOW (resolved). Constitution updated v1.0.0→v1.0.1 |
+| implement | ✅ | 03-08 | 03-08 | 58/58 tasks, 27 files created, 3 files modified. Tests: 81/81 pass. Build: OK. |
+| verify | ✅ | 03-08 | 03-08 | Tests: 81/81 pass, Build: OK, Types: OK. SBI: 19/20 (95%, B025 partial). Cross-feature: 3/5 ready, 2/5 partial (deferred to F003/F006). Demo CI: pass. |
 
 ### F003-chat-core
 
@@ -78,7 +84,7 @@
 | Feature ID | spec-kit Name | spec-kit Path | Branch | Merged |
 |------------|---------------|---------------|--------|--------|
 | F001 | 001-app-core | specs/001-app-core/ | 001-app-core | |
-| F002 | | | | |
+| F002 | 002-ai-provider | specs/002-ai-provider/ | 002-ai-provider | |
 | F003 | | | | |
 | F005 | | | | |
 | F004 | | | | |

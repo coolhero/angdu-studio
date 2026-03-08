@@ -47,8 +47,9 @@ Extensible registries MUST manage pluggable providers (OCR, MCP servers, AI mode
 
 The project MUST use a dual-database strategy:
 
-- **SQLite (via Drizzle ORM)**: Persistent, structured data — agents, provider configs, knowledge base metadata, settings. Runs in the **main process only**.
+- **SQLite (via Drizzle ORM)**: Persistent, structured data — agents, knowledge base metadata, settings. Runs in the **main process only**.
 - **Dexie (IndexedDB)**: High-frequency, large-volume data — chat messages, conversation history, message blocks. Runs in the **renderer process only**.
+- **electron-store**: Lightweight user preferences and provider configurations. Acceptable for data managed via Zustand persist middleware in the renderer process.
 - Schema migrations MUST be forward-compatible and non-destructive
 - Drizzle schema changes require migration files
 
@@ -59,7 +60,7 @@ Tests MUST be written before implementation. Each Feature starts with failing te
 - Red-Green-Refactor cycle enforced
 - Tests serve as living documentation and prevent regressions
 - **Vitest** for unit and integration tests, **Playwright** for end-to-end tests
-- Test files co-located in `__tests__/` directories alongside source
+- Test files in `tests/` directory at project root (unit/, integration/ subdirectories)
 - Mock IPC and services at the boundary, not deep internals
 
 ### VII. Demo-Ready Delivery
@@ -135,7 +136,7 @@ The application MUST support exactly two languages: Korean (ko) and English (en)
 ### File Organization
 
 - Feature-based directory structure under `src/renderer/src/`
-- Services in `services/`, stores in `store/`, UI components in `components/`
+- Services in `services/`, stores in `stores/`, UI components in `components/`
 - Pages in `pages/`, organized by route
 - Shared types in a top-level `types/` directory
 - Constants and configuration in `config/`

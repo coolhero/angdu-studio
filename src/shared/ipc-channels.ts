@@ -84,5 +84,51 @@ export enum IpcChannel {
   Zoom_HandleFactor = 'zoom:handle-factor',
 
   // ── Crash Reporter ──
-  Crash_MockRenderer = 'crash:mock-renderer'
+  Crash_MockRenderer = 'crash:mock-renderer',
+
+  // ── F002: Provider Management ──
+  Provider_AddKey = 'provider:add-key',
+
+  // ── F002: GitHub Copilot Auth ──
+  Copilot_GetAuthMessage = 'copilot:get-auth-message',
+  Copilot_GetCopilotToken = 'copilot:get-copilot-token',
+  Copilot_SaveCopilotToken = 'copilot:save-copilot-token',
+  Copilot_GetToken = 'copilot:get-token',
+  Copilot_Logout = 'copilot:logout',
+  Copilot_GetUser = 'copilot:get-user',
+
+  // ── F002: AngduIN Auth ──
+  AngduIN_SaveToken = 'angduin:save-token',
+  AngduIN_HasToken = 'angduin:has-token',
+  AngduIN_GetBalance = 'angduin:get-balance',
+  AngduIN_Logout = 'angduin:logout',
+  AngduIN_StartOAuthFlow = 'angduin:start-oauth-flow',
+  AngduIN_ExchangeToken = 'angduin:exchange-token',
+
+  // ── F002: Gemini File Operations ──
+  Gemini_UploadFile = 'gemini:upload-file',
+  Gemini_Base64File = 'gemini:base64-file',
+  Gemini_RetrieveFile = 'gemini:retrieve-file',
+  Gemini_ListFiles = 'gemini:list-files',
+  Gemini_DeleteFile = 'gemini:delete-file',
+
+  // ── F002: Vertex AI Auth ──
+  VertexAI_GetAuthHeaders = 'vertexai:get-auth-headers',
+  VertexAI_GetAccessToken = 'vertexai:get-access-token',
+  VertexAI_ClearAuthCache = 'vertexai:clear-auth-cache',
+
+  // ── F002: Anthropic OAuth ──
+  Anthropic_StartOAuthFlow = 'anthropic:start-oauth-flow',
+  Anthropic_CompleteOAuthWithCode = 'anthropic:complete-oauth-with-code',
+  Anthropic_CancelOAuthFlow = 'anthropic:cancel-oauth-flow',
+  Anthropic_GetAccessToken = 'anthropic:get-access-token',
+  Anthropic_HasCredentials = 'anthropic:has-credentials',
+  Anthropic_ClearCredentials = 'anthropic:clear-credentials',
+
+  // ── F002: Encryption ──
+  Aes_Encrypt = 'aes:encrypt',
+  Aes_Decrypt = 'aes:decrypt',
+
+  // ── F002: AngduAI Signature ──
+  Angduai_GetSignature = 'angduai:get-signature'
 }

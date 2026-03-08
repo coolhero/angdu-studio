@@ -11,7 +11,7 @@ describe('IPC Channel Contract', () => {
   it('all channel names follow the namespace:action pattern', () => {
     const values = Object.values(IpcChannel)
     for (const channel of values) {
-      expect(channel).toMatch(/^[a-z-]+:[a-z-]+$/)
+      expect(channel).toMatch(/^[a-z-]+:[a-z0-9-]+$/)
     }
   })
 
@@ -23,7 +23,10 @@ describe('IPC Channel Contract', () => {
       'app', 'window', 'config', 'theme', 'proxy',
       'notification', 'system', 'miniwindow', 'tray',
       'update', 'shortcut', 'protocol', 'store-sync',
-      'zoom', 'crash'
+      'zoom', 'crash',
+      // F002 channel groups
+      'provider', 'copilot', 'angduin', 'gemini',
+      'vertexai', 'anthropic', 'aes', 'angduai'
     ]
 
     for (const prefix of expectedPrefixes) {
