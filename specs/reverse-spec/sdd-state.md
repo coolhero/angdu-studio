@@ -5,9 +5,9 @@
 **Domain**: app
 **Source Path**: /Users/coolhero/Develop/cherry-studio
 **Scope**: core
-**Active Tiers**: T1
+**Active Tiers**: T1,T2
 **Created**: 2026-03-08T00:00:00
-**Last Updated**: 2026-03-09T09:50:00
+**Last Updated**: 2026-03-09T12:00:00
 **Constitution Version**: 1.0.0
 
 ---
@@ -31,9 +31,9 @@
 | F002 | ai-provider | T1 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | completed |
 | F003 | chat-core | T1 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | completed |
 | F005 | chat-ui | T1 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | completed |
-| F004 | settings-data | T2 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | deferred |
-| F006 | mcp-tools | T2 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | deferred |
-| F007 | knowledge | T2 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | deferred |
+| F004 | settings-data | T2 | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | pending |
+| F006 | mcp-tools | T2 | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | pending |
+| F007 | knowledge | T2 | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | pending |
 | F008 | memory | T3 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | deferred |
 | F009 | agents | T3 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | deferred |
 | F010 | notes | T3 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | deferred |
@@ -117,6 +117,7 @@
 
 | Date/Time | Trigger Feature | Target File | Change Description |
 |-----------|----------------|-------------|-------------------|
+| 2026-03-09 | — | sdd-state.md | Scope expanded: T1 → T1,T2. Activated F004, F006, F007 |
 
 ---
 

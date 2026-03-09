@@ -92,7 +92,6 @@ const Message: React.FC<MessageProps> = ({
     >
       <div
         className={cn(
-          'max-w-3xl',
           isBubble && 'max-w-[80%]',
           isBubble && isUser && 'rounded-2xl rounded-br-sm bg-blue-500 px-4 py-2 text-white dark:bg-blue-600',
           isBubble && !isUser && 'rounded-2xl rounded-bl-sm bg-zinc-100 px-4 py-2 dark:bg-zinc-800'

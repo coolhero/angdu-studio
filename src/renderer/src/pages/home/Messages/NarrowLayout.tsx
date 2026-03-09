@@ -11,7 +11,7 @@ const NarrowLayout: React.FC<NarrowLayoutProps> = ({ children, narrowMode }) => 
     <div
       className={cn(
         'flex flex-1 flex-col overflow-hidden',
-        narrowMode ? 'mx-auto w-full max-w-2xl px-2' : 'px-4'
+        narrowMode ? 'mx-auto w-full max-w-2xl px-2' : ''
       )}
     >
       {children}

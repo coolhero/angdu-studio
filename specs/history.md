@@ -59,3 +59,14 @@
 |----------|---------|
 | Constitution Version | 1.0.0 |
 | Key Modifications | Added Principle VIII: Internationalization (i18n) — Korean (ko) default, English (en) only |
+
+---
+
+## [2026-03-09] /smart-sdd expand
+
+### Scope Expansion
+
+| Decision | Details |
+|----------|---------|
+| Expanded | T1 → T1,T2 |
+| Activated Features | F004-settings-data, F006-mcp-tools, F007-knowledge |

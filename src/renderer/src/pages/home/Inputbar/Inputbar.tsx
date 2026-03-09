@@ -55,10 +55,9 @@ const Inputbar: React.FC<InputbarProps> = ({ assistant, topic }) => {
 
   return (
     <InputbarToolsProvider scope="chat" toolContext={toolContext}>
-      <div className="border-t border-zinc-200 bg-white px-4 py-3 dark:border-zinc-700 dark:bg-zinc-900">
-        <div className="mx-auto flex max-w-3xl flex-col gap-2">
-          <AttachmentPreview files={attachments} onRemove={handleRemoveAttachment} />
-
+      <div className="px-[18px] pb-[18px]">
+        <AttachmentPreview files={attachments} onRemove={handleRemoveAttachment} />
+        <div className="rounded-[17px] border border-zinc-200 bg-white/80 pt-2 dark:border-zinc-700 dark:bg-zinc-800/80">
           <InputbarCore
             onSend={handleSend}
             onStop={handleStop}
@@ -67,7 +66,7 @@ const Inputbar: React.FC<InputbarProps> = ({ assistant, topic }) => {
             topicId={topic.id}
           />
 
-          <div className="flex items-center justify-between">
+          <div className="flex h-10 items-center justify-between gap-4 px-2">
             <InputbarTools toolContext={toolContext} />
             <TokenCount text={text} />
           </div>

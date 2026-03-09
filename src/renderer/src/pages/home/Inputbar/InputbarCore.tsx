@@ -24,7 +24,7 @@ const InputbarCore: React.FC<InputbarCoreProps> = ({
   const { t } = useTranslation()
   const { text, setText, clearText } = useInputText(topicId)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
-  const { isExpanded, maxHeight, minHeight } = useTextareaResize(textareaRef, text)
+  useTextareaResize(textareaRef, text)
   const sendMessageShortcut = useSettingsStore((s) => s.sendMessageShortcut)
 
   const handleSend = useCallback(() => {
@@ -65,7 +65,7 @@ const InputbarCore: React.FC<InputbarCoreProps> = ({
   )
 
   return (
-    <div className="flex items-end gap-2">
+    <div className="relative">
       <textarea
         ref={textareaRef}
         value={text}
@@ -74,22 +74,22 @@ const InputbarCore: React.FC<InputbarCoreProps> = ({
         disabled={disabled}
         placeholder={t('chat.input.placeholder', 'Type a message...')}
         rows={1}
-        style={{ minHeight, maxHeight }}
         className={cn(
-          'flex-1 resize-none rounded-lg border border-zinc-300 bg-zinc-50 px-3 py-2',
-          'text-sm text-zinc-900 placeholder:text-zinc-400',
-          'focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500',
-          'dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder:text-zinc-500',
-          'dark:focus:border-blue-400 dark:focus:ring-blue-400',
+          'w-full resize-none border-none bg-transparent px-[15px] py-[6px]',
+          'text-sm leading-[1.4] text-zinc-900 placeholder:text-zinc-400',
+          'focus:outline-none',
+          'dark:text-zinc-100 dark:placeholder:text-zinc-500',
           disabled && 'cursor-not-allowed opacity-50'
         )}
       />
-      <SendMessageButton
-        isGenerating={isGenerating}
-        onSend={handleSend}
-        onStop={onStop}
-        disabled={!text.trim()}
-      />
+      <div className="absolute bottom-1 right-2">
+        <SendMessageButton
+          isGenerating={isGenerating}
+          onSend={handleSend}
+          onStop={onStop}
+          disabled={!text.trim()}
+        />
+      </div>
     </div>
   )
 }

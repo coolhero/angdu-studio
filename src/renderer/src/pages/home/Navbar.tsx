@@ -4,6 +4,7 @@ import { PanelLeft, MessageSquare } from 'lucide-react'
 import { cn } from '@renderer/lib/utils'
 import { useShowAssistants } from '@renderer/hooks/useShowAssistants'
 import { useShowTopics } from '@renderer/hooks/useShowTopics'
+import { useAppStore } from '@renderer/stores/useAppStore'
 import type { Assistant } from '@renderer/types/assistant'
 import type { Topic } from '@renderer/types/conversation'
 
@@ -16,14 +17,22 @@ const Navbar: React.FC<NavbarProps> = ({ assistant, topic }) => {
   const { t } = useTranslation()
   const [showAssistants, setShowAssistants] = useShowAssistants()
   const [showTopics, setShowTopics] = useShowTopics()
+  const isMac = useAppStore((s) => s.appInfo?.platform === 'darwin')
 
   return (
-    <div className="flex h-10 items-center gap-1 border-b border-zinc-200 px-2 dark:border-zinc-700">
+    <div
+      className={cn(
+        'flex h-10 items-center gap-1 border-b border-zinc-200 px-2 dark:border-zinc-700',
+        isMac && 'pl-[70px]'
+      )}
+      style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
+    >
       {/* Sidebar toggle - assistants */}
       <button
         type="button"
         onClick={() => setShowAssistants(!showAssistants)}
         title={t('navbar.toggleAssistants', 'Toggle Assistants')}
+        style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
         className={cn(
           'flex h-7 w-7 items-center justify-center rounded-md transition-colors',
           showAssistants
@@ -39,6 +48,7 @@ const Navbar: React.FC<NavbarProps> = ({ assistant, topic }) => {
         type="button"
         onClick={() => setShowTopics(!showTopics)}
         title={t('navbar.toggleTopics', 'Toggle Topics')}
+        style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
         className={cn(
           'flex h-7 w-7 items-center justify-center rounded-md transition-colors',
           showTopics

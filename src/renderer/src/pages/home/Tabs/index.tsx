@@ -2,23 +2,20 @@ import React, { useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AnimatePresence, motion } from 'motion/react'
 import { cn } from '@renderer/lib/utils'
-import { Users, MessageSquare, Bot } from 'lucide-react'
+import { Users, MessageSquare } from 'lucide-react'
 import AssistantsTab from './AssistantsTab'
 import TopicsTab from './TopicsTab'
-import SessionsTab from './SessionsTab'
 
-type TabId = 'assistants' | 'topics' | 'sessions'
+type TabId = 'assistants' | 'topics'
 
 const TABS: { id: TabId; icon: React.ElementType; labelKey: string; fallback: string }[] = [
   { id: 'assistants', icon: Users, labelKey: 'sidebar.assistants', fallback: 'Assistants' },
   { id: 'topics', icon: MessageSquare, labelKey: 'sidebar.topics', fallback: 'Topics' },
-  { id: 'sessions', icon: Bot, labelKey: 'sidebar.sessions', fallback: 'Sessions' },
 ]
 
 const TAB_COMPONENTS: Record<TabId, React.FC> = {
   assistants: AssistantsTab,
   topics: TopicsTab,
-  sessions: SessionsTab,
 }
 
 const HomeTabs: React.FC = () => {

@@ -69,7 +69,7 @@ function HomePage(): JSX.Element {
   )
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full w-full flex-col">
       <Navbar assistant={assistant} topic={topic} />
       <div className="flex flex-1 overflow-hidden">
         {topicPosition === 'left' && sidebarElement}
