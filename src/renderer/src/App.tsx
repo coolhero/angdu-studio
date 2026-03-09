@@ -1,8 +1,12 @@
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Toaster } from 'sonner'
 import './i18n'
 import TitleBar from './components/TitleBar'
 import NotificationCenter from './components/NotificationCenter'
+import { ErrorBoundary } from './components/ErrorBoundary'
+import { ConfirmDialogProvider } from './components/ConfirmDialogProvider'
+import HomePage from './pages/home/HomePage'
 import { useAppStore } from './stores/useAppStore'
 import { useThemeStore } from './stores/useThemeStore'
 import { useNotificationStore } from './stores/useNotificationStore'
@@ -56,18 +60,18 @@ function App(): JSX.Element {
   }
 
   return (
-    <div className="flex h-screen flex-col bg-white dark:bg-zinc-900">
-      <TitleBar />
-      <main className="flex flex-1 items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">{t('app.name')}</h1>
-          {appInfo && (
-            <p className="mt-2 text-sm text-zinc-500">v{appInfo.version}</p>
-          )}
+    <ErrorBoundary>
+      <ConfirmDialogProvider>
+        <div className="flex h-screen flex-col bg-white dark:bg-zinc-900">
+          <TitleBar />
+          <main className="flex flex-1 overflow-hidden">
+            <HomePage />
+          </main>
+          <NotificationCenter />
+          <Toaster richColors position="bottom-right" />
         </div>
-      </main>
-      <NotificationCenter />
-    </div>
+      </ConfirmDialogProvider>
+    </ErrorBoundary>
   )
 }
 
