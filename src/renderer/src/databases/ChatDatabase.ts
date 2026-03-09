@@ -5,6 +5,24 @@ import type { Topic } from "../types/conversation";
 import type { Message } from "../types/message";
 import type { MessageBlock } from "../types/message-block";
 
+// ── File Types (F004-settings-data) ──
+
+export type FileType = "image" | "document" | "video" | "audio" | "other";
+
+export interface FileRecord {
+	id: string;
+	name: string;
+	origin_name: string;
+	path: string;
+	size: number;
+	ext: string;
+	type: FileType;
+	created_at: string;
+	count: number;
+	tokens?: number;
+	purpose?: string;
+}
+
 // ── Chat Database ──
 
 class ChatDatabase extends Dexie {
@@ -12,6 +30,7 @@ class ChatDatabase extends Dexie {
 	topics!: Table<Topic, string>;
 	messages!: Table<Message, string>;
 	messageBlocks!: Table<MessageBlock, string>;
+	files!: Table<FileRecord, string>;
 
 	constructor() {
 		super("angdu-chat");
@@ -21,6 +40,10 @@ class ChatDatabase extends Dexie {
 			topics: "id, assistantId, [assistantId+updatedAt]",
 			messages: "id, topicId, askId, [topicId+createdAt]",
 			messageBlocks: "id, messageId, [messageId+createdAt]",
+		});
+
+		this.version(2).stores({
+			files: "id, type, created_at",
 		});
 	}
 }
@@ -43,7 +66,7 @@ export function createDexieStorageAdapter(): DexieStorageAdapter {
 			return JSON.stringify({ state: { assistants }, version: 0 });
 		},
 		setItem: async (_name: string, value: string) => {
-			const parsed = JSON.parse(value);
+			const parsed = typeof value === "string" ? JSON.parse(value) : value;
 			const assistants: Assistant[] = parsed?.state?.assistants ?? [];
 			await chatDb.transaction("rw", chatDb.assistants, async () => {
 				await chatDb.assistants.clear();

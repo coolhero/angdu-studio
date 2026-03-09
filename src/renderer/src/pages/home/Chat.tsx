@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Loader2 } from 'lucide-react'
 import type { Assistant } from '@renderer/types/assistant'
@@ -23,6 +23,7 @@ const Chat: React.FC<ChatProps> = ({ assistant, topic }) => {
   const isGenerating = useRuntimeStore((s) => s.generatingTopicIds.has(topic.id))
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const { messages } = useTopicMessages(topic.id)
+  const sendRef = useRef<((content: string) => void) | null>(null)
 
   // Ctrl+F / Cmd+F to toggle search
   useShortcut('mod+f', () => setIsSearchOpen((v) => !v))
@@ -58,8 +59,8 @@ const Chat: React.FC<ChatProps> = ({ assistant, topic }) => {
       {/* System prompt display */}
       {showPrompt && assistant.prompt && <Prompt prompt={assistant.prompt} />}
 
-      <Messages topicId={topic.id} />
-      <Inputbar assistant={assistant} topic={topic} />
+      <Messages topicId={topic.id} onSuggestionClick={(text) => sendRef.current?.(text)} />
+      <Inputbar assistant={assistant} topic={topic} sendRef={sendRef} />
     </div>
   )
 }

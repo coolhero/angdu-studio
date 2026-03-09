@@ -4,6 +4,7 @@ import { createGoogleGenerativeAI } from '@ai-sdk/google'
 import { createMistral } from '@ai-sdk/mistral'
 import { createAzure } from '@ai-sdk/azure'
 import type { Provider, ProviderType } from '../../types/provider'
+import { DEFAULT_HOSTS as DEFAULT_HOSTS_IMPORT } from './constants'
 
 // ── Provider SDK Client Type ──
 
@@ -20,22 +21,31 @@ type FactoryFn = (provider: Provider) => ProviderClient
 function selectApiKey(apiKey: string): string {
   const keys = apiKey.split(',').map((k) => k.trim()).filter(Boolean)
   if (keys.length === 0) return ''
-  // Round-robin via simple random selection
   return keys[Math.floor(Math.random() * keys.length)]
+}
+
+// Only pass baseURL when user has set a custom host (not the default).
+// Each SDK has its own correct default baseURL (e.g. @ai-sdk/anthropic uses
+// https://api.anthropic.com/v1, @ai-sdk/openai uses https://api.openai.com/v1).
+// Overriding with our DEFAULT_HOSTS (which lack /v1) breaks the SDKs.
+function customBaseURL(provider: Provider): string | undefined {
+  const defaultHost = DEFAULT_HOSTS_IMPORT[provider.type]
+  if (!provider.apiHost || provider.apiHost === defaultHost) return undefined
+  return provider.apiHost
 }
 
 const STATIC_FACTORIES: Record<string, FactoryFn> = {
   openai: (p) =>
     createOpenAI({
       apiKey: selectApiKey(p.apiKey),
-      baseURL: p.apiHost || undefined,
+      baseURL: customBaseURL(p),
       headers: p.extra_headers
     }),
 
   'openai-response': (p) =>
     createOpenAI({
       apiKey: selectApiKey(p.apiKey),
-      baseURL: p.apiHost || undefined,
+      baseURL: customBaseURL(p),
       headers: p.extra_headers,
       compatibility: 'strict'
     }),
@@ -43,14 +53,14 @@ const STATIC_FACTORIES: Record<string, FactoryFn> = {
   anthropic: (p) =>
     createAnthropic({
       apiKey: selectApiKey(p.apiKey),
-      baseURL: p.apiHost || undefined,
+      baseURL: customBaseURL(p),
       headers: p.extra_headers
     }),
 
   gemini: (p) =>
     createGoogleGenerativeAI({
       apiKey: selectApiKey(p.apiKey),
-      baseURL: p.apiHost || undefined,
+      baseURL: customBaseURL(p),
       headers: p.extra_headers
     }),
 
@@ -64,12 +74,10 @@ const STATIC_FACTORIES: Record<string, FactoryFn> = {
   mistral: (p) =>
     createMistral({
       apiKey: selectApiKey(p.apiKey),
-      baseURL: p.apiHost || undefined,
+      baseURL: customBaseURL(p),
       headers: p.extra_headers
     }),
 
-  // Vertex AI, AWS Bedrock, and vertex-anthropic use OpenAI-compatible
-  // endpoints with auth headers injected via IPC
   vertexai: (p) =>
     createOpenAI({
       apiKey: selectApiKey(p.apiKey),
@@ -87,11 +95,10 @@ const STATIC_FACTORIES: Record<string, FactoryFn> = {
   'vertex-anthropic': (p) =>
     createAnthropic({
       apiKey: selectApiKey(p.apiKey),
-      baseURL: p.apiHost || undefined,
+      baseURL: customBaseURL(p),
       headers: p.extra_headers
     }),
 
-  // Generic OpenAI-compatible endpoints
   'new-api': (p) =>
     createOpenAI({
       apiKey: selectApiKey(p.apiKey),
@@ -152,25 +159,69 @@ export async function checkProviderHealth(provider: Provider): Promise<{
   models?: string[]
 }> {
   try {
-    if (!provider.apiKey && provider.authType !== 'oauth') {
+    const apiKey = selectApiKey(provider.apiKey)
+    if (!apiKey && provider.authType !== 'oauth' && provider.type !== 'ollama') {
       return { ok: false, error: 'API key is required' }
     }
 
-    const baseUrl = provider.apiHost || 'https://api.openai.com'
-    const response = await fetch(`${baseUrl}/v1/models`, {
-      headers: {
-        Authorization: `Bearer ${selectApiKey(provider.apiKey)}`,
-        ...provider.extra_headers
-      },
+    const baseUrl = provider.apiHost || DEFAULT_HOSTS_IMPORT[provider.type] || 'https://api.openai.com'
+
+    // Provider-specific health check endpoints and headers
+    let url: string
+    let headers: Record<string, string> = { ...provider.extra_headers }
+
+    switch (provider.type) {
+      case 'anthropic':
+      case 'vertex-anthropic':
+        // Anthropic uses /v1/messages — just validate with a minimal request
+        url = `${baseUrl}/v1/models`
+        headers['x-api-key'] = apiKey
+        headers['anthropic-version'] = '2023-06-01'
+        break
+      case 'gemini': {
+        // Google Gemini uses a different endpoint
+        url = `${baseUrl}/v1beta/models?key=${apiKey}`
+        break
+      }
+      case 'ollama':
+        url = `${baseUrl}/api/tags`
+        break
+      default:
+        // OpenAI-compatible: /v1/models
+        url = `${baseUrl}/v1/models`
+        headers['Authorization'] = `Bearer ${apiKey}`
+        break
+    }
+
+    const response = await fetch(url, {
+      headers,
       signal: AbortSignal.timeout(10000)
     })
 
     if (!response.ok) {
-      return { ok: false, error: `HTTP ${response.status}: ${response.statusText}` }
+      const body = await response.text().catch(() => '')
+      const detail = body.length > 200 ? body.substring(0, 200) + '...' : body
+      return { ok: false, error: `HTTP ${response.status}: ${response.statusText}${detail ? ' — ' + detail : ''}` }
     }
 
-    const data = (await response.json()) as { data?: Array<{ id: string }> }
-    const models = data.data?.map((m) => m.id) ?? []
+    // Parse models from response
+    const data = await response.json()
+    let models: string[] = []
+
+    if (provider.type === 'gemini') {
+      // Gemini returns { models: [{ name: "models/gemini-pro" }] }
+      const geminiModels = data?.models as Array<{ name: string }> | undefined
+      models = geminiModels?.map((m) => m.name.replace('models/', '')) ?? []
+    } else if (provider.type === 'ollama') {
+      // Ollama returns { models: [{ name: "llama3" }] }
+      const ollamaModels = data?.models as Array<{ name: string }> | undefined
+      models = ollamaModels?.map((m) => m.name) ?? []
+    } else {
+      // OpenAI-compatible and Anthropic return { data: [{ id: "gpt-4" }] }
+      const openaiModels = data?.data as Array<{ id: string }> | undefined
+      models = openaiModels?.map((m) => m.id) ?? []
+    }
+
     return { ok: true, models }
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error'

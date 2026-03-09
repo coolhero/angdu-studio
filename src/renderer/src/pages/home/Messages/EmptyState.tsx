@@ -9,7 +9,11 @@ const PROMPT_SUGGESTIONS = [
   'Brainstorm ideas',
 ]
 
-const EmptyState: React.FC = () => {
+interface EmptyStateProps {
+  onSuggestionClick?: (text: string) => void
+}
+
+const EmptyState: React.FC<EmptyStateProps> = ({ onSuggestionClick }) => {
   const { t } = useTranslation()
 
   return (
@@ -27,12 +31,14 @@ const EmptyState: React.FC = () => {
       </div>
       <div className="mt-2 flex flex-wrap justify-center gap-2">
         {PROMPT_SUGGESTIONS.map((suggestion) => (
-          <span
+          <button
             key={suggestion}
-            className="rounded-full border border-zinc-200 px-3 py-1 text-xs text-zinc-500 dark:border-zinc-700 dark:text-zinc-400"
+            type="button"
+            className="cursor-pointer rounded-full border border-zinc-200 px-3 py-1 text-xs text-zinc-500 transition-colors hover:border-zinc-400 hover:text-zinc-700 dark:border-zinc-700 dark:text-zinc-400 dark:hover:border-zinc-500 dark:hover:text-zinc-200"
+            onClick={() => onSuggestionClick?.(suggestion)}
           >
             {suggestion}
-          </span>
+          </button>
         ))}
       </div>
     </div>

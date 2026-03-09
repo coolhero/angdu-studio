@@ -211,6 +211,11 @@ class StreamProcessingServiceClass {
 					| MainTextMessageBlock
 					| undefined;
 				if (block) {
+					// Auto-transition to STREAMING if still PENDING (no TEXT_START received)
+					if (block.status === MessageBlockStatus.PENDING) {
+						blockStore.transitionStatus(blockId, MessageBlockStatus.PROCESSING);
+						blockStore.transitionStatus(blockId, MessageBlockStatus.STREAMING);
+					}
 					blockStore.updateBlock(blockId, {
 						content: block.content + String(chunk.data ?? ""),
 					});

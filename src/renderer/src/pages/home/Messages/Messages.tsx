@@ -16,6 +16,7 @@ import EmptyState from './EmptyState'
 
 interface MessagesProps {
   topicId: string
+  onSuggestionClick?: (text: string) => void
 }
 
 /** Render item: either a single message or a grouped set sharing an askId */
@@ -62,7 +63,7 @@ function buildRenderItems(messages: MessageType[]): RenderItem[] {
   return items
 }
 
-const Messages: React.FC<MessagesProps> = ({ topicId }) => {
+const Messages: React.FC<MessagesProps> = ({ topicId, onSuggestionClick }) => {
   const { messages, isLoading, loadMore, hasMore } = useTopicMessages(topicId)
   const { isStreaming } = useTopicLoading(topicId)
   const { scrollRef, savePosition } = useScrollPosition(topicId)
@@ -95,12 +96,22 @@ const Messages: React.FC<MessagesProps> = ({ topicId }) => {
     prevMessageCountRef.current = messages.length
   }, [messages.length])
 
-  // Also auto-scroll during streaming
+  // Continuously scroll to bottom during streaming (content updates don't change messages array)
   useEffect(() => {
-    if (isStreaming) {
-      bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+    if (!isStreaming) return
+
+    let rafId: number
+    const scrollToBottom = () => {
+      const container = scrollRef.current
+      if (container) {
+        container.scrollTop = container.scrollHeight
+      }
+      rafId = requestAnimationFrame(scrollToBottom)
     }
-  }, [isStreaming, messages])
+    rafId = requestAnimationFrame(scrollToBottom)
+
+    return () => cancelAnimationFrame(rafId)
+  }, [isStreaming, scrollRef])
 
   // Save scroll position on scroll
   const handleScroll = useCallback(() => {
@@ -117,7 +128,7 @@ const Messages: React.FC<MessagesProps> = ({ topicId }) => {
   if (!isLoading && messages.length === 0) {
     return (
       <NarrowLayout narrowMode={narrowMode}>
-        <EmptyState />
+        <EmptyState onSuggestionClick={onSuggestionClick} />
       </NarrowLayout>
     )
   }
@@ -152,7 +163,7 @@ const Messages: React.FC<MessagesProps> = ({ topicId }) => {
             className="flex flex-col-reverse"
             style={{ display: 'flex', flexDirection: 'column-reverse' }}
           >
-            <div className="flex flex-col gap-1 pb-2">
+            <div className="flex flex-col gap-1 pb-4">
               {renderItems.map((item) => {
                 if (item.type === 'group' && item.messages && item.askId) {
                   return (

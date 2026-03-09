@@ -8,6 +8,7 @@ import type {
   UpdateCheckResult,
   RelaunchOptions
 } from '@shared/types'
+import type { FileMetadata, BackupFileInfo, BackupProgress, DirectoryEntry } from '@shared/types/settings'
 
 const api = {
   // App lifecycle
@@ -222,6 +223,119 @@ const api = {
   angduai: {
     getSignature: (params: Record<string, string>): Promise<{ signature: string; timestamp: number }> =>
       ipcRenderer.invoke(IpcChannel.Angduai_GetSignature, params)
+  },
+
+  // ── F004: File Operations ──
+  file: {
+    upload: (filePath: string, fileName?: string, type?: string): Promise<FileMetadata> =>
+      ipcRenderer.invoke(IpcChannel.File_Upload, filePath, fileName, type),
+    read: (idOrPath: string): Promise<ArrayBuffer> =>
+      ipcRenderer.invoke(IpcChannel.File_Read, idOrPath),
+    delete: (id: string, filePath: string): Promise<void> =>
+      ipcRenderer.invoke(IpcChannel.File_Delete, id, filePath),
+    rename: (filePath: string, newName: string): Promise<void> =>
+      ipcRenderer.invoke(IpcChannel.File_Rename, filePath, newName),
+    move: (from: string, to: string): Promise<void> =>
+      ipcRenderer.invoke(IpcChannel.File_Move, from, to),
+    download: (url: string, destPath?: string): Promise<string> =>
+      ipcRenderer.invoke(IpcChannel.File_Download, url, destPath),
+    base64Image: (filePath: string): Promise<string> =>
+      ipcRenderer.invoke(IpcChannel.File_Base64Image, filePath),
+    binaryImage: (filePath: string): Promise<ArrayBuffer> =>
+      ipcRenderer.invoke(IpcChannel.File_BinaryImage, filePath),
+    saveBase64Image: (base64: string, ext?: string): Promise<FileMetadata> =>
+      ipcRenderer.invoke(IpcChannel.File_SaveBase64Image, base64, ext),
+    select: (filters?: Electron.FileFilter[], multiple?: boolean): Promise<string[]> =>
+      ipcRenderer.invoke(IpcChannel.File_Select, filters, multiple),
+    selectFolder: (): Promise<string> =>
+      ipcRenderer.invoke(IpcChannel.File_SelectFolder),
+    listDirectory: (dirPath: string): Promise<DirectoryEntry[]> =>
+      ipcRenderer.invoke(IpcChannel.File_ListDirectory, dirPath),
+    showInFolder: (filePath: string): Promise<void> =>
+      ipcRenderer.invoke(IpcChannel.File_ShowInFolder, filePath),
+    open: (filePath: string): Promise<string> =>
+      ipcRenderer.invoke(IpcChannel.File_Open, filePath),
+    save: (filePath: string, data: Buffer | string): Promise<void> =>
+      ipcRenderer.invoke(IpcChannel.File_Save, filePath, data),
+    mkdir: (dirPath: string): Promise<void> =>
+      ipcRenderer.invoke(IpcChannel.File_Mkdir, dirPath),
+    write: (filePath: string, data: Buffer | string): Promise<void> =>
+      ipcRenderer.invoke(IpcChannel.File_Write, filePath, data),
+    copy: (from: string, to: string): Promise<void> =>
+      ipcRenderer.invoke(IpcChannel.File_Copy, from, to),
+    isTextFile: (filePath: string): Promise<boolean> =>
+      ipcRenderer.invoke(IpcChannel.File_IsTextFile, filePath),
+    isDirectory: (filePath: string): Promise<boolean> =>
+      ipcRenderer.invoke(IpcChannel.File_IsDirectory, filePath),
+    get: (filePath: string): Promise<{ name: string; path: string; size: number; isDirectory: boolean; isFile: boolean }> =>
+      ipcRenderer.invoke(IpcChannel.File_Get, filePath),
+    createTempFile: (prefix: string, ext: string, data?: Buffer | string): Promise<string> =>
+      ipcRenderer.invoke(IpcChannel.File_CreateTempFile, prefix, ext, data)
+  },
+
+  // ── F004: Filesystem Direct ──
+  fs: {
+    read: (filePath: string): Promise<ArrayBuffer> =>
+      ipcRenderer.invoke(IpcChannel.Fs_Read, filePath),
+    readText: (filePath: string, encoding?: string): Promise<string> =>
+      ipcRenderer.invoke(IpcChannel.Fs_ReadText, filePath, encoding)
+  },
+
+  // ── F004: Backup & Restore ──
+  backup: {
+    backupToLocal: (dirPath: string): Promise<void> =>
+      ipcRenderer.invoke(IpcChannel.Backup_ToLocalDir, dirPath),
+    restoreFromLocal: (filePath: string): Promise<void> =>
+      ipcRenderer.invoke(IpcChannel.Backup_RestoreFromLocal, filePath),
+    listLocalFiles: (): Promise<BackupFileInfo[]> =>
+      ipcRenderer.invoke(IpcChannel.Backup_ListLocalFiles),
+    deleteLocalFile: (filePath: string): Promise<void> =>
+      ipcRenderer.invoke(IpcChannel.Backup_DeleteLocalFile, filePath),
+    checkWebdavConnection: (config: { url: string; username: string; password: string; basePath: string }): Promise<boolean> =>
+      ipcRenderer.invoke(IpcChannel.Backup_CheckWebdavConnection, config),
+    backupToWebdav: (config: { url: string; username: string; password: string; basePath: string }): Promise<void> =>
+      ipcRenderer.invoke(IpcChannel.Backup_ToWebdav, config),
+    restoreFromWebdav: (args: { config: { url: string; username: string; password: string; basePath: string }; fileName: string }): Promise<void> =>
+      ipcRenderer.invoke(IpcChannel.Backup_RestoreFromWebdav, args),
+    listWebdavFiles: (config: { url: string; username: string; password: string; basePath: string }): Promise<BackupFileInfo[]> =>
+      ipcRenderer.invoke(IpcChannel.Backup_ListWebdavFiles, config),
+    deleteWebdavFile: (args: { config: { url: string; username: string; password: string; basePath: string }; fileName: string }): Promise<void> =>
+      ipcRenderer.invoke(IpcChannel.Backup_DeleteWebdavFile, args),
+    checkS3Connection: (config: { endpoint: string; region: string; bucket: string; accessKeyId: string; secretAccessKey: string }): Promise<boolean> =>
+      ipcRenderer.invoke(IpcChannel.Backup_CheckS3Connection, config),
+    backupToS3: (config: { endpoint: string; region: string; bucket: string; accessKeyId: string; secretAccessKey: string }): Promise<void> =>
+      ipcRenderer.invoke(IpcChannel.Backup_ToS3, config),
+    restoreFromS3: (args: { config: { endpoint: string; region: string; bucket: string; accessKeyId: string; secretAccessKey: string }; key: string }): Promise<void> =>
+      ipcRenderer.invoke(IpcChannel.Backup_RestoreFromS3, args),
+    listS3Files: (config: { endpoint: string; region: string; bucket: string; accessKeyId: string; secretAccessKey: string }): Promise<BackupFileInfo[]> =>
+      ipcRenderer.invoke(IpcChannel.Backup_ListS3Files, config),
+    deleteS3File: (args: { config: { endpoint: string; region: string; bucket: string; accessKeyId: string; secretAccessKey: string }; key: string }): Promise<void> =>
+      ipcRenderer.invoke(IpcChannel.Backup_DeleteS3File, args),
+    onProgress: (cb: (progress: BackupProgress) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, progress: BackupProgress) => cb(progress)
+      ipcRenderer.on(IpcChannel.Backup_Progress, handler)
+      return () => ipcRenderer.removeListener(IpcChannel.Backup_Progress, handler)
+    },
+    onRestoreProgress: (cb: (progress: BackupProgress) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, progress: BackupProgress) => cb(progress)
+      ipcRenderer.on(IpcChannel.Restore_Progress, handler)
+      return () => ipcRenderer.removeListener(IpcChannel.Restore_Progress, handler)
+    }
+  },
+
+  // ── F004: Data Migration ──
+  data: {
+    setDataPath: (dataPath: string): Promise<void> =>
+      ipcRenderer.invoke(IpcChannel.Data_SetDataPath, dataPath),
+    getDataPath: (): Promise<string> =>
+      ipcRenderer.invoke(IpcChannel.Data_GetDataPath),
+    migrateData: (oldPath: string, newPath: string): Promise<void> =>
+      ipcRenderer.invoke(IpcChannel.Data_MigrateData, { oldPath, newPath }),
+    onMigrateProgress: (cb: (progress: BackupProgress) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, progress: BackupProgress) => cb(progress)
+      ipcRenderer.on(IpcChannel.Data_MigrateProgress, handler)
+      return () => ipcRenderer.removeListener(IpcChannel.Data_MigrateProgress, handler)
+    }
   }
 }
 

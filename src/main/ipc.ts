@@ -10,6 +10,8 @@ import { trayService } from './services/TrayService'
 import { updateService } from './services/UpdateService'
 import { shortcutService } from './services/ShortcutService'
 import { notificationService } from './services/NotificationService'
+import { registerFileIpc } from './ipc/file-handlers'
+import { registerBackupIpc } from './ipc/backup-handlers'
 import { setStopQuit } from './lifecycle'
 import os from 'node:os'
 import process from 'node:process'
@@ -199,6 +201,10 @@ export function registerIpc(mainWindow: BrowserWindow): void {
       mainWindow.webContents.forcefullyCrashRenderer()
     }
   })
+
+  // ── F004: File & Backup IPC ──
+  registerFileIpc()
+  registerBackupIpc(mainWindow)
 
   // Wire config change notifications to renderer via StoreSync
   const pushConfigToRenderer = (key: string) => {

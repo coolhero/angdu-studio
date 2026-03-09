@@ -130,5 +130,59 @@ export enum IpcChannel {
   Aes_Decrypt = 'aes:decrypt',
 
   // ── F002: AngduAI Signature ──
-  Angduai_GetSignature = 'angduai:get-signature'
+  Angduai_GetSignature = 'angduai:get-signature',
+
+  // ── F004: File Operations ──
+  File_Upload = 'file:upload',
+  File_Read = 'file:read',
+  File_Delete = 'file:delete',
+  File_Rename = 'file:rename',
+  File_Move = 'file:move',
+  File_Download = 'file:download',
+  File_Base64Image = 'file:base64-image',
+  File_BinaryImage = 'file:binary-image',
+  File_SaveBase64Image = 'file:save-base64-image',
+  File_Select = 'file:select',
+  File_SelectFolder = 'file:select-folder',
+  File_ListDirectory = 'file:list-directory',
+  File_ShowInFolder = 'file:show-in-folder',
+  File_Open = 'file:open',
+  File_Save = 'file:save',
+  File_Mkdir = 'file:mkdir',
+  File_Write = 'file:write',
+  File_Copy = 'file:copy',
+  File_IsTextFile = 'file:is-text-file',
+  File_IsDirectory = 'file:is-directory',
+  File_Get = 'file:get',
+  File_CreateTempFile = 'file:create-temp-file',
+
+  // ── F004: Filesystem Direct ──
+  Fs_Read = 'fs:read',
+  Fs_ReadText = 'fs:read-text',
+
+  // ── F004: Backup & Restore ──
+  Backup_ToLocalDir = 'backup:to-local-dir',
+  Backup_RestoreFromLocal = 'backup:restore-from-local',
+  Backup_ListLocalFiles = 'backup:list-local-files',
+  Backup_DeleteLocalFile = 'backup:delete-local-file',
+  Backup_CheckWebdavConnection = 'backup:check-webdav-connection',
+  Backup_ToWebdav = 'backup:to-webdav',
+  Backup_RestoreFromWebdav = 'backup:restore-from-webdav',
+  Backup_ListWebdavFiles = 'backup:list-webdav-files',
+  Backup_DeleteWebdavFile = 'backup:delete-webdav-file',
+  Backup_CheckS3Connection = 'backup:check-s3-connection',
+  Backup_ToS3 = 'backup:to-s3',
+  Backup_RestoreFromS3 = 'backup:restore-from-s3',
+  Backup_ListS3Files = 'backup:list-s3-files',
+  Backup_DeleteS3File = 'backup:delete-s3-file',
+
+  // ── F004: Backup Progress Events ──
+  Backup_Progress = 'backup:progress',
+  Restore_Progress = 'backup:restore-progress',
+
+  // ── F004: Data Migration ──
+  Data_SetDataPath = 'data:set-data-path',
+  Data_GetDataPath = 'data:get-data-path',
+  Data_MigrateData = 'data:migrate-data',
+  Data_MigrateProgress = 'data:migrate-progress'
 }
