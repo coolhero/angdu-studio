@@ -77,7 +77,7 @@
 | tasks | ✅ | 03-09 | 03-09 | 42 tasks, 11 phases, 8 user stories, 4 parallel groups |
 | analyze | ✅ | 03-09 | 03-09 | 0 CRITICAL, 0 HIGH, 3 MEDIUM, 3 LOW. 24/24 FR coverage (100%). Constitution 8/8 pass |
 | implement | ✅ | 03-09 | 03-09 | 17 files created, 4 modified. Tests: 126/126 pass (45 new). Types: OK. 4 types, 6 services, 3 stores, 1 database, 1 migration, 3 test files, i18n keys, demo script |
-| verify | ✅ | 03-09 | 03-09 | Tests: 126/126 pass, Build: OK, Lint: 0 errors, SBI: 20/20 (100%), Cross-feature: 5/5 pass, Demo CI: OK |
+| verify | ✅ | 03-09 | 03-09 | Re-verified 03-09: Tests 126/126, Build OK, Types OK. SBI P1:13/13(100%) P2:4/5(80%). Cross-feature 5/5 pass. Entity/API registry match. CDP UI: app renders, 0 console errors, no Error Boundary. Demo: Coverage 24/24 FR (100%), @demo-scaffold markers, CI stable 10s. Status: success |
 | merge | ✅ | 03-09 | 03-09 | Merged to main via --no-ff |
 
 ### F005-chat-ui
