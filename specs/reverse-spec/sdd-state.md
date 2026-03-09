@@ -7,7 +7,7 @@
 **Scope**: core
 **Active Tiers**: T1
 **Created**: 2026-03-08T00:00:00
-**Last Updated**: 2026-03-09T00:02:00
+**Last Updated**: 2026-03-09T09:50:00
 **Constitution Version**: 1.0.0
 
 ---
