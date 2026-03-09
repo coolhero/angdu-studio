@@ -31,7 +31,7 @@
 | F002 | ai-provider | T1 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | completed |
 | F003 | chat-core | T1 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | completed |
 | F005 | chat-ui | T1 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | completed |
-| F004 | settings-data | T2 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ⬜ | in_progress |
+| F004 | settings-data | T2 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | completed |
 | F006 | mcp-tools | T2 | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | pending |
 | F007 | knowledge | T2 | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | pending |
 | F008 | memory | T3 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | deferred |
@@ -102,7 +102,7 @@
 | analyze | ✅ | 03-09 | 03-09 | 0 CRITICAL, 0 HIGH, 3 MEDIUM, 2 LOW. 21/21 FR coverage (100%). Constitution 8/8 pass |
 | implement | ✅ | 03-09 | 03-09 | 39/44 tasks completed. ~30 files created/modified, 4 stores (useSettingsStore extended, useBackupStore, useMiniAppsStore, useShortcutsStore), 4 services (FileStorageService, BackupService, WebDavService, S3Service), 2 IPC handler files, 6 settings pages, 6 reusable components, 3 standalone pages (Files, MinApps, MinApp), 2 hooks, preload API, i18n keys, navigation integration. Build: OK. Types: OK. |
 | verify | 🔀✅ | 03-09 | 03-09 | Re-verified 03-09 (🔀): Tests 191/191, Build OK, Lint ⚠️ (eslint not installed — toolchain). SBI P1:8/8(100%) P2:13/15(87%). Cross-feature 5/5 pass (F003 backup Dexie gap noted — not F004 blocking). Entity/API registry 8/8 match. CDP UI: Settings 7 tabs + Files + MiniApps render, 9/10 SC verified, 0 console errors. Demo --ci: stable 10s, CDP active, 14/18 FR (78%). Phase 3b smoke: pass. Status: success |
-| merge | | | | |
+| merge | ✅ | 03-09 | 03-09 | Merged to main via --no-ff |
 
 ---
 
@@ -114,7 +114,7 @@
 | F002 | 002-ai-provider | specs/002-ai-provider/ | 002-ai-provider | |
 | F003 | 003-chat-core | specs/003-chat-core/ | 003-chat-core | |
 | F005 | 005-chat-ui | specs/005-chat-ui/ | 005-chat-ui | ✅ |
-| F004 | 004-settings-data | specs/004-settings-data/ | 004-settings-data | |
+| F004 | 004-settings-data | specs/004-settings-data/ | 004-settings-data | ✅ |
 | F006 | | | | |
 | F007 | | | | |
 | F008 | | | | |
@@ -130,6 +130,7 @@
 | Date/Time | Trigger Feature | Target File | Change Description |
 |-----------|----------------|-------------|-------------------|
 | 2026-03-09 | — | sdd-state.md | Scope expanded: T1 → T1,T2. Activated F004, F006, F007 |
+| 2026-03-09 | F004 | sdd-state.md | Branch 004-settings-data merged to main. F004 completed |
 
 ---
 
