@@ -30,7 +30,7 @@
 | F001 | app-core | T1 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | completed |
 | F002 | ai-provider | T1 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | completed |
 | F003 | chat-core | T1 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | completed |
-| F005 | chat-ui | T1 | | | | | | | | pending |
+| F005 | chat-ui | T1 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | | in-progress |
 | F004 | settings-data | T2 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | deferred |
 | F006 | mcp-tools | T2 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | deferred |
 | F007 | knowledge | T2 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | deferred |
@@ -84,6 +84,12 @@
 
 | Step | Status | Started | Completed | Notes |
 |------|--------|---------|-----------|-------|
+| specify | ✅ | 03-09 | 03-09 | 8 US, 40 FR, 10 SC, SBI 34/34 (100%) — 15 P1, 16 P2, 3 P3 |
+| plan | ✅ | 03-09 | 03-09 | 10 phases, 3 stores, 15+ hooks, ~70 components, 18 input tools |
+| tasks | ✅ | 03-09 | 03-09 | 117 tasks, 12 phases, 8 user stories, 4 parallel groups |
+| analyze | ✅ | 03-09 | 03-09 | 0 CRITICAL, 0 HIGH, 3 MEDIUM, 2 LOW. 40/40 FR coverage (100%). Constitution 8/8 pass |
+| implement | ✅ | 03-09 | 03-09 | 120/120 tasks completed. ~70 files created, 5 modified. Tests: 191/191 pass. Types: OK. 13 UI components, 16 hooks, 3 stores, 1 service, 11 block renderers, 18 input tools, 15 sidebar/nav components, demo script |
+| verify | ✅ | 03-09 | 03-09 | Tests 191/191, Build OK, Types OK. Lint: no eslint config (pre-existing). SBI P1:15/15(100%) P2:16/16(100%). Cross-feature 5/5 pass. Entity/API registry match. CDP UI: app renders, Playwright MCP unavailable mid-session. Demo: Coverage 36/40 FR (90%), @demo-scaffold markers, CI stable. Status: success |
 
 ---
 
@@ -94,7 +100,7 @@
 | F001 | 001-app-core | specs/001-app-core/ | 001-app-core | |
 | F002 | 002-ai-provider | specs/002-ai-provider/ | 002-ai-provider | |
 | F003 | 003-chat-core | specs/003-chat-core/ | 003-chat-core | |
-| F005 | | | | |
+| F005 | 005-chat-ui | specs/005-chat-ui/ | 005-chat-ui | |
 | F004 | | | | |
 | F006 | | | | |
 | F007 | | | | |

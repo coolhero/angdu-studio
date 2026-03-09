@@ -7,6 +7,7 @@
 | F001-app-core | `./demos/F001-app-core.sh` | Launches the Electron shell — window management, theme switching, config persistence, zoom controls, tray icon |
 | F002-ai-provider | `./demos/F002-ai-provider.sh` | Launches with AI provider system — provider CRUD via DevTools, model selection, IPC channel verification |
 | F003-chat-core | `./demos/F003-chat-core.sh` | Launches with chat data layer — 3 Zustand stores, 6 services, Dexie persistence, inspect assistant/message/block state via DevTools |
+| F005-chat-ui | `./demos/F005-chat-ui.sh` | Full chat UI — message rendering, input toolbar, content search (Ctrl+F), message groups, outline sidebar, flow history graph |
 
 ## Usage
 
