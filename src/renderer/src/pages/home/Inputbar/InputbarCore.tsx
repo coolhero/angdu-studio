@@ -24,7 +24,7 @@ const InputbarCore: React.FC<InputbarCoreProps> = ({
   const { t } = useTranslation()
   const { text, setText, clearText } = useInputText(topicId)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
-  const { isExpanded, maxHeight, minHeight } = useTextareaResize(textareaRef)
+  const { isExpanded, maxHeight, minHeight } = useTextareaResize(textareaRef, text)
   const sendMessageShortcut = useSettingsStore((s) => s.sendMessageShortcut)
 
   const handleSend = useCallback(() => {
@@ -32,11 +32,6 @@ const InputbarCore: React.FC<InputbarCoreProps> = ({
     if (!trimmed || isGenerating) return
     onSend(trimmed)
     clearText()
-
-    // Reset textarea height
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto'
-    }
   }, [text, isGenerating, onSend, clearText])
 
   const handleKeyDown = useCallback(
