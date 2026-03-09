@@ -12,6 +12,5 @@ export function useIpcListener(
   useEffect(() => {
     const cleanup = subscribe(callback)
     return cleanup
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, deps)
+  }, deps) // eslint-disable-line
 }

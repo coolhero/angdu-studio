@@ -7,8 +7,9 @@
 **Scope**: core
 **Active Tiers**: T1,T2
 **Created**: 2026-03-08T00:00:00
-**Last Updated**: 2026-03-09T12:00:00
+**Last Updated**: 2026-03-10T00:00:00
 **Constitution Version**: 1.0.0
+**Foundation Verified**: 2026-03-10 | PASS | Build ✅, Tests 191/191 ✅, Lint ✅ (eslint v10 flat config installed)
 
 ---
 
@@ -171,6 +172,16 @@ Overall: 0/0 (—)
 | DG-02 | Knowledge-Enhanced Chat | F001,F002,F003,F005,F007 | 0/5 | ⏳ F007 deferred | — |
 | DG-03 | Agent Workflow | F001,F002,F003,F005,F006,F009 | 0/6 | ⏳ F006,F009 deferred | — |
 | DG-04 | Productivity Tools | F001,F002,F004,F010,F011,F012 | 0/6 | ⏳ F004,F010,F011,F012 deferred | — |
+
+---
+
+## Toolchain
+
+| Tool | Status | Command | Notes |
+|------|--------|---------|-------|
+| Build | ✅ available | `electron-vite build` | — |
+| Test | ✅ available | `vitest run` | 191/191 pass |
+| Lint | ✅ available | `eslint src/ --fix` | ESLint v10, flat config, 0 errors / 84 warnings baseline |
 
 ---
 
