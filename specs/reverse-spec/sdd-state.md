@@ -31,7 +31,7 @@
 | F002 | ai-provider | T1 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | ✅ 03-08 | completed |
 | F003 | chat-core | T1 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | completed |
 | F005 | chat-ui | T1 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | completed |
-| F004 | settings-data | T2 | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | pending |
+| F004 | settings-data | T2 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ⬜ | in_progress |
 | F006 | mcp-tools | T2 | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | pending |
 | F007 | knowledge | T2 | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | pending |
 | F008 | memory | T3 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | deferred |
@@ -53,7 +53,7 @@
 | tasks | ✅ | 03-08 | 03-08 | 108 tasks |
 | analyze | ✅ | 03-08 | 03-08 | 3 HIGH issues fixed |
 | implement | ✅ | 03-08 | 03-08 | 33 files, 11 services, 57 IPC channels |
-| verify | ✅ | 03-08 | 03-08 | Tests: 32/32 pass, Build: OK, SBI: 15/15 (100%), Demo: stable 15s. Re-verified 03-08: UI bug fixed (TypeError _onThemeUpdated), CDP UI verify 8/8 SC pass, 0 console errors |
+| verify | ✅ | 03-08 | 03-09 | Tests: 32/32 pass, Build: OK, SBI: 15/15 (100%), Demo: stable 15s. Re-verified 03-08: UI bug fixed (TypeError _onThemeUpdated), CDP UI verify 8/8 SC pass, 0 console errors. Re-verified 03-09: Tests 191/191, Build OK, Lint ❌ (pre-existing: eslint not installed), SBI P1:8/8(100%) P2:5/5(100%) P3:2/2(100%), Cross-feature 4/4 (2 issues noted: Config sync + Theme propagation → F004 responsibility), Entity/API registry match, CDP UI: 7 settings pages render, 0 console errors, Demo --ci stable 15s. Status: success |
 | merge | ✅ | 03-08 | 03-08 | Merged to main via --no-ff |
 
 ### F002-ai-provider
@@ -65,7 +65,7 @@
 | tasks | ✅ | 03-08 | 03-08 | 58 tasks, 11 phases, 8 user stories |
 | analyze | ✅ | 03-08 | 03-08 | 0 CRITICAL, 1 HIGH (resolved), 2 MEDIUM (resolved), 2 LOW (resolved). Constitution updated v1.0.0→v1.0.1 |
 | implement | ✅ | 03-08 | 03-08 | 58/58 tasks, 27 files created, 3 files modified. Tests: 81/81 pass. Build: OK. |
-| verify | ✅ | 03-08 | 03-08 | Re-verified 03-08: Tests 81/81, Build OK, Types OK. SBI P1:8/8(100%) P2:9/10(90%) P3:2/2(100%). Cross-feature 5/5 verified. Entity/API registry 46/46 match. CDP UI: 7/7 IPC groups, 0 console errors, no Error Boundary. Demo: Coverage 67% (10✅/5⬜), @demo-scaffold markers added. Status: success |
+| verify | ✅ | 03-08 | 03-09 | Re-verified 03-09: Tests 191/191, Build OK, Lint ⚠️ (eslint not installed — toolchain). SBI P1:8/8(100%) P2:10/10(100%) P3:1/1(100%). Cross-feature 6/6 verified (F001 IPC ⚠️ Provider_AddKey minimal). Redux→Zustand: 0 Redux imports. Entity/API registry: 100% match (Provider #5, Model #6). CDP UI: main page + settings + provider list render, 0 console errors, no Error Boundary. Demo --ci: build+test+types+10s stable. Coverage 67% (10✅/5⬜). Status: success |
 | merge | ✅ | 03-08 | 03-08 | Merged to main via --no-ff |
 
 ### F003-chat-core
@@ -77,7 +77,7 @@
 | tasks | ✅ | 03-09 | 03-09 | 42 tasks, 11 phases, 8 user stories, 4 parallel groups |
 | analyze | ✅ | 03-09 | 03-09 | 0 CRITICAL, 0 HIGH, 3 MEDIUM, 3 LOW. 24/24 FR coverage (100%). Constitution 8/8 pass |
 | implement | ✅ | 03-09 | 03-09 | 17 files created, 4 modified. Tests: 126/126 pass (45 new). Types: OK. 4 types, 6 services, 3 stores, 1 database, 1 migration, 3 test files, i18n keys, demo script |
-| verify | ✅ | 03-09 | 03-09 | Re-verified 03-09: Tests 126/126, Build OK, Types OK. SBI P1:13/13(100%) P2:4/5(80%). Cross-feature 5/5 pass. Entity/API registry match. CDP UI: app renders, 0 console errors, no Error Boundary. Demo: Coverage 24/24 FR (100%), @demo-scaffold markers, CI stable 10s. Status: success |
+| verify | ✅ | 03-09 | 03-09 | Re-verified 03-09 (🔀): Tests 126/126, Build OK, Lint ℹ️ not configured (ESLint v10, no flat config). SBI P1:13/13(100%) P2:4/5(80%) P3:7/7(100%). Cross-feature 5/5 pass (F004 backup Dexie ⚠️ F004 responsibility). Redux→Zustand: 0 imports. Entity/API registry 4/4 match. CDP UI: app renders, 0 console errors, no Error Boundary. Demo --ci: stable 10s, 24/24 FR (100%). Phase 3b smoke: pass. Status: success |
 | merge | ✅ | 03-09 | 03-09 | Merged to main via --no-ff |
 
 ### F005-chat-ui
@@ -92,6 +92,18 @@
 | verify | ✅ | 03-09 | 03-09 | Tests 191/191, Build OK, Types OK. Lint: no eslint config (pre-existing). SBI P1:15/15(100%) P2:16/16(100%). Cross-feature 5/5 pass. Entity/API registry match. CDP UI: app renders, Playwright MCP unavailable mid-session. Demo: Coverage 36/40 FR (90%), @demo-scaffold markers, CI stable. Status: success |
 | merge | ✅ | 03-09 | 03-09 | Merged to main via --no-ff |
 
+### F004-settings-data
+
+| Step | Status | Started | Completed | Notes |
+|------|--------|---------|-----------|-------|
+| specify | ✅ | 03-09 | 03-09 | 8 US, 21 FR, 10 SC, SBI 21/21 P1/P2 mapped |
+| plan | ✅ | 03-09 | 03-09 | 8 phases, 4 stores, 4 services, 7 entities, 57 IPC channels in-scope |
+| tasks | ✅ | 03-09 | 03-09 | 44 tasks, 11 phases, 8 user stories |
+| analyze | ✅ | 03-09 | 03-09 | 0 CRITICAL, 0 HIGH, 3 MEDIUM, 2 LOW. 21/21 FR coverage (100%). Constitution 8/8 pass |
+| implement | ✅ | 03-09 | 03-09 | 39/44 tasks completed. ~30 files created/modified, 4 stores (useSettingsStore extended, useBackupStore, useMiniAppsStore, useShortcutsStore), 4 services (FileStorageService, BackupService, WebDavService, S3Service), 2 IPC handler files, 6 settings pages, 6 reusable components, 3 standalone pages (Files, MinApps, MinApp), 2 hooks, preload API, i18n keys, navigation integration. Build: OK. Types: OK. |
+| verify | 🔀✅ | 03-09 | 03-09 | Re-verified 03-09 (🔀): Tests 191/191, Build OK, Lint ⚠️ (eslint not installed — toolchain). SBI P1:8/8(100%) P2:13/15(87%). Cross-feature 5/5 pass (F003 backup Dexie gap noted — not F004 blocking). Entity/API registry 8/8 match. CDP UI: Settings 7 tabs + Files + MiniApps render, 9/10 SC verified, 0 console errors. Demo --ci: stable 10s, CDP active, 14/18 FR (78%). Phase 3b smoke: pass. Status: success |
+| merge | | | | |
+
 ---
 
 ## Feature Mapping
@@ -102,7 +114,7 @@
 | F002 | 002-ai-provider | specs/002-ai-provider/ | 002-ai-provider | |
 | F003 | 003-chat-core | specs/003-chat-core/ | 003-chat-core | |
 | F005 | 005-chat-ui | specs/005-chat-ui/ | 005-chat-ui | ✅ |
-| F004 | | | | |
+| F004 | 004-settings-data | specs/004-settings-data/ | 004-settings-data | |
 | F006 | | | | |
 | F007 | | | | |
 | F008 | | | | |

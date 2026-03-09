@@ -24,6 +24,14 @@
 | 13 | AgentSessionEntity | SQLite (Drizzle) | F009 | belongs to Agent, has many SessionMessages |
 | 14 | AgentSessionMessageEntity | SQLite (Drizzle) | F009 | belongs to Session |
 | 15 | Notification | Runtime (in-memory) | F001 | standalone |
+| 16 | SettingsState | Zustand (electron-store persist) | F004 | standalone (50+ config fields) |
+| 17 | MiniApp | Zustand (localStorage persist) | F004 | standalone |
+| 18 | Shortcut | Zustand (localStorage persist) | F004 | standalone |
+| 19 | QuickPhrase | Zustand (localStorage persist) | F004 | standalone |
+| 20 | SidebarIcon | Zustand (nested in SettingsState) | F004 | standalone |
+| 21 | WebDavConfig | Zustand (localStorage persist) | F004 | used by BackupService |
+| 22 | S3Config | Zustand (localStorage persist) | F004 | used by BackupService |
+| 23 | BackupFileInfo | Runtime (IPC response) | F004 | standalone |
 
 ---
 

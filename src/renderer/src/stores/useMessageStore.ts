@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
+import Dexie from "dexie";
 import { chatDb } from "../databases/ChatDatabase";
 import type { Message } from "../types/message";
 
