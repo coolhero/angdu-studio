@@ -20,7 +20,7 @@ interface ChatProps {
 const Chat: React.FC<ChatProps> = ({ assistant, topic }) => {
   const { t } = useTranslation()
   const showPrompt = useSettingsStore((s) => s.showPrompt)
-  const isGenerating = useRuntimeStore((s) => s.isGenerating(topic.id))
+  const isGenerating = useRuntimeStore((s) => s.generatingTopicIds.has(topic.id))
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const { messages } = useTopicMessages(topic.id)
 

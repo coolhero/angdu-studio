@@ -22,8 +22,8 @@ interface InputbarProps {
 }
 
 const Inputbar: React.FC<InputbarProps> = ({ assistant, topic }) => {
-  const isGenerating = useRuntimeStore((s) => s.isGenerating(topic.id))
-  const canSendMessage = useRuntimeStore((s) => s.canSendMessage(topic.id))
+  const isGenerating = useRuntimeStore((s) => s.generatingTopicIds.has(topic.id))
+  const canSendMessage = !isGenerating
   const { text } = useInputText(topic.id)
   const [attachments, setAttachments] = useState<FileMetadata[]>([])
 

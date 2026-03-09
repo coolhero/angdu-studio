@@ -1,24 +1,35 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useMessageStore } from '@renderer/stores/useMessageStore'
 import { useMessageBlockStore } from '@renderer/stores/useMessageBlockStore'
 
 const LOAD_MORE_COUNT = 20
+const EMPTY_IDS: string[] = []
 
 export function useTopicMessages(topicId: string | null) {
   const [isLoading, setIsLoading] = useState(false)
   const [hasMore, setHasMore] = useState(true)
 
-  const messages = useMessageStore((s) =>
-    topicId ? s.getMessagesForTopic(topicId) : []
+  // Select raw state — stable references (no function calls in selectors)
+  const messageIds = useMessageStore((s) =>
+    topicId ? (s.messagesByTopic[topicId] ?? EMPTY_IDS) : EMPTY_IDS
   )
+  const messagesMap = useMessageStore((s) => s.messages)
   const displayCount = useMessageStore((s) =>
-    topicId ? s.getDisplayCount(topicId) : 0
+    topicId ? (s.displayCount[topicId] ?? 0) : 0
   )
   const loadMessagesForTopic = useMessageStore((s) => s.loadMessagesForTopic)
   const loadMoreMessages = useMessageStore((s) => s.loadMoreMessages)
   const loadBlocksForMessages = useMessageBlockStore(
     (s) => s.loadBlocksForMessages
   )
+
+  // Derive messages from raw state — only recomputes when inputs change
+  const messages = useMemo(() => {
+    if (messageIds.length === 0) return []
+    return messageIds
+      .map((id) => messagesMap[id])
+      .filter(Boolean)
+  }, [messageIds, messagesMap])
 
   useEffect(() => {
     if (!topicId) return
@@ -29,11 +40,11 @@ export function useTopicMessages(topicId: string | null) {
       setIsLoading(true)
       try {
         await loadMessagesForTopic(topicId)
-        const messageIds = useMessageStore
+        const ids = useMessageStore
           .getState()
-          .getMessageIdsForTopic(topicId)
-        if (messageIds.length > 0) {
-          await loadBlocksForMessages(messageIds)
+          .messagesByTopic[topicId] ?? []
+        if (ids.length > 0) {
+          await loadBlocksForMessages(ids)
         }
       } finally {
         if (!cancelled) {
@@ -52,21 +63,19 @@ export function useTopicMessages(topicId: string | null) {
   const loadMore = useCallback(async () => {
     if (!topicId || isLoading) return
 
-    const countBefore = useMessageStore
+    const countBefore = (useMessageStore
       .getState()
-      .getMessageIdsForTopic(topicId).length
+      .messagesByTopic[topicId] ?? []).length
 
     setIsLoading(true)
     try {
       await loadMoreMessages(topicId, LOAD_MORE_COUNT)
 
-      const countAfter = useMessageStore
+      const currentIds = useMessageStore
         .getState()
-        .getMessageIdsForTopic(topicId).length
-      const newIds = useMessageStore
-        .getState()
-        .getMessageIdsForTopic(topicId)
-        .slice(0, countAfter - countBefore)
+        .messagesByTopic[topicId] ?? []
+      const countAfter = currentIds.length
+      const newIds = currentIds.slice(0, countAfter - countBefore)
 
       if (newIds.length > 0) {
         await loadBlocksForMessages(newIds)

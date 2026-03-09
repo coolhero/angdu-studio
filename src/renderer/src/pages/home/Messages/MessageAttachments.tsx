@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { ImageIcon, FileIcon } from 'lucide-react'
 import { cn } from '@renderer/lib/utils'
 import { useMessageBlockStore } from '@renderer/stores/useMessageBlockStore'
@@ -14,10 +14,13 @@ interface MessageAttachmentsProps {
 }
 
 const MessageAttachments: React.FC<MessageAttachmentsProps> = ({ message }) => {
-  const blocks = useMessageBlockStore((s) => s.getBlocksForMessage(message.id))
+  const blocksMap = useMessageBlockStore((s) => s.blocks)
 
-  const attachments = blocks.filter(
-    (b) => b.type === MessageBlockType.FILE || b.type === MessageBlockType.IMAGE
+  const attachments = useMemo(
+    () => Object.values(blocksMap).filter(
+      (b) => b.messageId === message.id && (b.type === MessageBlockType.FILE || b.type === MessageBlockType.IMAGE)
+    ),
+    [blocksMap, message.id]
   )
 
   if (attachments.length === 0) return null
