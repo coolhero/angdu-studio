@@ -184,5 +184,44 @@ export enum IpcChannel {
   Data_SetDataPath = 'data:set-data-path',
   Data_GetDataPath = 'data:get-data-path',
   Data_MigrateData = 'data:migrate-data',
-  Data_MigrateProgress = 'data:migrate-progress'
+  Data_MigrateProgress = 'data:migrate-progress',
+
+  // ── F006: MCP Server Management ──
+  Mcp_RestartServer = 'mcp:restart-server',
+  Mcp_StopServer = 'mcp:stop-server',
+  Mcp_RemoveServer = 'mcp:remove-server',
+  Mcp_CheckConnectivity = 'mcp:check-connectivity',
+  Mcp_GetServerVersion = 'mcp:get-server-version',
+  Mcp_UploadDxt = 'mcp:upload-dxt',
+
+  // ── F006: MCP Tools ──
+  Mcp_ListTools = 'mcp:list-tools',
+  Mcp_CallTool = 'mcp:call-tool',
+  Mcp_AbortTool = 'mcp:abort-tool',
+
+  // ── F006: MCP Prompts & Resources ──
+  Mcp_ListPrompts = 'mcp:list-prompts',
+  Mcp_GetPrompt = 'mcp:get-prompt',
+  Mcp_ListResources = 'mcp:list-resources',
+  Mcp_GetResource = 'mcp:get-resource',
+
+  // ── F006: MCP Server Logs ──
+  Mcp_GetServerLogs = 'mcp:get-server-logs',
+
+  // ── F006: MCP Events (main → renderer) ──
+  Mcp_AddServer = 'mcp:add-server',
+  Mcp_ServersChanged = 'mcp:servers-changed',
+  Mcp_ServersUpdated = 'mcp:servers-updated',
+  Mcp_Progress = 'mcp:progress',
+  Mcp_ServerLog = 'mcp:server-log',
+
+  // ── F006: Code Tools ──
+  CodeTools_Run = 'code-tools:run',
+  CodeTools_GetAvailableTerminals = 'code-tools:get-available-terminals',
+  CodeTools_SetCustomTerminalPath = 'code-tools:set-custom-terminal-path',
+  CodeTools_GetCustomTerminalPath = 'code-tools:get-custom-terminal-path',
+  CodeTools_RemoveCustomTerminalPath = 'code-tools:remove-custom-terminal-path',
+
+  // ── F006: Python ──
+  Python_Execute = 'python:execute'
 }

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Settings, Monitor, Database, Keyboard, MessageSquareQuote, Info, ArrowLeft, Bot } from 'lucide-react'
+import { Settings, Monitor, Database, Keyboard, MessageSquareQuote, Info, ArrowLeft, Bot, Wrench } from 'lucide-react'
 import { ErrorBoundary } from '@renderer/components/ErrorBoundary'
 import { useRuntimeStore } from '@renderer/stores/useRuntimeStore'
 import GeneralSettings from './GeneralSettings'
@@ -10,8 +10,9 @@ import DataSettings from './DataSettings'
 import ShortcutSettings from './ShortcutSettings'
 import QuickPhraseSettings from './QuickPhraseSettings'
 import AboutSettings from './AboutSettings'
+import MCPSettings from './MCPSettings'
 
-type SettingsTab = 'general' | 'provider' | 'display' | 'data' | 'shortcuts' | 'quickPhrases' | 'about'
+type SettingsTab = 'general' | 'provider' | 'mcp' | 'display' | 'data' | 'shortcuts' | 'quickPhrases' | 'about'
 
 interface TabItem {
   id: SettingsTab
@@ -22,6 +23,7 @@ interface TabItem {
 const tabs: TabItem[] = [
   { id: 'general', labelKey: 'settings.tabs.general', icon: Settings },
   { id: 'provider', labelKey: 'settings.tabs.provider', icon: Bot },
+  { id: 'mcp', labelKey: 'settings.tabs.mcp', icon: Wrench },
   { id: 'display', labelKey: 'settings.tabs.display', icon: Monitor },
   { id: 'data', labelKey: 'settings.tabs.data', icon: Database },
   { id: 'shortcuts', labelKey: 'settings.tabs.shortcuts', icon: Keyboard },
@@ -32,6 +34,7 @@ const tabs: TabItem[] = [
 const tabContentMap: Record<SettingsTab, () => JSX.Element> = {
   general: GeneralSettings,
   provider: ProviderSettings,
+  mcp: MCPSettings,
   display: DisplaySettings,
   data: DataSettings,
   shortcuts: ShortcutSettings,
@@ -45,6 +48,10 @@ export default function SettingsPage(): JSX.Element {
   const setActivePage = useRuntimeStore((s) => s.setActivePage)
 
   const ActiveContent = tabContentMap[activeTab]
+
+  // MCP settings has its own internal layout (sidebar + content),
+  // so we render it without the outer overflow-y-auto
+  const isMcpTab = activeTab === 'mcp'
 
   return (
     <ErrorBoundary>
@@ -84,7 +91,7 @@ export default function SettingsPage(): JSX.Element {
         </nav>
 
         {/* Right side with tab content */}
-        <main className="flex-1 overflow-y-auto">
+        <main className={isMcpTab ? 'flex-1 overflow-hidden' : 'flex-1 overflow-y-auto'}>
           <ActiveContent />
         </main>
       </div>

@@ -168,7 +168,7 @@ export async function checkProviderHealth(provider: Provider): Promise<{
 
     // Provider-specific health check endpoints and headers
     let url: string
-    let headers: Record<string, string> = { ...provider.extra_headers }
+    const headers: Record<string, string> = { ...provider.extra_headers }
 
     switch (provider.type) {
       case 'anthropic':

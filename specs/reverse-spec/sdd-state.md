@@ -33,7 +33,7 @@
 | F003 | chat-core | T1 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | completed |
 | F005 | chat-ui | T1 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | completed |
 | F004 | settings-data | T2 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | completed |
-| F006 | mcp-tools | T2 | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | pending |
+| F006 | mcp-tools | T2 | ✅ 03-10 | ✅ 03-10 | ✅ 03-10 | ✅ 03-10 | ✅ 03-10 | ⬜ | ⬜ | in_progress |
 | F007 | knowledge | T2 | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | pending |
 | F008 | memory | T3 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | deferred |
 | F009 | agents | T3 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | deferred |
@@ -116,7 +116,7 @@
 | F003 | 003-chat-core | specs/003-chat-core/ | 003-chat-core | |
 | F005 | 005-chat-ui | specs/005-chat-ui/ | 005-chat-ui | ✅ |
 | F004 | 004-settings-data | specs/004-settings-data/ | 004-settings-data | ✅ |
-| F006 | | | | |
+| F006 | 006-mcp-tools | specs/006-mcp-tools/ | 006-mcp-tools | |
 | F007 | | | | |
 | F008 | | | | |
 | F009 | | | | |

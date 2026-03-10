@@ -121,6 +121,10 @@ if $CI_MODE; then
 fi
 
 # ── Interactive mode ──
+# Kill the background process (started for CDP readiness check) and restart in foreground
+kill $APP_PID 2>/dev/null || true
+wait $APP_PID 2>/dev/null || true
+
 echo ""
 echo "╔══════════════════════════════════════════════════╗"
 echo "║  Angdu Studio is running!                        ║"
@@ -138,6 +142,5 @@ echo "║  Press Ctrl+C to stop                            ║"
 echo "╚══════════════════════════════════════════════════╝"
 echo ""
 
-# Keep running until Ctrl+C
-trap "kill $APP_PID 2>/dev/null; exit 0" INT TERM
-wait $APP_PID
+# Run in foreground so the script stays alive until Ctrl+C
+exec npx electron-vite dev -- --remote-debugging-port=9222

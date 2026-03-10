@@ -88,7 +88,8 @@ class ParameterBuilderClass {
 			}
 		}
 
-		// MCP tools
+		// MCP tools — per-assistant config (for assistants with explicit mcpMode)
+		// Note: Global MCP toggle is handled directly in Inputbar.tsx via useMCPStore
 		if (
 			assistant.mcpMode &&
 			assistant.mcpMode !== "disabled" &&

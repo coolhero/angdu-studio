@@ -35,7 +35,6 @@ const Message: React.FC<MessageProps> = ({
   const isBubble = messageStyle === 'bubble'
   const isComplete = message.status === 'success' || message.status === 'error'
 
-  const [isHovered, setIsHovered] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
 
   // Get initial content for editor
@@ -87,8 +86,6 @@ const Message: React.FC<MessageProps> = ({
         isBubble && isUser && 'justify-end',
         isBubble && !isUser && 'justify-start'
       )}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
     >
       <div
         className={cn(
@@ -132,11 +129,11 @@ const Message: React.FC<MessageProps> = ({
         )}
       </div>
 
-      {/* Hover menubar */}
-      {isHovered && !isStreaming && !isEditing && isComplete && (
+      {/* Hover menubar — only visible on hover via CSS group-hover, avoids flicker */}
+      {!isStreaming && !isEditing && isComplete && (
         <div
           className={cn(
-            'absolute -top-3 z-10',
+            'absolute -top-3 z-10 opacity-0 transition-opacity group-hover:opacity-100',
             isUser ? 'right-6' : 'left-6'
           )}
         >

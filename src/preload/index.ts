@@ -9,6 +9,14 @@ import type {
   RelaunchOptions
 } from '@shared/types'
 import type { FileMetadata, BackupFileInfo, BackupProgress, DirectoryEntry } from '@shared/types/settings'
+import type {
+  MCPServer,
+  MCPTool,
+  MCPPrompt,
+  MCPCallToolResponse,
+  MCPProgressEvent,
+  GetResourceResponse,
+} from '@shared/types/mcp'
 
 const api = {
   // App lifecycle
@@ -321,6 +329,58 @@ const api = {
       ipcRenderer.on(IpcChannel.Restore_Progress, handler)
       return () => ipcRenderer.removeListener(IpcChannel.Restore_Progress, handler)
     }
+  },
+
+  // ── F006: MCP ──
+  mcp: {
+    restartServer: (server: MCPServer): Promise<void> =>
+      ipcRenderer.invoke(IpcChannel.Mcp_RestartServer, server),
+    stopServer: (server: MCPServer): Promise<void> =>
+      ipcRenderer.invoke(IpcChannel.Mcp_StopServer, server),
+    removeServer: (server: MCPServer): Promise<void> =>
+      ipcRenderer.invoke(IpcChannel.Mcp_RemoveServer, server),
+    checkConnectivity: (server: MCPServer): Promise<boolean> =>
+      ipcRenderer.invoke(IpcChannel.Mcp_CheckConnectivity, server),
+    getServerVersion: (server: MCPServer): Promise<string | null> =>
+      ipcRenderer.invoke(IpcChannel.Mcp_GetServerVersion, server),
+    listTools: (server: MCPServer): Promise<MCPTool[]> =>
+      ipcRenderer.invoke(IpcChannel.Mcp_ListTools, server),
+    callTool: (args: { server: MCPServer; name: string; args: unknown; callId?: string }): Promise<MCPCallToolResponse> =>
+      ipcRenderer.invoke(IpcChannel.Mcp_CallTool, args),
+    abortTool: (callId: string): Promise<boolean> =>
+      ipcRenderer.invoke(IpcChannel.Mcp_AbortTool, callId),
+    listPrompts: (server: MCPServer): Promise<MCPPrompt[]> =>
+      ipcRenderer.invoke(IpcChannel.Mcp_ListPrompts, server),
+    getPrompt: (args: { server: MCPServer; name: string; args?: Record<string, string> }): Promise<unknown> =>
+      ipcRenderer.invoke(IpcChannel.Mcp_GetPrompt, args),
+    listResources: (server: MCPServer): Promise<unknown[]> =>
+      ipcRenderer.invoke(IpcChannel.Mcp_ListResources, server),
+    getResource: (args: { server: MCPServer; uri: string }): Promise<GetResourceResponse> =>
+      ipcRenderer.invoke(IpcChannel.Mcp_GetResource, args),
+    getServerLogs: (server: MCPServer): Promise<unknown[]> =>
+      ipcRenderer.invoke(IpcChannel.Mcp_GetServerLogs, server),
+    uploadDxt: (filePath: string): Promise<MCPServer> =>
+      ipcRenderer.invoke(IpcChannel.Mcp_UploadDxt, filePath),
+    onServersChanged: (cb: (servers: MCPServer[]) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, servers: MCPServer[]) => cb(servers)
+      ipcRenderer.on(IpcChannel.Mcp_ServersChanged, handler)
+      return () => ipcRenderer.removeListener(IpcChannel.Mcp_ServersChanged, handler)
+    },
+    onServersUpdated: (cb: (data: { id: string; updates: Partial<MCPServer> }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, data: { id: string; updates: Partial<MCPServer> }) => cb(data)
+      ipcRenderer.on(IpcChannel.Mcp_ServersUpdated, handler)
+      return () => ipcRenderer.removeListener(IpcChannel.Mcp_ServersUpdated, handler)
+    },
+    onProgress: (cb: (event: MCPProgressEvent) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, progress: MCPProgressEvent) => cb(progress)
+      ipcRenderer.on(IpcChannel.Mcp_Progress, handler)
+      return () => ipcRenderer.removeListener(IpcChannel.Mcp_Progress, handler)
+    },
+    onServerLog: (cb: (entry: unknown) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, entry: unknown) => cb(entry)
+      ipcRenderer.on(IpcChannel.Mcp_ServerLog, handler)
+      return () => ipcRenderer.removeListener(IpcChannel.Mcp_ServerLog, handler)
+    },
   },
 
   // ── F004: Data Migration ──

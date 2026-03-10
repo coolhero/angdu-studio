@@ -20,6 +20,7 @@ import {
 import React from 'react'
 import { defineTool, registerTool } from '../registry'
 import { eventService, ChatEvent } from '@renderer/services/EventService'
+import { useMCPStore } from '@renderer/stores/useMCPStore'
 import type { ToolContext, ToolDefinition } from '../types'
 
 // ── Helper: creates a simple icon-button tool ──
@@ -66,12 +67,31 @@ const knowledgeBaseTool = defineTool({
   render: () => null,
 })
 
+function McpToolsButton(): React.ReactElement {
+  const mcpEnabled = useMCPStore((s) => s.mcpEnabled)
+  const toggleMcpEnabled = useMCPStore((s) => s.toggleMcpEnabled)
+  const activeCount = useMCPStore((s) => s.servers.filter((sv) => sv.isActive).length)
+
+  return React.createElement('button', {
+    type: 'button',
+    title: `MCP Tools${mcpEnabled ? ` (${activeCount} active)` : ''}`,
+    onClick: toggleMcpEnabled,
+    className: [
+      'flex h-7 w-7 items-center justify-center rounded transition-colors',
+      mcpEnabled
+        ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400'
+        : 'text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-700 dark:hover:text-zinc-200',
+    ].join(' '),
+    children: React.createElement(Wrench, { className: 'h-4 w-4' }),
+  })
+}
+
 const mcpToolsTool = defineTool({
   key: 'mcpTools',
   label: 'MCP Tools',
   icon: Wrench,
   visibleInScopes: ['chat', 'session'],
-  render: () => null,
+  render: () => React.createElement(McpToolsButton),
 })
 
 const mentionModelsTool = defineTool({

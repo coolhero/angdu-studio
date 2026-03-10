@@ -12,6 +12,7 @@ import { shortcutService } from './services/ShortcutService'
 import { notificationService } from './services/NotificationService'
 import { registerFileIpc } from './ipc/file-handlers'
 import { registerBackupIpc } from './ipc/backup-handlers'
+import { registerMcpIpc } from './ipc/mcp-handlers'
 import { setStopQuit } from './lifecycle'
 import os from 'node:os'
 import process from 'node:process'
@@ -205,6 +206,9 @@ export function registerIpc(mainWindow: BrowserWindow): void {
   // ── F004: File & Backup IPC ──
   registerFileIpc()
   registerBackupIpc(mainWindow)
+
+  // ── F006: MCP IPC ──
+  registerMcpIpc()
 
   // Wire config change notifications to renderer via StoreSync
   const pushConfigToRenderer = (key: string) => {

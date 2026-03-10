@@ -1,12 +1,14 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
-import { streamText } from 'ai'
+import { streamText, jsonSchema } from 'ai'
 import { nanoid } from 'nanoid'
 import { useRuntimeStore } from '@renderer/stores/useRuntimeStore'
 import { useProviderStore } from '@renderer/stores/useProviderStore'
 import { useMessageStore } from '@renderer/stores/useMessageStore'
 import { useMessageBlockStore } from '@renderer/stores/useMessageBlockStore'
+import { useMCPStore } from '@renderer/stores/useMCPStore'
 import { resolveProviderClient } from '@renderer/aiCore/provider/factory'
+import type { MCPServer, MCPTool, MCPCallToolResponse } from '@shared/types/mcp'
 import { InputbarToolsProvider } from './context/InputbarToolsProvider'
 import InputbarCore from './InputbarCore'
 import InputbarTools from './InputbarTools'
@@ -22,6 +24,85 @@ import type { ToolContext } from './types'
 
 // Ensure tools are registered
 import './tools/index'
+
+// ── MCP Tool Integration ──
+
+/**
+ * Normalize an MCP tool's inputSchema to a valid JSON Schema object type.
+ * MCP servers may return schemas with missing or non-"object" type fields.
+ */
+function normalizeMcpSchema(schema: Record<string, unknown>): Record<string, unknown> {
+  // Ensure the schema is type "object" — OpenAI requires this
+  const normalized = { ...schema }
+  if (!normalized.type || normalized.type === 'None') {
+    normalized.type = 'object'
+  }
+  if (!normalized.properties) {
+    normalized.properties = {}
+  }
+  return normalized
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type McpToolMap = Record<string, any>
+
+/**
+ * Map to capture MCP tool execute() return values by toolCallId.
+ * AI SDK v6's fullStream tool-result event has part.result === undefined,
+ * so we store results here and look them up in the stream handler.
+ */
+type ToolResultsMap = Map<string, string>
+
+async function buildMcpToolsForStreamText(): Promise<McpToolMap | undefined> {
+  const mcpState = useMCPStore.getState()
+  if (!mcpState.mcpEnabled) return undefined
+
+  const activeServers = mcpState.servers.filter((s) => s.isActive)
+  if (activeServers.length === 0) return undefined
+
+  const tools: McpToolMap = {}
+
+  for (const server of activeServers) {
+    try {
+      const mcpTools: MCPTool[] = await window.api.mcp.listTools(server)
+      for (const mcpTool of mcpTools) {
+        // Skip disabled tools
+        if (server.disabledTools?.includes(mcpTool.name)) continue
+
+        const toolId = `${server.id}__${mcpTool.name}`
+        const normalizedSchema = normalizeMcpSchema(mcpTool.inputSchema)
+
+        // Build tool definition manually — AI SDK v6 prepareToolsAndToolChoice
+        // reads `inputSchema` (not `parameters`), so we provide it directly.
+        tools[toolId] = {
+          type: 'function' as const,
+          description: mcpTool.description || mcpTool.name,
+          inputSchema: jsonSchema(normalizedSchema as Parameters<typeof jsonSchema>[0]),
+          execute: async (args: Record<string, unknown>) => {
+            const result: MCPCallToolResponse = await window.api.mcp.callTool({
+              server,
+              name: mcpTool.name,
+              args,
+            })
+            // Extract text content from MCP response (content may be undefined)
+            const contentArr = result?.content ?? []
+            const textParts = contentArr
+              .filter((c) => c.type === 'text' && c.text)
+              .map((c) => c.text)
+            const extracted = textParts.join('\n')
+            if (extracted) return extracted
+            // Fallback: stringify content array (return '(empty)' if truly empty)
+            return contentArr.length > 0 ? JSON.stringify(contentArr) : '(no content returned)'
+          },
+        }
+      }
+    } catch (err) {
+      console.warn(`[MCP] Failed to list tools from ${server.name}:`, err)
+    }
+  }
+
+  return Object.keys(tools).length > 0 ? tools : undefined
+}
 
 interface InputbarProps {
   assistant: Assistant
@@ -134,7 +215,7 @@ const Inputbar: React.FC<InputbarProps> = ({ assistant, topic, sendRef }) => {
           if (msg.id === assistantMessage.id) continue // skip the placeholder
           if (msg.role !== 'user' && msg.role !== 'assistant') continue
 
-          const blocks = msg.blocks
+          const blocks = (msg.blocks ?? [])
             .map((bid) => blockStore.getBlock(bid))
             .filter(Boolean) as MessageBlock[]
           const textBlock = blocks.find((b) => b.type === MessageBlockType.MAIN_TEXT) as MainTextMessageBlock | undefined
@@ -155,11 +236,32 @@ const Inputbar: React.FC<InputbarProps> = ({ assistant, topic, sendRef }) => {
           ? client.chat(model.id)
           : client(model.id)
 
+        // --- Build MCP tools if enabled ---
+        // Track tool execute() return values — AI SDK v6 fullStream tool-result
+        // has part.result === undefined, so we capture results via callback.
+        const toolResultsMap: ToolResultsMap = new Map()
+        const mcpTools = await buildMcpToolsForStreamText()
+
         const stream = streamText({
           model: providerModel,
           messages: sdkMessages,
           system: assistant.prompt || undefined,
           abortSignal: AbortSignal.timeout(120000),
+          ...(mcpTools ? {
+            tools: mcpTools,
+            maxSteps: 5,
+            experimental_onToolCallFinish: (event) => {
+              if (event.success && event.output != null) {
+                const callId = event.toolCall?.toolCallId
+                if (callId) {
+                  const value = typeof event.output === 'string'
+                    ? event.output
+                    : JSON.stringify(event.output)
+                  toolResultsMap.set(callId, value)
+                }
+              }
+            },
+          } : {}),
         })
 
         // --- Stream the response ---
@@ -167,6 +269,25 @@ const Inputbar: React.FC<InputbarProps> = ({ assistant, topic, sendRef }) => {
         for await (const part of stream.fullStream) {
           if (part.type === 'text-delta') {
             fullText += part.text
+            blockStore.updateBlock(assistantBlockId, { content: fullText })
+          } else if (part.type === 'tool-call') {
+            // Show tool name without serverId prefix for cleaner display
+            const displayName = part.toolName.includes('__')
+              ? part.toolName.split('__').slice(1).join('__')
+              : part.toolName
+            fullText += `\n\n> 🔧 \`${displayName}\`\n`
+            blockStore.updateBlock(assistantBlockId, { content: fullText })
+          } else if (part.type === 'tool-result') {
+            // Look up the actual tool result from our callback map
+            // (AI SDK v6 fullStream tool-result output may be undefined for custom tools)
+            const captured = toolResultsMap.get(part.toolCallId)
+            const trimmed = (captured ?? '').trim()
+            if (trimmed && trimmed !== '(no content returned)') {
+              const preview = trimmed.length > 500 ? trimmed.slice(0, 500) + '...' : trimmed
+              fullText += `\n\`\`\`\n${preview}\n\`\`\`\n\n`
+            } else {
+              fullText += '\n'
+            }
             blockStore.updateBlock(assistantBlockId, { content: fullText })
           } else if (part.type === 'error') {
             const err = part.error as { message?: string; statusCode?: number; responseBody?: string }
