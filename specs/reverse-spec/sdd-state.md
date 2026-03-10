@@ -33,7 +33,7 @@
 | F003 | chat-core | T1 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | completed |
 | F005 | chat-ui | T1 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | completed |
 | F004 | settings-data | T2 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | completed |
-| F006 | mcp-tools | T2 | ✅ 03-10 | ✅ 03-10 | ✅ 03-10 | ✅ 03-10 | ✅ 03-10 | ✅ 03-10 | ⬜ | in_progress |
+| F006 | mcp-tools | T2 | ✅ 03-10 | ✅ 03-10 | ✅ 03-10 | ✅ 03-10 | ✅ 03-10 | ✅ 03-10 | ✅ 03-10 | completed |
 | F007 | knowledge | T2 | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | pending |
 | F008 | memory | T3 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | deferred |
 | F009 | agents | T3 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | deferred |
@@ -115,7 +115,7 @@
 | analyze | ✅ | 03-10 | 03-10 | 0 CRITICAL, 0 HIGH, 34/34 FR coverage (100%). Constitution 8/8 pass |
 | implement | ✅ | 03-10 | 03-10 | 75 files changed, +12,937 lines. MCPService ~800 lines, 12 built-in servers, 17+ settings UI components, useMCPStore Zustand, 19 IPC channels. MCP tool-result fix: experimental_onToolCallFinish + ToolResultsMap pattern |
 | verify | ✅ | 03-10 | 03-10 | Tests 228/228, Build OK, Lint ✅ (0 errors/113 warnings). SBI P1:11/11(100%) P2:15/15(100%). Cross-feature 6/6 pass (F001 IPC 19ch ✅, F002 AI pipeline ✅, F005 ToolBlock ✅, Redux→Zustand 0 imports ✅, Identity @angdu ✅). CDP UI: MCP settings renders (server list + search + toggle + 5 sub-tabs), server detail (5 tabs, 14 tools listed), 0 console errors. SC coverage: 7/10 (70%). Inline changes: 1 bug fix (mcpService.cleanup() added to will-quit handler). Status: success |
-| merge | ⬜ | | | |
+| merge | ✅ | 03-10 | 03-10 | Merged to main (fast-forward + verify fix commit) |
 
 ---
 
@@ -128,7 +128,7 @@
 | F003 | 003-chat-core | specs/003-chat-core/ | 003-chat-core | |
 | F005 | 005-chat-ui | specs/005-chat-ui/ | 005-chat-ui | ✅ |
 | F004 | 004-settings-data | specs/004-settings-data/ | 004-settings-data | ✅ |
-| F006 | 006-mcp-tools | specs/006-mcp-tools/ | 006-mcp-tools | |
+| F006 | 006-mcp-tools | specs/006-mcp-tools/ | 006-mcp-tools | ✅ |
 | F007 | | | | |
 | F008 | | | | |
 | F009 | | | | |
@@ -144,6 +144,7 @@
 |-----------|----------------|-------------|-------------------|
 | 2026-03-09 | — | sdd-state.md | Scope expanded: T1 → T1,T2. Activated F004, F006, F007 |
 | 2026-03-09 | F004 | sdd-state.md | Branch 004-settings-data merged to main. F004 completed |
+| 2026-03-10 | F006 | sdd-state.md | F006 mcp-tools verified and merged to main. Inline fix: mcpService.cleanup() added to will-quit. F006 completed |
 
 ---
 
