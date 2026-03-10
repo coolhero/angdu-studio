@@ -33,7 +33,7 @@
 | F003 | chat-core | T1 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | completed |
 | F005 | chat-ui | T1 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | completed |
 | F004 | settings-data | T2 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | completed |
-| F006 | mcp-tools | T2 | ✅ 03-10 | ✅ 03-10 | ✅ 03-10 | ✅ 03-10 | ✅ 03-10 | ⬜ | ⬜ | in_progress |
+| F006 | mcp-tools | T2 | ✅ 03-10 | ✅ 03-10 | ✅ 03-10 | ✅ 03-10 | ✅ 03-10 | ✅ 03-10 | ⬜ | in_progress |
 | F007 | knowledge | T2 | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | pending |
 | F008 | memory | T3 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | deferred |
 | F009 | agents | T3 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | deferred |
@@ -104,6 +104,18 @@
 | implement | ✅ | 03-09 | 03-09 | 39/44 tasks completed. ~30 files created/modified, 4 stores (useSettingsStore extended, useBackupStore, useMiniAppsStore, useShortcutsStore), 4 services (FileStorageService, BackupService, WebDavService, S3Service), 2 IPC handler files, 6 settings pages, 6 reusable components, 3 standalone pages (Files, MinApps, MinApp), 2 hooks, preload API, i18n keys, navigation integration. Build: OK. Types: OK. |
 | verify | 🔀✅ | 03-09 | 03-09 | Re-verified 03-09 (🔀): Tests 191/191, Build OK, Lint ⚠️ (eslint not installed — toolchain). SBI P1:8/8(100%) P2:13/15(87%). Cross-feature 5/5 pass (F003 backup Dexie gap noted — not F004 blocking). Entity/API registry 8/8 match. CDP UI: Settings 7 tabs + Files + MiniApps render, 9/10 SC verified, 0 console errors. Demo --ci: stable 10s, CDP active, 14/18 FR (78%). Phase 3b smoke: pass. Status: success |
 | merge | ✅ | 03-09 | 03-09 | Merged to main via --no-ff |
+
+### F006-mcp-tools
+
+| Step | Status | Started | Completed | Notes |
+|------|--------|---------|-----------|-------|
+| specify | ✅ | 03-10 | 03-10 | 8 US, 34 FR, 10 SC, SBI 32/32 (P1:11, P2:15, P3:6) |
+| plan | ✅ | 03-10 | 03-10 | 10 phases, MCPService main-process singleton, 4 transport types, 19 IPC channels |
+| tasks | ✅ | 03-10 | 03-10 | 75 tasks, 10 phases, 8 user stories |
+| analyze | ✅ | 03-10 | 03-10 | 0 CRITICAL, 0 HIGH, 34/34 FR coverage (100%). Constitution 8/8 pass |
+| implement | ✅ | 03-10 | 03-10 | 75 files changed, +12,937 lines. MCPService ~800 lines, 12 built-in servers, 17+ settings UI components, useMCPStore Zustand, 19 IPC channels. MCP tool-result fix: experimental_onToolCallFinish + ToolResultsMap pattern |
+| verify | ✅ | 03-10 | 03-10 | Tests 228/228, Build OK, Lint ✅ (0 errors/113 warnings). SBI P1:11/11(100%) P2:15/15(100%). Cross-feature 6/6 pass (F001 IPC 19ch ✅, F002 AI pipeline ✅, F005 ToolBlock ✅, Redux→Zustand 0 imports ✅, Identity @angdu ✅). CDP UI: MCP settings renders (server list + search + toggle + 5 sub-tabs), server detail (5 tabs, 14 tools listed), 0 console errors. SC coverage: 7/10 (70%). Inline changes: 1 bug fix (mcpService.cleanup() added to will-quit handler). Status: success |
+| merge | ⬜ | | | |
 
 ---
 

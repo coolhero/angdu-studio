@@ -13,6 +13,7 @@ import { miniWindowService } from './services/MiniWindowService'
 import { updateService } from './services/UpdateService'
 import { protocolService } from './services/ProtocolService'
 import { shortcutService } from './services/ShortcutService'
+import { mcpService } from './services/MCPService'
 import { appMenuService } from './services/AppMenuService'
 import { MIN_WINDOW_WIDTH, MIN_WINDOW_HEIGHT } from '@shared/constants'
 import { setStopQuit, getStopQuitReason, setIsQuitting, getIsQuitting } from './lifecycle'
@@ -119,10 +120,11 @@ function setupGracefulShutdown(): void {
     }, 5000)
 
     try {
-      // Cleanup order: shortcuts → tray → mini window → proxy → update
+      // Cleanup order: shortcuts → tray → mini window → MCP → proxy → update
       shortcutService.unregisterAll()
       trayService.destroy()
       miniWindowService.close()
+      await mcpService.cleanup()
       proxyManager.stopSystemProxyPolling()
       await proxyManager.cleanup()
     } catch (error) {
