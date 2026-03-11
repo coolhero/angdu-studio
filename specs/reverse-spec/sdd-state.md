@@ -7,7 +7,7 @@
 **Scope**: core
 **Active Tiers**: T1,T2
 **Created**: 2026-03-08T00:00:00
-**Last Updated**: 2026-03-11T00:00:00
+**Last Updated**: 2026-03-10T00:00:00
 **Constitution Version**: 1.0.0
 **Foundation Verified**: 2026-03-10 | PASS | Build ✅, Tests 191/191 ✅, Lint ✅ (eslint v10 flat config installed)
 
@@ -34,6 +34,7 @@
 | F005 | chat-ui | T1 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | completed |
 | F004 | settings-data | T2 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | ✅ 03-09 | completed |
 | F006 | mcp-tools | T2 | ✅ 03-10 | ✅ 03-10 | ✅ 03-10 | ✅ 03-10 | ✅ 03-10 | ✅ 03-10 | ✅ 03-10 | completed |
+| F007 | knowledge | T2 | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | pending |
 | F008 | memory | T3 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | deferred |
 | F009 | agents | T3 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | deferred |
 | F010 | notes | T3 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | deferred |
@@ -128,6 +129,7 @@
 | F005 | 005-chat-ui | specs/005-chat-ui/ | 005-chat-ui | ✅ |
 | F004 | 004-settings-data | specs/004-settings-data/ | 004-settings-data | ✅ |
 | F006 | 006-mcp-tools | specs/006-mcp-tools/ | 006-mcp-tools | ✅ |
+| F007 | | | | |
 | F008 | | | | |
 | F009 | | | | |
 | F010 | | | | |
@@ -150,7 +152,6 @@
 
 | Date/Time | Operation | Details | Affected Features |
 |-----------|-----------|---------|-------------------|
-| 2026-03-11 | delete | F007-knowledge | User requested via /smart-sdd remove |
 
 ---
 
@@ -181,7 +182,7 @@ Overall: 0/0 (—)
 | Group | Scenario | Features | Completed | Status | Last Demo |
 |-------|----------|----------|-----------|--------|-----------|
 | DG-01 | Basic Chat Flow | F001,F002,F003,F005 | 0/4 | ⏳ F001,F002,F003,F005 pending | — |
-| DG-02 | Knowledge-Enhanced Chat | F001,F002,F003,F005 | 0/4 | ⏳ F007 removed | — |
+| DG-02 | Knowledge-Enhanced Chat | F001,F002,F003,F005,F007 | 0/5 | ⏳ F007 deferred | — |
 | DG-03 | Agent Workflow | F001,F002,F003,F005,F006,F009 | 0/6 | ⏳ F006,F009 deferred | — |
 | DG-04 | Productivity Tools | F001,F002,F004,F010,F011,F012 | 0/6 | ⏳ F004,F010,F011,F012 deferred | — |
 
