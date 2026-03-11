@@ -17,8 +17,6 @@
 | 6 | Model | Zustand (nested in Provider) | F002 | belongs to Provider |
 | 7 | MCPServer | Zustand | F006 | has many MCPTools (runtime) |
 | 8 | MCPTool | Runtime (fetched from server) | F006 | belongs to MCPServer |
-| 9 | KnowledgeBase | Dexie | F007 | has many KnowledgeItems, has Model |
-| 10 | KnowledgeItem | Dexie (nested) | F007 | belongs to KnowledgeBase |
 | 11 | FileMetadata | Dexie | F004 | referenced by Message, KnowledgeItem |
 | 12 | AgentEntity | SQLite (Drizzle) | F009 | has many Sessions |
 | 13 | AgentSessionEntity | SQLite (Drizzle) | F009 | belongs to Agent, has many SessionMessages |
@@ -264,7 +262,7 @@
 ### Relationships
 
 - **belongs to** Provider (via `provider` field)
-- **referenced by** Assistant, Message, KnowledgeBase
+- **referenced by** Assistant, Message
 
 ---
 
@@ -333,68 +331,7 @@
 
 ---
 
-## 9. KnowledgeBase
-
-**Owner**: F007 knowledge
-**Storage**: Dexie (IndexedDB) + vector store
-
-### Fields
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| id | string | yes | UUID |
-| name | string | yes | Display name |
-| model | Model | yes | Embedding model |
-| dimensions | number | no | Embedding dimensions |
-| description | string | no | Description |
-| items | KnowledgeItem[] | yes | Documents/URLs in the base |
-| created_at | number | yes | Unix timestamp |
-| updated_at | number | yes | Unix timestamp |
-| version | number | yes | Schema version |
-| documentCount | number | no | Retrieval document count |
-| chunkSize | number | no | Text chunk size |
-| chunkOverlap | number | no | Chunk overlap |
-| threshold | number | no | Similarity threshold |
-| rerankModel | Model | no | Reranking model |
-| preprocessProvider | object | no | Document preprocessing config (doc2x/mistral/mineru/paddleocr) |
-
-### Relationships
-
-- **has many** KnowledgeItem (via `items` array)
-- **has one** Model (embedding model)
-- **referenced by** Assistant (via `knowledge_bases`)
-
----
-
-## 10. KnowledgeItem
-
-**Owner**: F007 knowledge
-**Storage**: Nested in KnowledgeBase (Dexie)
-
-### Fields
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| id | string | yes | UUID |
-| baseId | string | no | Parent knowledge base ID |
-| type | KnowledgeItemType | yes | file/url/note/sitemap/directory/memory/video |
-| content | string \| FileMetadata \| FileMetadata[] | yes | Content varies by type |
-| remark | string | no | User note |
-| created_at | number | yes | Unix timestamp |
-| updated_at | number | yes | Unix timestamp |
-| processingStatus | ProcessingStatus | no | pending/processing/completed/failed |
-| processingProgress | number | no | 0-100 progress |
-| processingError | string | no | Error message |
-| retryCount | number | no | Processing retry attempts |
-| isPreprocessed | boolean | no | Preprocessing complete flag |
-
-### Relationships
-
-- **belongs to** KnowledgeBase (via `baseId`)
-
----
-
-## 11. FileMetadata
+## 9. FileMetadata
 
 **Owner**: F004 settings-data
 **Storage**: Dexie (IndexedDB)
@@ -417,7 +354,7 @@
 
 ### Relationships
 
-- **referenced by** Message, KnowledgeItem, ImageMessageBlock, FileMessageBlock
+- **referenced by** Message, ImageMessageBlock, FileMessageBlock
 
 ---
 

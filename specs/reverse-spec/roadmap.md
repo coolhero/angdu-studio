@@ -44,7 +44,6 @@ tabbed Electron shell.
 |----|------|-------------|
 | F004 | settings-data | Settings UI, backup/restore (local/WebDAV/S3), import/export, file management, mini apps launcher |
 | F006 | mcp-tools | MCP server lifecycle, tool discovery/execution, built-in MCP servers, DXT packages, tool permissions |
-| F007 | knowledge | RAG pipeline: embedding, chunking, vector search, reranking, document preprocessing (PDF/CSV/MD/URL/sitemap) |
 
 ### Tier 3 -- Expansion
 
@@ -73,8 +72,6 @@ graph TD
     F005 --> F003
     F006[F006: mcp-tools] --> F001
     F006 --> F002
-    F007[F007: knowledge] --> F001
-    F007 --> F002
     F008[F008: memory] --> F001
     F008 --> F002
     F009[F009: agents] --> F001
@@ -106,13 +103,12 @@ Delivers: Full chat loop end-to-end, settings and backup.
 - F003 chat-core -- depends on F001, F002
 - F004 settings-data -- depends on F001
 
-### RG-3: Rich Features (F005, F006, F007, F008)
+### RG-3: Rich Features (F005, F006, F008)
 
-Delivers: Production-quality chat UI, MCP tools, knowledge RAG, memory.
+Delivers: Production-quality chat UI, MCP tools, memory.
 
 - F005 chat-ui -- depends on F001, F002, F003
 - F006 mcp-tools -- depends on F001, F002
-- F007 knowledge -- depends on F001, F002
 - F008 memory -- depends on F001, F002
 
 ### RG-4: Expansion (F009, F010, F011, F012)
@@ -134,12 +130,6 @@ Delivers: Agents, notes, translate, image generation.
 **Description**: User opens app, configures a provider with API key, selects a model, sends a message, receives streaming response with thinking blocks, switches assistants/topics.
 **SBI Coverage**: TBD
 
-### DG-02: Knowledge-Enhanced Chat
-
-**Features**: F001, F002, F003, F005, F007
-**Description**: User creates a knowledge base, uploads documents, configures embedding model, asks a question -- response includes RAG citations from knowledge base.
-**SBI Coverage**: TBD
-
 ### DG-03: Agent Workflow
 
 **Features**: F001, F002, F003, F005, F006, F009
@@ -158,20 +148,19 @@ Delivers: Agents, notes, translate, image generation.
 
 | Entity | Owner | Used By |
 |--------|-------|---------|
-| Provider | F002 | F003, F005, F006, F007, F008, F009, F011, F012 |
-| Model | F002 | F003, F005, F007, F008, F009, F011, F012 |
+| Provider | F002 | F003, F005, F006, F008, F009, F011, F012 |
+| Model | F002 | F003, F005, F008, F009, F011, F012 |
 | Assistant | F003 | F005, F009, F011 |
-| Topic | F003 | F005, F007 |
-| Message | F003 | F005, F007, F008, F009 |
+| Topic | F003 | F005 |
+| Message | F003 | F005, F008, F009 |
 | MessageBlock | F003 | F005, F009 |
 | MCPServer | F006 | F003, F005, F009 |
 | MCPTool | F006 | F003, F005, F009 |
-| KnowledgeBase | F007 | F003, F005 |
-| FileMetadata | F004 | F003, F005, F007, F012 |
+| FileMetadata | F004 | F003, F005, F012 |
 | AgentEntity | F009 | (self-contained) |
 | Session | F009 | (self-contained) |
 | MemoryItem | F008 | F003, F005 |
-| Notification | F001 | F004, F007 |
+| Notification | F001 | F004 |
 
 ---
 
@@ -183,10 +172,8 @@ Delivers: Agents, notes, translate, image generation.
 | F005 chat-ui | F003 chat-core | Message CRUD, topic management, assistant selection |
 | F005 chat-ui | F002 ai-provider | Model selector, provider status |
 | F005 chat-ui | F006 mcp-tools | Tool listing for input bar, tool result display |
-| F005 chat-ui | F007 knowledge | Knowledge base selector, citation rendering |
 | F005 chat-ui | F008 memory | Memory injection into context |
 | F006 mcp-tools | F002 ai-provider | Tool-calling model capabilities |
-| F007 knowledge | F002 ai-provider | Embedding model, reranking model API clients |
 | F009 agents | F003 chat-core | Message persistence (AgentPersistedMessage) |
 | F009 agents | F006 mcp-tools | MCP server management for agent tools |
 | F011 translate | F002 ai-provider | LLM calls for translation |

@@ -28,7 +28,6 @@
 | F004 settings-data | File (39), FileService (4), Fs (2), Backup (18), Export (1), Shortcuts (1), Zip (2), LocalTransfer (8) | 75 |
 | F005 chat-ui | (renderer-only, no IPC) | 0 |
 | F006 mcp-tools | Mcp (16), Python (1), CodeTools (5) | 22 |
-| F007 knowledge | KnowledgeBase (7) | 7 |
 | F008 memory | Memory (11) | 11 |
 | F009 agents | AgentMessage (2), AgentToolPermission (2), ApiServer (5), ClaudeCodePlugin (7) | 16 |
 | F010 notes | (uses File IPC channels) | 0 |
@@ -36,7 +35,7 @@
 | F012 paintings | (uses ai-provider, no dedicated IPC) | 0 |
 | Cross-cutting | TRACE (13), Ovms (8), OpenClaw (15), Analytics (1), ExternalApps (1), Obsidian (2), Nutstore (3) | 43 |
 
-**Total IPC channels: 283**
+**Total IPC channels: 275**
 
 ### REST API Routes by Feature
 
@@ -435,21 +434,6 @@ Direction legend:
 
 ---
 
-### F007: Knowledge Base
-
-| ID | Channel | Direction | Description | Request Type | Response Type |
-|----|---------|-----------|-------------|-------------|---------------|
-| IPC-254 | `knowledge-base:create` | invoke | Create knowledge base | create params | void |
-| IPC-255 | `knowledge-base:reset` | invoke | Reset knowledge base vectors | base id | void |
-| IPC-256 | `knowledge-base:delete` | invoke | Delete knowledge base | base id | void |
-| IPC-257 | `knowledge-base:add` | invoke | Add item to knowledge base | `{ baseId, item }` | void |
-| IPC-258 | `knowledge-base:remove` | invoke | Remove item from knowledge base | `{ baseId, itemId }` | void |
-| IPC-259 | `knowledge-base:search` | invoke | Vector search knowledge base | `{ baseId, query, limit }` | `KnowledgeSearchResult[]` |
-| IPC-260 | `knowledge-base:rerank` | invoke | Rerank search results | `{ results, query }` | `KnowledgeSearchResult[]` |
-| IPC-261 | `directory-processing-percent` | send(M->R) | Knowledge dir processing progress | -- | `{ percent }` |
-
----
-
 ### F008: Memory
 
 | ID | Channel | Direction | Description | Request Type | Response Type |
@@ -607,9 +591,6 @@ Summary of all push-only channels from main process to renderer.
 | `mcp:servers-updated` | F006 | Server status updated | server list |
 | `mcp:progress` | F006 | Tool execution progress | progress data |
 | `mcp:server-log` | F006 | Server log output | `{ serverId, message }` |
-| `directory-processing-percent` | F007 | Knowledge processing progress | `{ percent }` |
-| `file-preprocess-progress` | F007 | File preprocessing progress | progress data |
-| `file-preprocess-finished` | F007 | File preprocessing done | result data |
 | `agent-tool-permission:request` | F009 | Tool permission prompt | permission payload |
 | `agent-tool-permission:result` | F009 | Permission decision result | result data |
 | `api-server:ready` | F009 | API server started | -- |
