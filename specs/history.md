@@ -67,3 +67,16 @@
 | F010 | notes | T3 | RG-2 | Notes editor (TipTap rich text), note tree management, Obsidian export |
 | F011 | data-sync | T3 | RG-3 | Backup/restore, WebDAV/S3/Nutstore cloud sync, local transfer, data migration |
 | F012 | creative-tools | T3 | RG-4 | AI art/paintings, translation, code tools, mini-apps, OpenClaw, launchpad |
+
+---
+
+## [2026-03-13] /smart-sdd pipeline — Constitution Finalization
+
+### Constitution Decisions
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Constitution version | 1.0.0 | Initial creation from constitution-seed.md |
+| Core principles | 5 principles (IPC Separation, Service-Oriented Main, Feature-Owned State, Provider Abstraction, Streaming-First) | Extracted from Cherry Studio architecture |
+| i18n constraint | Korean (ko) + English (en) only, Korean default | User requirement — 다국어는 한국어와 영어만 지원, 한국어 기본 |
+| Technical constraints | 7 constraints (Electron Security, Titlebar, Windows, Build, MCP, Offline-First, i18n) | — |

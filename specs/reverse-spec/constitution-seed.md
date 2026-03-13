@@ -224,6 +224,13 @@ Within `pages/` and `store/`, code is organized by feature domain. Each feature'
 - **Cloud sync is opt-in**: WebDAV/S3/Nutstore sync is additive, never required.
 - **No server dependency**: The app must be fully functional without internet (except for AI provider API calls).
 
+### 5.5 Internationalization (i18n)
+
+- **Supported languages**: Korean (`ko`) and English (`en`) only. No other locales are implemented or planned.
+- **Default language**: Korean (`ko`). The app launches in Korean unless the user explicitly switches to English.
+- **i18n framework**: All user-facing strings must use i18n keys (via `react-i18next`). No hardcoded display strings in components.
+- **Translation completeness**: Both `ko` and `en` translation files must be kept in sync — every key present in one must exist in the other.
+
 ---
 
 ## 6. Development Principles
