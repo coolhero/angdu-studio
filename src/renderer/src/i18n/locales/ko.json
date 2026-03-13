@@ -1,0 +1,26 @@
+{
+  "app": {
+    "name": "Angdu Studio",
+    "quickAssistant": "빠른 어시스턴트"
+  },
+  "window": {
+    "minimize": "최소화",
+    "maximize": "최대화",
+    "close": "닫기"
+  },
+  "tray": {
+    "showWindow": "창 보기",
+    "miniWindow": "미니 창",
+    "selectionAssistant": "선택 어시스턴트",
+    "quit": "종료"
+  },
+  "theme": {
+    "dark": "다크 모드",
+    "light": "라이트 모드",
+    "system": "시스템"
+  },
+  "error": {
+    "somethingWentWrong": "문제가 발생했습니다",
+    "tryAgain": "다시 시도"
+  }
+}

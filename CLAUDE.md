@@ -71,3 +71,10 @@ Pipeline 실행 중 spec-kit-skills 개선이 필요한 사항을 `skill-feedbac
 4. **AGENT_LIMIT도 기록** — skill로 해결 불가한 것을 명시해야 같은 시도를 반복 안 함
 5. **한 항목 = 한 이슈** — 복합 문제는 분리해서 각각 기록
 
+
+## Active Technologies
+- TypeScript 5.8+ (strict mode) + Electron 40, electron-store, electron-updater, electron-window-state (001-app-shell)
+- electron-store (main process config, JSON file) (001-app-shell)
+
+## Recent Changes
+- 001-app-shell: Added TypeScript 5.8+ (strict mode) + Electron 40, electron-store, electron-updater, electron-window-state

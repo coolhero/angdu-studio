@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+:root {
+  --bg-primary: #ffffff;
+  --text-primary: #1e1e2e;
+  --sidebar-width: 48px;
+  --navbar-height: 36px;
+}
+
+.dark {
+  --bg-primary: #1e1e2e;
+  --text-primary: #cdd6f4;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Ubuntu', 'Segoe UI', sans-serif;
+  font-size: 14px;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Electron drag regions */
+.drag-region {
+  -webkit-app-region: drag;
+}
+
+.no-drag {
+  -webkit-app-region: no-drag;
+}
