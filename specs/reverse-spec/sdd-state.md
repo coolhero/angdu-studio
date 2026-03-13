@@ -74,7 +74,7 @@ Foundation Verified: 2026-03-13 | WARN | Build/Lint deferred — no source code 
 
 | Feature ID | Feature Name | Tier | specify | plan | tasks | analyze | implement | verify | merge | Status |
 |------------|-------------|------|---------|------|-------|---------|-----------|--------|-------|--------|
-| F001 | app-shell | T1 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | verified |
+| F001 | app-shell | T1 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | merged |
 | F002 | navigation | T1 | | | | | | | | pending |
 | F003 | settings | T1 | | | | | | | | pending |
 | F004 | ai-engine | T1 | | | | | | | | pending |
@@ -150,6 +150,7 @@ Foundation Verified: 2026-03-13 | WARN | Build/Lint deferred — no source code 
 | analyze | ✅ | 2026-03-13 | 2026-03-13 | 21/21 FR→Task coverage |
 | implement | ✅ | 2026-03-13 | 2026-03-13 | 27 source files. ↩️ REGRESSION #1: renderer had no titlebar/controls/theme. Fixed: App.tsx now has custom titlebar + drag region + window controls + theme toggle |
 | verify | ✅ | 2026-03-13 | 2026-03-13 | Build ✅, TSC ✅, Lint ✅, 12/12 SCs ✅, Demo CI ✅. Post-regression: titlebar+controls+theme working |
+| merge | ✅ | 2026-03-13 | 2026-03-13 | Merged to main via --no-ff |
 
 ### F002-navigation
 
