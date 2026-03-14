@@ -44,6 +44,7 @@ Pipeline 실행 중 spec-kit-skills 개선이 필요한 사항을 `skill-feedbac
 - **Phase**: 발생 시점 (예: reverse-spec Phase 2-7b, smart-sdd verify Phase 1)
 - **Category**: MISSING_RULE / WRONG_RULE / AMBIGUOUS_RULE / WRONG_ASSUMPTION / MISSING_INJECTION / TEMPLATE_GAP / OVER_ENGINEERED / AGENT_LIMIT
 - **Severity**: Critical (pipeline 중단) / Major (결과물 품질 저하) / Minor (마찰) / Idea (개선 아이디어)
+- **Timestamp**: YYYY-MM-DD HH:MM (발견 시각, 24시간 형식)
 
 ### Skill Trace
 - **File**: spec-kit-skills 내 원인 파일 (예: `.claude/skills/smart-sdd/commands/verify-phases.md`)
@@ -73,8 +74,7 @@ Pipeline 실행 중 spec-kit-skills 개선이 필요한 사항을 `skill-feedbac
 
 
 ## Active Technologies
-- TypeScript 5.8+ (strict mode) + Electron 40, electron-store, electron-updater, electron-window-state (001-app-shell)
-- electron-store (main process config, JSON file) (001-app-shell)
+(clean restart — no implementation yet)
 
 ## Recent Changes
-- 001-app-shell: Added TypeScript 5.8+ (strict mode) + Electron 40, electron-store, electron-updater, electron-window-state
+(clean restart — no implementation yet)
