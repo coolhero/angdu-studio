@@ -52,7 +52,7 @@
 
 | ID | Feature | Tier | RG | specify | plan | tasks | analyze | implement | verify | Status |
 |----|---------|------|----|---------|------|-------|---------|-----------|--------|--------|
-| F001 | Electron Shell | T1 | RG-1 | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | pending |
+| F001 | Electron Shell | T1 | RG-1 | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | in_progress |
 | F002 | Navigation & Layout | T1 | RG-2 | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | pending |
 | F003 | Theme & Appearance | T1 | RG-2 | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | pending |
 | F004 | Provider Management | T1 | RG-3 | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | pending |
@@ -71,7 +71,7 @@
 
 | ID | Feature | Directory | Dependencies |
 |----|---------|-----------|-------------|
-| F001 | Electron Shell | specs/001-electron-shell | F008 |
+| F001 | Electron Shell | specs/001-electron-shell | (none) |
 | F002 | Navigation & Layout | specs/002-navigation-layout | F001, F009 |
 | F003 | Theme & Appearance | specs/003-theme-appearance | F001, F009 |
 | F004 | Provider Management | specs/004-provider-management | F007 |
