@@ -99,6 +99,8 @@ Pipeline 실행 중 spec-kit-skills 개선이 필요한 사항을 `skill-feedbac
 (clean restart — no implementation yet)
 - TypeScript 5.8+ (strict mode) + Electron v40+, electron-vite, electron-updater, better-sqlite3, Zustand, React 19, Zod (001-app-shell)
 - better-sqlite3 for config persistence (main process) (001-app-shell)
+- TypeScript 5.8+ (strict mode) + react-router-dom v7 (HashRouter), Zustand, @dnd-kit/core + @dnd-kit/sortable, shadcn/ui (ContextMenu, Tooltip, DropdownMenu), lucide-reac (002-navigation)
+- F001's AppConfig via IPC (config:get/set) for tab and navbar persistence (002-navigation)
 
 ## Recent Changes
 (clean restart — no implementation yet)

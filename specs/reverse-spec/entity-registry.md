@@ -4,6 +4,34 @@ This document catalogs every domain entity extracted from Cherry Studio source c
 
 ---
 
+## E-F002-1: Tab
+
+**Owner**: F002 (navigation) — **FINALIZED** (plan complete)
+**Storage**: Serialized as `openTabs` JSON config key in AppConfig (F001)
+
+### Fields
+
+| Field | Type | Required | Default | Description |
+|-------|------|----------|---------|-------------|
+| id | string | Yes | derived from route | Unique tab identifier |
+| route | string | Yes | — | Hash route path (e.g., "/settings") |
+| title | string | Yes | — | Display title shown on tab |
+| icon | string | No | null | Lucide icon name |
+| closable | boolean | Yes | true | Whether the tab can be closed |
+| order | number | Yes | — | Sort position in tab bar |
+
+### Used by Features
+
+- F002 (owner), F003 (settings opens as tab), F005 (chat opens as tab)
+
+### Validation Rules
+
+- `id` MUST be unique across all open tabs
+- `closable` MUST be `false` for Home tab (id="home")
+- `order` >= 0; Home tab always order=0
+
+---
+
 ## E-F001-1: WindowState
 
 **Owner**: F001 (app-shell) — **FINALIZED** (plan complete)
