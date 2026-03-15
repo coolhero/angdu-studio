@@ -811,3 +811,51 @@ Feature 의존성 판단 기준:
 
 3. **Dependency Graph 구성 후 sanity check 추가**:
    - "RG-1에 있는 Feature 중 의존성이 있는 Feature가 있으면 경고: '{Feature}는 RG-1(Foundation)이지만 {dep}에 의존합니다. Foundation Feature는 보통 의존성이 없습니다. 맞는지 확인하세요.'"
+
+---
+
+## [SKF-019] Plan research chose better-sqlite3 without verifying native build compatibility with target Electron version
+
+- **Trigger**: A (자각)
+- **Phase**: smart-sdd implement Phase 1 (F001-app-shell) — dependency installation
+- **Category**: MISSING_RULE
+- **Severity**: Major (결과물 품질 저하)
+- **Timestamp**: 2026-03-15 16:00
+- **Status**: ✅ Reflected — `injection/implement.md` Step 1b (Native/compiled dependency compatibility check)
+
+### Skill Trace
+- **File**: `.claude/skills/smart-sdd/reference/injection/implement.md`
+- **Rule**: "Plugin/Dependency Pre-flight" (lines 213-248) — 의존성이 package.json에 있는지만 확인하고, 네이티브 모듈의 빌드 호환성은 검증하지 않음
+- **Line**: 213-248
+
+### Problem
+Plan의 R-001에서 config persistence로 better-sqlite3를 선택했다. 근거는 ACID 트랜잭션, corruption detection, electron-store 대비 우월성이었다. 그러나 실제 구현 시 better-sqlite3 v11.10.0이 Electron 40의 V8 API와 호환되지 않아 네이티브 빌드 실패:
+
+1. **C++ 헤더 호환성**: Electron 40의 V8 headers가 `<source_location>` (C++20)를 요구하는데, macOS 12의 Apple Clang 14는 이 헤더를 제공하지 않음
+2. **Python distutils 제거**: Python 3.14에서 distutils가 제거되어 node-gyp 빌드 실패 (setuptools 설치로 해결)
+3. **V8 API 변경**: better-sqlite3 v11이 `GetPrototype()` 등 Electron 40에서 제거된 V8 API를 사용
+4. **Homebrew LLVM으로도 불가**: C++20 플래그를 강제해도 V8 API 불일치는 해결 불가
+
+결과: implement 전체가 네이티브 모듈 빌드 이슈로 2시간 이상 차단. 최종적으로 electron-store로 대체하여 해결.
+
+### Expected
+Plan의 research 단계에서 네이티브 모듈을 선택할 때:
+1. 대상 Electron 버전과의 호환성을 확인해야 함 (npm 페이지의 Electron 호환 매트릭스, GitHub issues 확인)
+2. 빌드 환경 요구사항 (C++ 표준, Python 버전, node-gyp 버전)을 확인해야 함
+3. 호환되지 않는 경우 대안 (electron-store, sql.js WASM build 등)을 우선 제시해야 함
+
+### Workaround
+better-sqlite3를 electron-store로 대체:
+- ConfigService를 electron-store 기반으로 재작성 (JSON key-value store)
+- key-value config에는 electron-store가 충분 (atomic write via temp-file-rename)
+- 관계형 데이터가 필요한 F005(conversations/messages)에서 better-sqlite3 호환성을 다시 해결하기로 연기
+
+### Suggested Fix
+1. `reference/injection/plan.md` 또는 `reference/injection/implement.md`의 Dependency Pre-flight에 규칙 추가:
+   - "네이티브 모듈 (C/C++ addon)을 선택할 때, 대상 Electron 버전과의 호환성을 확인해야 한다"
+   - "확인 방법: `npm info {package} → engines.electron` 필드, GitHub issues에서 Electron 버전 관련 이슈 검색, prebuild-install 지원 여부"
+   - "네이티브 모듈 빌드 실패 시 대안 순서: (1) prebuild 바이너리, (2) WASM 대체 (sql.js), (3) 순수 JS 대체 (electron-store), (4) Electron 버전 조정"
+
+2. `commands/pipeline.md`의 Plan Research (Phase 0)에 추가:
+   - "Electron 프로젝트에서 네이티브 모듈을 dependencies에 포함하려면, plan 단계에서 빌드 호환성 확인 작업을 포함해야 한다"
+   - "특히 better-sqlite3, sharp, canvas 등 C++ addon은 Electron headers 재빌드가 필요하며, V8 API 버전 호환성 이슈가 빈번하다"
