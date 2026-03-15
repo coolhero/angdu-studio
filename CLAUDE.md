@@ -73,6 +73,28 @@ Pipeline 실행 중 spec-kit-skills 개선이 필요한 사항을 `skill-feedbac
 5. **한 항목 = 한 이슈** — 복합 문제는 분리해서 각각 기록
 
 
+## Pipeline Execution Notes
+
+> 이전 파이프라인 실행에서 발견된 이슈와 교훈을 기록합니다.
+> smart-sdd pipeline 실행 시 에이전트가 참고해야 할 사항입니다.
+
+### Known Behavioral Issues
+
+1. **spec-kit 출력 억제 필수 (MANDATORY RULE 3)**: `speckit-*` 명령 실행 후 raw output ("Suggested commit", "Ready for /speckit.*", "Constitution finalized" 등)을 사용자에게 보여주지 마세요. 반드시 artifact 파일을 읽고 → Review 포맷으로 표시 → AskUserQuestion 호출 순서를 따르세요. 컨텍스트 한계 시 `💡 Type "continue" to review the results.`를 표시하세요. 이 규칙은 smart-sdd SKILL.md MANDATORY RULE 3에 정의되어 있습니다.
+
+2. **HARD STOP 건너뛰기 금지**: Review 후 사용자 승인 없이 다음 step으로 넘어가지 마세요. "Constitution finalized → F001 pipeline" 처럼 HARD STOP을 건너뛰는 것은 continuity가 아니라 위반입니다.
+
+3. **Feature 의존성 = 구현 순서**: "A의 코드가 B를 import한다"는 런타임 결합이지 Feature 의존성이 아닙니다. Feature 의존성은 "B의 코드가 없으면 A를 처음부터 작성할 수 없는가?"로 판단합니다. F001 (app-shell)은 항상 첫 번째입니다.
+
+### Execution Log
+
+| Date | Phase | Issue | Resolution |
+|------|-------|-------|------------|
+| 2026-03-15 | reverse-spec | case-study-log.md가 cherry-studio(소스)에 생성됨 | CWD(angdu-studio)로 복사, analyze.md 경로 수정 |
+| 2026-03-15 | reverse-spec | Demo Group SBI Coverage "TBD"로 남음 | roadmap.md에 직접 계산하여 기입, analyze.md 구조 분리 |
+| 2026-03-15 | smart-sdd constitution | Review 없이 F001로 바로 진행 | MANDATORY RULE 3 추가 (SKILL.md) |
+| 2026-03-15 | smart-sdd specify F001 | "Ready for /speckit.clarify" raw output 표시 후 멈춤 | MANDATORY RULE 3 반영 전 발생, 최신 버전에서 확인 예정 |
+
 ## Active Technologies
 (clean restart — no implementation yet)
 
