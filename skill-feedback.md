@@ -759,3 +759,54 @@ Timeout: 총 120초. 각 단계 실패 시 5초 간격 재시도.
 ```
 
 Also add `REMOTE_DEBUGGING_PORT=9222 npx electron-vite dev` as an alternative form in the Phase 1.5-4 Step 1b table.
+
+---
+
+## [SKF-018] Roadmap dependency graph placed Data & Storage before Electron Shell — wrong foundation order
+
+- **Trigger**: B (사용자 지적)
+- **Phase**: smart-sdd pipeline — Feature Selection (Step 4)
+- **Category**: WRONG_ASSUMPTION
+- **Severity**: Major (결과물 품질 저하)
+- **Timestamp**: 2026-03-15 14:30
+
+### Skill Trace
+- **File**: `.claude/skills/reverse-spec/commands/analyze.md`
+- **Rule**: Phase 3-2 "Dependency Graph Construction and Release Group Determination" — "Direct Dependency: Uses another Feature's modules via import/require" + "Release 1 (Foundation): Features with no dependencies"
+- **Line**: ~1392-1413
+
+### Problem
+reverse-spec Phase 3에서 Dependency Graph를 구성할 때, F008 Data & Storage를 "의존성 없음"으로, F001 Electron Shell을 "F008에 의존"으로 설정했다. 그 논리는 "Shell이 시작할 때 DB를 초기화하므로 DB가 먼저 있어야 한다"는 것이었다.
+
+이로 인해 pipeline 시작 시 Feature Selection이 F008을 첫 번째 Feature로 선택했다. 사용자가 "왜 F001부터 하지 않는거지?"라고 지적.
+
+**실제 의존 관계**: Electron Shell은 모든 것의 기초다. 앱 윈도우가 없으면 DB를 초기화할 프로세스 자체가 없다. DB 스키마 정의와 Drizzle ORM 설정은 Shell 내부에서 수행되거나, Shell과 병렬로 진행할 수 있지만, Shell이 DB에 "의존"하는 것은 아니다.
+
+**원인 분석**: analyze.md의 의존성 규칙이 "코드 import 관계"에 집중하여, "Electron main process가 DB를 import한다 → Shell이 DB에 의존한다"로 판단. 그러나 이것은 **런타임 초기화 순서**이지 **Feature 구현 순서**가 아니다. Feature 의존성은 "이 Feature를 구현하려면 다른 Feature가 먼저 완성되어 있어야 하는가?"로 판단해야 한다.
+
+### Expected
+F001 Electron Shell은 의존성이 없어야 하며, pipeline의 첫 번째 Feature여야 한다. DB 스키마(F008)는 Shell과 동일한 RG-1에 있지만 Shell에 의존하거나, 독립적으로 병렬 진행 가능해야 한다.
+
+Feature 의존성 판단 기준:
+- ✅ "이 Feature를 spec/plan/implement하려면 다른 Feature의 코드가 완성되어 있어야 하는가?"
+- ❌ "런타임에서 이 Feature의 코드가 다른 Feature의 코드를 import하는가?"
+
+후자는 코드 결합(coupling)이지 Feature 구현 순서 의존성이 아니다.
+
+### Workaround
+사용자 지적 후 sdd-state.md에서 F001의 의존성을 `(none)`으로 수정하여 해결.
+
+### Suggested Fix
+`reverse-spec/commands/analyze.md` Phase 3-2 "Dependency Graph Construction"에 규칙 추가:
+
+1. **Feature 의존성 vs 코드 결합 구분 규칙**:
+   - "Feature A가 Feature B에 의존한다"는 "Feature A를 **구현/검증**하려면 Feature B의 **코드가 완성**되어 있어야 한다"를 의미한다
+   - 런타임 초기화 순서 (import 관계)는 Feature 의존성과 다르다
+   - 예: "Shell이 DB를 초기화한다"는 코드 결합이지, "Shell Feature를 구현하려면 DB Feature가 완성되어야 한다"는 아닐 수 있다
+
+2. **Foundation Feature 보호 규칙**:
+   - "App Shell / Bootstrap Feature는 특별히 명시적 의존성이 없는 한 항상 RG-1의 첫 번째 Feature여야 한다"
+   - "다른 Feature가 Shell에 의존하는 것은 자연스럽지만, Shell이 다른 Feature에 의존하는 것은 이례적이므로 반드시 사용자 확인을 거쳐야 한다"
+
+3. **Dependency Graph 구성 후 sanity check 추가**:
+   - "RG-1에 있는 Feature 중 의존성이 있는 Feature가 있으면 경고: '{Feature}는 RG-1(Foundation)이지만 {dep}에 의존합니다. Foundation Feature는 보통 의존성이 없습니다. 맞는지 확인하세요.'"
