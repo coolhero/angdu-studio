@@ -769,6 +769,7 @@ Also add `REMOTE_DEBUGGING_PORT=9222 npx electron-vite dev` as an alternative fo
 - **Category**: WRONG_ASSUMPTION
 - **Severity**: Major (결과물 품질 저하)
 - **Timestamp**: 2026-03-15 14:30
+- **Status**: ✅ Reflected — `analyze.md` Phase 3-2 Dependency Interpretation Rules (3 rules: Shell always RG-1, Foundation sanity check, Dependency Direction Test) + Post-sort validation
 
 ### Skill Trace
 - **File**: `.claude/skills/reverse-spec/commands/analyze.md`
