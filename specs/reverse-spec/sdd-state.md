@@ -77,7 +77,7 @@ Foundation Verified: 2026-03-16 | PASS | Build ✅, Toolchain ✅, Platform N/A
 | Feature ID | Feature Name | Tier | specify | plan | tasks | analyze | implement | verify | merge | Status |
 |------------|-------------|------|---------|------|-------|---------|-----------|--------|-------|--------|
 | F001 | app-shell | T1 | ✅ 03-15 | ✅ 03-15 | ✅ 03-15 | ✅ 03-15 | ✅ 03-15 | ✅ 03-15 | ✅ 03-15 | completed |
-| F002 | navigation | T1 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | | in_progress |
+| F002 | navigation | T1 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | completed |
 | F003 | settings | T1 | | | | | | | | pending |
 | F004 | model-provider | T1 | | | | | | | | pending |
 | F005 | chat-conversation | T1 | | | | | | | | pending |
@@ -110,6 +110,8 @@ Foundation Verified: 2026-03-16 | PASS | Build ✅, Toolchain ✅, Platform N/A
 | plan | completed | 2026-03-16T07:55:00 | 2026-03-16T08:10:00 | 2 entities (Tab, NavbarConfig), 6 phases, 6 research decisions, 9 interaction chains |
 | tasks | completed | 2026-03-16T08:10:00 | 2026-03-16T08:20:00 | 44 tasks, 11 phases, 8 user stories |
 | analyze | completed | 2026-03-16T08:20:00 | 2026-03-16T08:30:00 | 0 critical, 0 high blocking, FR-006 clarified in T005 |
+| implement | completed | 2026-03-16T08:30:00 | 2026-03-16T09:00:00 | 37 files, TS clean, build OK, runtime OK. Fixed Tailwind CSS plugin + layout mode |
+| verify | completed | 2026-03-16T09:00:00 | 2026-03-16T09:15:00 | Build ✅, TS ✅, Smoke ✅, Cross-feature ✅, Demo ✅ |
 
 ### F003-settings
 
@@ -133,7 +135,7 @@ Foundation Verified: 2026-03-16 | PASS | Build ✅, Toolchain ✅, Platform N/A
 | Feature ID | spec-kit Name | spec-kit Path | Branch | Merged |
 |------------|---------------|---------------|--------|--------|
 | F001 | 001-app-shell | specs/001-app-shell/ | 001-app-shell | ✅ |
-| F002 | 002-navigation | specs/002-navigation/ | 002-navigation | |
+| F002 | 002-navigation | specs/002-navigation/ | 002-navigation | ✅ |
 | F003 | | | | |
 | F004 | | | | |
 | F005 | | | | |
