@@ -1,6 +1,6 @@
 import { Component, useEffect, type ReactNode } from 'react'
-import { TitleBar } from './components/TitleBar'
 import { useUIStore, initUIStoreListeners } from './stores/useUIStore'
+import { AppRouter } from './Router'
 
 // Error Boundary — catches render errors, shows fallback UI (F7-01, Pattern Constraint)
 class ErrorBoundary extends Component<
@@ -57,16 +57,7 @@ function AppContent() {
     document.body.classList.add(theme)
   }, [theme])
 
-  return (
-    <div className="flex h-screen flex-col bg-background text-foreground">
-      <TitleBar />
-      <main className="flex-1 overflow-auto">
-        <div className="flex h-full items-center justify-center">
-          <p className="text-muted-foreground">Angdu Studio — Ready</p>
-        </div>
-      </main>
-    </div>
-  )
+  return <AppRouter />
 }
 
 export default function App() {

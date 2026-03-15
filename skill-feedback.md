@@ -869,6 +869,7 @@ better-sqlite3를 electron-store로 대체:
 - **Category**: MISSING_RULE
 - **Severity**: Minor (마찰)
 - **Timestamp**: 2026-03-15 17:00
+- **Status**: ✅ Reflected — `verify-phases.md` Phase 3 Step 3a + Step 6 (Console noise filter), `runtime-verification.md` (Electron Console Noise)
 
 ### Skill Trace
 - **File**: `.claude/skills/smart-sdd/commands/verify-phases.md`
@@ -904,3 +905,310 @@ Verify Phase 3에서 Electron 앱의 Console 출력을 수집할 때:
 
 2. `reference/runtime-verification.md`에 Electron 전용 주의사항 추가:
    - "Electron 앱에서 Playwright evaluate()를 사용하면 anti-self-XSS 경고가 DevTools Console에 표시됨. 이는 정상이며 차단되지 않음. Console error 수집 시 이 패턴을 필터링할 것"
+
+---
+
+## [SKF-021] speckit-specify auto-numbering conflicts with smart-sdd pre-created Feature branch
+
+- **Trigger**: A (자각) + B (사용자 지적)
+- **Phase**: smart-sdd pipeline Step 1 (specify) — speckit-specify execution
+- **Category**: WRONG_ASSUMPTION
+- **Severity**: Major (결과물 품질 저하)
+- **Timestamp**: 2026-03-16 07:42
+- **Status**: ✅ Reflected — `pipeline.md` (Feature Number Conflict Prevention), `branch-management.md` (Auto-numbering conflict warning)
+
+### Skill Trace
+- **File**: `.claude/skills/smart-sdd/commands/pipeline.md`
+- **Rule**: Step 0 (pre-flight) "Create Feature branch {NNN}-{short-name}" (line ~661) AND Step 1 (specify) which invokes `speckit-specify` that calls `create-new-feature.sh` with `--json` flag
+- **Line**: ~661 (pre-flight branch creation) + speckit-specify SKILL.md Step 2 (create-new-feature.sh)
+
+### Problem
+smart-sdd pipeline은 두 단계에서 branch/directory를 생성한다:
+
+1. **Step 0 (pre-flight)**: `git checkout -b 002-navigation` — smart-sdd가 Feature branch를 먼저 생성
+2. **Step 1 (specify)**: `speckit-specify`가 `.specify/scripts/bash/create-new-feature.sh` 실행 — 이 스크립트가 auto-numbering으로 다음 가용 번호를 탐지
+
+스크립트의 auto-numbering 로직은 **기존 branch와 spec directory를 스캔**하여 다음 번호를 결정한다. Step 0에서 이미 `002-navigation` branch가 존재하므로, 스크립트가 002를 "사용 중"으로 판단하고 `003-navigation`을 생성했다.
+
+결과:
+- git branch: `003-navigation` (스크립트가 새로 생성 + checkout)
+- spec directory: `specs/003-navigation/` (스크립트가 생성)
+- 원래 의도: `002-navigation` branch + `specs/002-navigation/`
+
+에이전트가 수동으로 `specs/003-navigation/`을 `specs/002-navigation/`으로 이동하고, `003-navigation` branch를 삭제하고, `002-navigation` branch로 복귀해야 했다. 이 과정에서 `sdd-state.md`의 Feature Mapping도 수동 조정이 필요했다.
+
+### Expected
+smart-sdd가 speckit-specify를 호출할 때, Feature 번호가 이미 결정되어 있으므로(sdd-state.md의 Feature ID에서 추출) `create-new-feature.sh`에 `--number` 플래그로 명시적 번호를 전달해야 한다. 또는 smart-sdd가 pre-flight에서 branch를 생성하지 않고 speckit-specify의 스크립트에 branch 생성을 위임해야 한다.
+
+### Workaround
+에이전트가 수동으로 수정:
+```bash
+mv specs/003-navigation specs/002-navigation
+git checkout 002-navigation
+git branch -D 003-navigation
+```
+
+### Suggested Fix
+두 가지 접근 중 하나를 선택:
+
+**Option A (권장): smart-sdd가 speckit-specify에 명시적 번호 전달**
+`commands/pipeline.md` Step 1 (specify) 실행 시:
+- sdd-state.md의 Feature ID에서 번호 추출 (F002 → 002)
+- `create-new-feature.sh`에 `--number 002` 전달 (auto-numbering 비활성화)
+- 또는: speckit-specify 호출 시 `002-navigation`을 feature description이 아닌 **feature name**으로 전달하여 스크립트가 해당 번호를 사용하도록 유도
+
+**Option B: pre-flight에서 branch 생성을 스킵하고 speckit에 위임**
+`commands/pipeline.md` Step 0 (pre-flight)에서 branch 생성 로직을 제거하고, speckit-specify의 `create-new-feature.sh`가 branch를 생성하도록 위임. 이 경우 smart-sdd는 스크립트 완료 후 생성된 branch 이름을 읽어 sdd-state.md에 기록.
+
+**Option A가 권장**: smart-sdd가 Feature ID를 통제하므로 번호를 명시적으로 전달하는 것이 더 안전. Option B는 speckit의 auto-numbering이 roadmap의 Feature ID와 다른 번호를 선택할 위험이 있음.
+
+---
+
+## [SKF-022] Execute + Review continuity rule structurally impossible when using Skill tool for speckit invocation
+
+- **Trigger**: B (사용자 지적) — 3회 이상 반복 발생
+- **Phase**: smart-sdd pipeline Step 3 (Execute + Review) — specify, plan 등 모든 speckit-* 호출 시
+- **Category**: WRONG_ASSUMPTION
+- **Severity**: Critical (pipeline 중단)
+- **Timestamp**: 2026-03-16 08:10
+- **Status**: ✅ Reflected — `pipeline.md` Step 3 Execute (Inline Execution Protocol — Skill tool 대신 inline 실행을 기본으로 변경)
+
+### Skill Trace
+- **File**: `.claude/skills/smart-sdd/commands/pipeline.md`
+- **Rule**: "⚠️⚠️⚠️ EXECUTE + REVIEW CONTINUITY RULE ⚠️⚠️⚠️ — Execute and Review are ONE continuous action — they MUST happen in the SAME response." (line ~147-160)
+- **Line**: 147-160
+
+### Problem
+pipeline.md의 EXECUTE + REVIEW CONTINUITY RULE은 "speckit 실행과 Review가 동일 응답에서 연속으로 이루어져야 한다"고 명시한다. 그러나 이 규칙은 **Skill tool 호출의 구조적 특성으로 인해 준수가 불가능**하다.
+
+**발생 메커니즘 (3단계)**:
+
+1. **smart-sdd 에이전트가 `Skill(speckit-plan)` 호출** → Skill tool이 speckit-plan SKILL.md를 로드하고 실행
+2. **speckit-plan이 자체 완료 메시지를 생성** → "Branch: 002-navigation, spec dir: specs/002-navigation/" 등의 completion report
+3. **Skill tool이 결과를 smart-sdd 에이전트에 반환** → 이 시점에서 **에이전트의 응답 턴이 종료됨**
+
+핵심 문제: **Skill tool의 결과 반환이 곧 에이전트 응답의 경계**이다. speckit skill은 자체 SKILL.md 지시에 따라 "Report completion" 메시지를 생성하고, 이것이 사용자에게 보이는 최종 응답이 된다. smart-sdd의 "Review를 동일 응답에서 계속하라"는 지시는 이미 소실된 상태.
+
+**실제 관찰된 패턴** (F002 pipeline에서 3회 발생):
+
+| 단계 | speckit 호출 | 실제 동작 | 규칙 위반 |
+|------|------------|----------|---------|
+| specify | `Skill(speckit-specify)` | speckit이 completion report 출력 → 멈춤 | Review 미표시, continue 안내 없음 |
+| plan | `Skill(speckit-plan)` | speckit이 "Branch, artifacts" 출력 → 멈춤 | Review 미표시, continue 안내 없음 |
+
+**사용자 경험**: 에이전트가 speckit 완료 메시지만 보여주고 멈춘다. 사용자는:
+- Review가 나올 것을 기다리지만 아무것도 안 나옴
+- "continue"를 타이핑해야 한다는 안내도 없음
+- 파이프라인이 끝난 것인지, 멈춘 것인지 판단 불가
+
+**Fallback도 작동하지 않는 이유**: pipeline.md line 162-168의 fallback 메시지 (`💡 Type "continue" to review the results.`)는 "에이전트가 Review를 진행할 수 없을 때" 표시하라고 되어 있다. 그러나 문제는 에이전트가 fallback을 표시할 기회 자체가 없다는 것이다 — Skill tool 반환 후 speckit의 completion 메시지가 이미 최종 응답으로 출력되었기 때문.
+
+### Expected
+두 가지 중 하나:
+
+**A) Skill tool 호출 후에도 smart-sdd가 응답을 이어갈 수 있어야 함**
+- Skill 실행이 smart-sdd의 "하위 단계"로 작동하여, speckit 완료 후 smart-sdd가 동일 응답에서 Review를 계속 표시
+
+**B) Skill tool의 구조적 한계를 인정하고, speckit 완료 후 항상 fallback 메시지를 표시하는 메커니즘**
+- speckit skill의 completion 메시지 자체에 "다음 단계" 안내를 포함
+- 또는 smart-sdd가 Skill tool 대신 inline execution (Skill Invocation Fallback)을 기본으로 사용
+
+### Workaround
+현재 없음 — 사용자가 매번 "continue" 또는 별도 메시지를 입력하여 수동으로 이어감. 3회 반복 발생으로 사용자 경험 심각하게 저하.
+
+### Suggested Fix
+**근본 수정 (Option 1 — 권장): speckit-* 호출 시 Skill tool 대신 Inline Execution을 기본으로 사용**
+
+pipeline.md의 Step 3 (Execute) 규칙을 변경:
+```
+현재: "Invokes speckit-[command] via the Skill tool"
+수정: "기본적으로 Skill Invocation Fallback (inline execution)을 사용한다.
+       Skill tool은 speckit-*에 대해 사용하지 않는다.
+       이유: Skill tool의 응답 경계가 Execute+Review 연속성을 깨뜨리기 때문."
+```
+
+Inline execution은 이미 pipeline.md line 108-113에 정의되어 있다:
+1. speckit SKILL.md 파일을 직접 읽기
+2. 지시사항을 inline 워크플로우 단계로 실행
+3. 실행 완료 후 동일 응답에서 바로 Review로 진행
+
+이렇게 하면:
+- speckit의 completion 메시지가 생성되지 않음 (별도 Skill 응답 없음)
+- smart-sdd 에이전트가 동일 응답 내에서 artifact 읽기 → Review 표시 → AskUserQuestion까지 연속 진행 가능
+- EXECUTE + REVIEW CONTINUITY RULE을 구조적으로 준수 가능
+
+**보조 수정 (Option 2 — Option 1이 불가능할 때): speckit SKILL.md에 smart-sdd 인식 규칙 추가**
+
+각 speckit-* SKILL.md에 규칙 추가:
+```
+"smart-sdd pipeline 내에서 호출된 경우 (대화 컨텍스트에 smart-sdd pipeline 진행 흔적이 있는 경우):
+  - completion report를 생성하지 않는다
+  - 대신 마지막 줄에 다음을 출력한다:
+    '✅ speckit-[command] executed for [FID]-[name]. 💡 Type "continue" to review the results.'
+  - 이렇게 해도 Review는 표시되지 않지만, 최소한 사용자가 다음 행동을 알 수 있다"
+```
+
+**Option 1이 구조적으로 올바른 수정**이며, Option 2는 Skill tool 사용을 유지해야 하는 제약이 있을 때의 차선책이다.
+
+### 영향 범위
+이 문제는 smart-sdd pipeline의 **모든 speckit-* 호출**에 영향:
+- `speckit-constitution` (Phase 0-3)
+- `speckit-specify` (Phase 1 step 1)
+- `speckit-clarify` (Phase 1 step 1b)
+- `speckit-plan` (Phase 1 step 2)
+- `speckit-tasks` (Phase 1 step 3)
+- `speckit-analyze` (Phase 1 step 4)
+- `speckit-implement` (Phase 1 step 5)
+
+총 7개 호출 지점 × Feature 수 = **매 Feature마다 최대 7회 중단** 가능.
+F001~F010 전체 pipeline에서 최대 70회 중단 발생 가능.
+
+---
+
+## [SKF-023] Verify passed without detecting that Tailwind CSS was not rendering — build/TS/smoke all green while UI was completely unstyled
+
+- **Trigger**: B (사용자 지적) — "demo를 실행해보니 이게 뭘 만든건지 모르겠는데"
+- **Phase**: smart-sdd verify Phase 1-3 (F002-navigation) + implement Smoke Launch
+- **Category**: MISSING_RULE
+- **Severity**: Critical (pipeline 중단)
+- **Timestamp**: 2026-03-16 09:00
+- **Status**: ✅ Reflected — `injection/implement.md` (CSS Build Pipeline Verification), `pipeline.md` (Smoke Launch mandatory snapshot + Foundation Gate CSS Toolchain), `verify-phases.md` (Phase 1 item 5 CSS rendering check)
+
+### Skill Trace
+- **File**: `.claude/skills/smart-sdd/commands/pipeline.md`
+- **Rule**: Post-Implement Smoke Launch (lines 761-774) — "For GUI projects: Confirm the main window is not blank — if Playwright CLI is available, take a single snapshot to verify basic UI elements rendered"
+- **Line**: 761-774 (Smoke Launch) + verify-phases.md Phase 1 (Build gate)
+
+### Problem
+F002 implement + verify가 모두 통과했지만, 실제 앱은 **Tailwind CSS가 완전히 적용되지 않은 상태**였다:
+
+1. **Build 통과**: `pnpm run build` 성공. CSS 파일 30.20 KB 생성. 그러나 이 CSS는 F001의 기존 클래스만 포함하고, F002의 새 컴포넌트 클래스는 포함되지 않았음
+2. **TypeScript 통과**: `npx tsc --noEmit` 성공. Tailwind 클래스는 string이므로 TS가 검증하지 않음
+3. **Smoke Launch 통과**: 앱이 시작되고 크래시 없이 실행됨. 그러나 "blank가 아닌지 확인"이 실행되지 않았음
+4. **Verify Phase 1 통과**: Build/TS 게이트 모두 green
+
+**실제 화면**: 사이드바 아이콘이 가로 한 줄로 나열, 배경색/테두리/레이아웃 없음, flex-row/flex-col 적용 안됨. 사용자가 "이게 뭘 만든건지 모르겠다"고 지적.
+
+**근본 원인**: Tailwind CSS 4는 `@tailwindcss/vite` 플러그인이 `electron.vite.config.ts`의 renderer 섹션에 등록되어야 소스 파일을 스캔하여 사용된 클래스를 CSS로 변환한다. F001에서 이 플러그인 없이도 기본 클래스가 동작한 것은 `@import "tailwindcss"` 자체가 일부 reset/base 스타일을 포함하기 때문이지만, 새 컴포넌트의 utility 클래스(w-12, h-11, flex-row, border-border 등)는 누락되었다.
+
+### Expected
+세 단계에서 잡았어야 함:
+
+1. **Implement 에이전트**: 새 CSS framework 플러그인이 빌드 파이프라인에 등록되었는지 확인. Tailwind CSS 4 + Vite = `@tailwindcss/vite` 필수
+2. **Smoke Launch**: Playwright 스냅샷을 찍고 "기본 UI 요소가 렌더링되었는지" 확인하는 규칙이 있으나, 실제로 스냅샷을 찍지 않았음
+3. **Verify Phase 3**: GUI Feature에서 Playwright로 시각적 검증을 해야 하지만, Phase 1 (build/TS) 통과로 바로 Review로 이동
+
+### Workaround
+`@tailwindcss/vite` 플러그인 설치 + `electron.vite.config.ts` renderer.plugins에 추가:
+```typescript
+import tailwindcss from '@tailwindcss/vite'
+renderer: { plugins: [tailwindcss(), react()] }
+```
+
+### Suggested Fix
+**1. Implement B-3 규칙 추가** (`injection/implement.md`):
+- "CSS framework (Tailwind CSS, PostCSS 등)를 사용하는 프로젝트에서 새 컴포넌트를 추가할 때, CSS 빌드 파이프라인이 새 파일을 스캔하는지 확인"
+- "Tailwind CSS 4: `@tailwindcss/vite` 또는 `@tailwindcss/postcss` 플러그인이 빌드 도구에 등록되어 있는지 확인"
+- "CSS 관련 변경 후 빌드된 CSS 파일 크기가 합리적인지 확인 (새 컴포넌트 추가 후 CSS가 줄거나 동일하면 경고)"
+
+**2. Smoke Launch 강화** (`pipeline.md` line 767):
+- 현재: "take a single snapshot to verify basic UI elements rendered"
+- 강화: "스냅샷을 **반드시 캡처**하고, 캡처된 이미지에서 **레이아웃이 의도대로 적용되었는지** 확인. 모든 요소가 왼쪽 상단에 수직으로 나열되어 있으면 CSS 미적용 경고"
+
+**3. Verify Phase 1에 CSS rendering check 추가** (`verify-phases.md`):
+- Build gate 통과 후, GUI Feature에서는 Playwright로 앱 실행 → 스냅샷 → 최소 하나의 flex/grid 레이아웃이 적용되었는지 확인
+- "CSS 파일이 생성되었지만 적용되지 않는" 상황은 build gate만으로 잡을 수 없음
+
+**4. Foundation Gate에 CSS toolchain 확인 추가** (`pipeline.md` Step 3b):
+- Tailwind CSS 4 프로젝트에서 `@tailwindcss/vite` 또는 `@tailwindcss/postcss`가 빌드 설정에 등록되어 있는지 확인
+- 미등록 시 경고 + 자동 설치 제안
+
+---
+
+## [SKF-024] Implement agent produced layout that doesn't match source app — sidebar+tabbar shown simultaneously instead of mode-exclusive
+
+- **Trigger**: B (사용자 지적) — "ui 형상이 cherry studio와 완전히 다르게되었는데 의도된건가?"
+- **Phase**: smart-sdd implement (F002-navigation) — layout structure
+- **Category**: WRONG_ASSUMPTION
+- **Severity**: Major (결과물 품질 저하)
+- **Timestamp**: 2026-03-16 09:10
+
+### Skill Trace
+- **File**: `.claude/skills/smart-sdd/reference/injection/implement.md`
+- **Rule**: "Source App Visual Reference" (rebuild mode, GUI) — 원본 앱의 레이아웃 구조를 참조하여 구현하라는 규칙 존재. 그러나 실행되지 않음
+- **Line**: ~115-159
+
+### Problem
+Cherry Studio 원본의 네비게이션 모드는 **상호 배타적**이다:
+- **top 모드 (기본)**: 상단에 탭바만 표시. 사이드바 없음. 전체 너비를 콘텐츠가 사용.
+- **left 모드**: 좌측에 아이콘 사이드바. 탭바 없음 (또는 콘텐츠 영역 내부에 탭).
+
+그러나 F002 구현 결과: **사이드바와 탭바가 동시에 표시**. navbarPosition과 무관하게 항상 좌측 사이드바가 보이고, 상단 탭바도 보임. 이는 Cherry Studio의 어떤 모드와도 일치하지 않는 혼합 레이아웃.
+
+**원인 분석**: plan.md의 "Layout Strategy"가 Cherry Studio의 "left" 모드 구조를 기본으로 설명하면서, 이것을 navbarPosition에 따라 전환하지 않았다. plan.md가 "In 'top' mode, the Sidebar renders navigation icons"라고 기술했으나, Cherry Studio의 top 모드에는 사이드바 자체가 없다. plan 단계에서 이미 소스 앱의 모드 전환 동작을 잘못 이해한 것이 implement까지 전파됨.
+
+이것은 SKF-014 (잘못된 가정의 파이프라인 전파)의 또 다른 사례:
+1. pre-context: "Two navigation paradigms" 기술 (맞음)
+2. plan: "Sidebar always visible, TabBar switches" (틀림 — Cherry Studio에서는 Sidebar 자체가 모드에 따라 표시/숨김)
+3. implement: plan 따라 구현 (plan이 틀렸으므로 결과도 틀림)
+
+### Expected
+- **top 모드**: 사이드바 없음. 전체 너비 상단 탭바 (Cherry Studio의 Navbar.tsx + TabsContainer.tsx)
+- **left 모드**: 좌측 사이드바 (아이콘). 콘텐츠 영역 상단에 내비바 (WindowControls + 드래그 영역)
+- 모드 전환 시: 한 요소가 사라지고 다른 요소가 나타남
+
+### Workaround
+AppLayout.tsx에서 navbarPosition에 따라 Sidebar를 조건부 렌더링하도록 수정. Top 모드에서는 Sidebar 숨기고 TabBar를 전체 너비로 표시.
+
+### Suggested Fix
+**이 문제는 plan 단계에서 발생한 가정 오류의 전파**이므로 두 수준의 수정 필요:
+
+1. **Plan 단계에서 소스 앱 모드 전환 동작 확인** (`injection/plan.md`):
+   - "설정/모드 전환 Feature의 plan 작성 시, 소스 앱에서 각 모드의 **실제 레이아웃 구조**를 확인해야 한다"
+   - "pre-context의 'two paradigms' 같은 요약 설명만으로 레이아웃을 설계하지 말고, 각 모드에서 어떤 컴포넌트가 보이고/숨겨지는지 소스 코드에서 확인"
+
+2. **Implement에서 소스 앱 비교 (SKF-008 관련)**:
+   - 이미 SKF-008에서 "implement 시 source app의 layout structure를 코드 수준에서 분석" 규칙이 제안됨
+   - 추가: "모드 전환이 있는 Feature에서는 **각 모드별** 레이아웃을 소스에서 확인하고, 모드 간 컴포넌트 가시성 차이를 문서화"
+
+---
+
+## [SKF-025] Verify-time code changes lack Source Modification Gate classification — verify에서 발견된 UI 문제 수정 시 implement 단계로 돌아갈지 판단 없이 즉시 수정
+
+- **Trigger**: B (사용자 지적) — "수정 진행 과정에서 implement의 단계로 내려갈지 여부를 검토하지 않았다면 이 부분도 skill feedback에 반영"
+- **Phase**: smart-sdd verify → implement regression (F002-navigation)
+- **Category**: MISSING_RULE
+- **Severity**: Major (결과물 품질 저하)
+- **Timestamp**: 2026-03-16 09:15
+
+### Skill Trace
+- **File**: `.claude/skills/smart-sdd/commands/verify-phases.md`
+- **Rule**: Source Modification Gate (verify-phases.md) — verify 중 코드 변경이 필요할 때 Type 1 (bugfix) / Type 2 (design change) / Type 3 (new requirement) 분류하여 적절한 단계로 돌아가라는 규칙
+- **Line**: ~(verify-phases.md의 Source Modification Gate 섹션)
+
+### Problem
+Verify 단계에서 두 가지 문제가 발견됨:
+1. **Tailwind CSS 미적용** (SKF-023) — CSS 빌드 파이프라인 설정 누락
+2. **레이아웃 구조 불일치** (SKF-024) — 사이드바+탭바 동시 표시 vs 모드별 배타적 표시
+
+에이전트는 이 문제들을 발견 후 **Source Modification Gate 분류 없이** 즉시 수정을 시작했다:
+- Tailwind 수정: `electron.vite.config.ts`에 `@tailwindcss/vite` 플러그인 추가 — 이것은 **Type 1 (bugfix)**: 빌드 설정 누락이므로 verify 내에서 수정 가능
+- 레이아웃 수정: `AppLayout.tsx`와 `Navbar.tsx`의 레이아웃 구조 변경 — 이것은 **Type 2 (design change)**: plan.md의 Layout Strategy가 잘못되었으므로 implement로 돌아가야 함
+
+Type 2 변경은 plan.md 업데이트 → implement 재실행이 필요하지만, 에이전트는 이 분류를 수행하지 않고 verify 내에서 직접 코드를 수정했다.
+
+### Expected
+Verify에서 코드 변경이 필요할 때:
+1. Source Modification Gate 분류 수행 (Type 1/2/3)
+2. Type 1 (bugfix): verify 내에서 수정 허용
+3. Type 2 (design change): HARD STOP → 사용자에게 "이것은 설계 변경입니다. implement로 돌아가서 plan 수정 후 재구현할까요, 아니면 verify 내에서 hot-fix하고 plan은 나중에 업데이트할까요?" 확인
+4. Type 3 (new requirement): HARD STOP → specify로 돌아가야 함
+
+### Workaround
+에이전트가 분류 없이 직접 수정. 결과적으로 수정 자체는 올바르지만, plan.md의 Layout Strategy는 아직 구 버전(사이드바 항상 표시)으로 남아있어 문서와 코드 불일치 발생.
+
+### Suggested Fix
+`commands/verify-phases.md`의 Source Modification Gate 규칙을 더 강하게 강조:
+- "verify 중 코드 변경이 필요한 상황이 발생하면, **반드시 먼저** Type 1/2/3 분류를 수행하고 사용자에게 표시해야 한다"
+- "Type 2 이상의 변경을 verify 내에서 직접 수행하는 것은 **HARD STOP 위반**이다"
+- "분류 결과를 AskUserQuestion으로 제시: 'Type 2 설계 변경 필요 — implement로 돌아갈까요?'"
