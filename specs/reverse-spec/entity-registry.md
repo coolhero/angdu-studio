@@ -4,6 +4,52 @@ This document catalogs every domain entity extracted from Cherry Studio source c
 
 ---
 
+## E-F001-1: WindowState
+
+**Owner**: F001 (app-shell) — **FINALIZED** (plan complete)
+**Storage**: `window_state` table in config SQLite database
+
+### Fields
+
+| Field | Type | Required | Default | Description |
+|-------|------|----------|---------|-------------|
+| id | string | Yes | 'main' | Window identifier |
+| x | number | No | centered | Window X position |
+| y | number | No | centered | Window Y position |
+| width | number | Yes | 960 | Window width |
+| height | number | Yes | 600 | Window height |
+| isMaximized | boolean | Yes | false | Maximized state |
+| displayId | string | No | null | Display identifier |
+
+### Used by Features
+
+- F001 (owner), F002 (window state reference)
+
+---
+
+## E-F001-2: AppConfig
+
+**Owner**: F001 (app-shell) — **FINALIZED** (plan complete)
+**Storage**: `config` table as key-value pairs with JSON serialization
+
+### Fields
+
+| Field | Type | Required | Default | Description |
+|-------|------|----------|---------|-------------|
+| key | string | Yes | — | Configuration key (primary key) |
+| value | string (JSON) | Yes | — | JSON-serialized value |
+| updatedAt | string (ISO 8601) | Yes | now | Last update timestamp |
+
+### Typed Keys
+
+theme ('light'|'dark'|'system'), language, proxyUrl, autoUpdate, updateInterval, globalShortcut, schemaVersion
+
+### Used by Features
+
+- F001 (owner), F003 (settings UI), F004 (proxy config)
+
+---
+
 ## E001: Message
 
 **Owner**: F005 (chat-conversation)

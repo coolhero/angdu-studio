@@ -859,3 +859,48 @@ better-sqlite3를 electron-store로 대체:
 2. `commands/pipeline.md`의 Plan Research (Phase 0)에 추가:
    - "Electron 프로젝트에서 네이티브 모듈을 dependencies에 포함하려면, plan 단계에서 빌드 호환성 확인 작업을 포함해야 한다"
    - "특히 better-sqlite3, sharp, canvas 등 C++ addon은 Electron headers 재빌드가 필요하며, V8 API 버전 호환성 이슈가 빈번하다"
+
+---
+
+## [SKF-020] Playwright evaluate() triggers Electron DevTools anti-self-XSS warning — may interfere with console error detection
+
+- **Trigger**: B (사용자 지적)
+- **Phase**: smart-sdd verify Phase 3 (F001-app-shell) — Playwright runtime SC verification
+- **Category**: MISSING_RULE
+- **Severity**: Minor (마찰)
+- **Timestamp**: 2026-03-15 17:00
+
+### Skill Trace
+- **File**: `.claude/skills/smart-sdd/commands/verify-phases.md`
+- **Rule**: Phase 3 SC Verification — Playwright `win.evaluate()` 사용 시 발생하는 Electron/Chromium 경고에 대한 처리 규칙 없음
+- **Line**: N/A
+
+### Problem
+Playwright `_electron.launch()` 후 `win.evaluate()`로 SC 검증 코드를 주입하면, Electron의 DevTools Console에 다음 경고가 표시된다:
+
+```
+Warning: Don't paste code into the DevTools Console that you don't understand or haven't reviewed yourself.
+This could allow attackers to steal your identity or take control of your computer.
+Please type 'allow pasting' below and press Enter to allow pasting.
+```
+
+이 경고 자체는 `evaluate()` 실행을 차단하지 않는다 (Playwright는 CDP를 통해 직접 주입하므로). 그러나 두 가지 문제가 발생할 수 있다:
+
+1. **Console error 수집 오염**: verify Phase 3의 "Console error scan"에서 이 경고를 runtime error로 오탐할 수 있음
+2. **사용자 혼란**: 앱을 수동으로 확인할 때 DevTools Console에 이 경고가 보여 기능 문제로 오해할 수 있음
+
+### Expected
+Verify Phase 3에서 Electron 앱의 Console 출력을 수집할 때:
+1. Chromium/Electron의 시스템 경고 (anti-self-XSS, deprecation 등)를 런타임 에러에서 제외해야 함
+2. 사용자에게 "이 경고는 Playwright 자동화에 의한 것이며 앱 문제가 아님"을 안내해야 함
+
+### Workaround
+현재 SC 검증은 정상 통과함 (evaluate 실행 자체는 차단되지 않음). 사용자에게 경고 원인을 설명.
+
+### Suggested Fix
+1. `commands/verify-phases.md` Phase 3 Console Error Scan에 필터 규칙 추가:
+   - "Console 수집 시 Electron/Chromium 시스템 경고를 제외: 'Don't paste code', 'Electron Security Warning', 'DevTools', '[DEP0']"
+   - "이러한 경고는 Playwright 자동화의 부산물이며 앱의 런타임 에러가 아님"
+
+2. `reference/runtime-verification.md`에 Electron 전용 주의사항 추가:
+   - "Electron 앱에서 Playwright evaluate()를 사용하면 anti-self-XSS 경고가 DevTools Console에 표시됨. 이는 정상이며 차단되지 않음. Console error 수집 시 이 패턴을 필터링할 것"

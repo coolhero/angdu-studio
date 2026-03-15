@@ -50,3 +50,14 @@
 | Tier Adjustments | None — accepted AI recommendation as-is | T1: 5 Features, T2: 3 Features, T3: 2 Features |
 | Demo Groups | 4 groups defined | DG-01 Basic Chat, DG-02 Knowledge RAG, DG-03 Multi-Tool, DG-04 External API |
 | Archetype | ai-assistant (detected) | 15+ AI providers, streaming-first, RAG pipeline, embeddings |
+
+---
+
+## [2026-03-15] /smart-sdd pipeline — Constitution
+
+### Constitution
+
+| Decision | Details |
+|----------|---------|
+| Constitution Version | 1.0.0 |
+| Key Modifications | Accepted as-is |

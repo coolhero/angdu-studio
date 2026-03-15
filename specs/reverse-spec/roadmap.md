@@ -172,25 +172,25 @@ graph TD
 
 **Features**: F001, F002, F004, F005
 **Scenario**: User launches app, navigates to chat, selects a model provider and model, sends a message, receives streamed response with message blocks.
-**SBI Coverage**: TBD
+**SBI Coverage**: B001–B055, B081–B160
 
 ### DG-02: Knowledge RAG
 
 **Features**: F004, F005, F006
 **Scenario**: User creates a knowledge base, adds documents, starts a chat with knowledge base attached, receives responses augmented with retrieved knowledge references.
-**SBI Coverage**: TBD
+**SBI Coverage**: B081–B195
 
 ### DG-03: Multi-Tool
 
 **Features**: F003, F007, F008, F009
 **Scenario**: User configures MCP servers in settings, enables web search, uses tools during chat. Creates notes, manages files, performs translations.
-**SBI Coverage**: TBD
+**SBI Coverage**: B056–B080, B196–B290
 
 ### DG-04: External API
 
 **Features**: F004, F005, F010
 **Scenario**: User enables API server in settings, configures API key. External client sends OpenAI-compatible chat completion request. Creates agent, creates session, sends session message via REST API.
-**SBI Coverage**: TBD
+**SBI Coverage**: B081–B160, B291–B330
 
 ## Cross-Feature Entity Dependencies
 

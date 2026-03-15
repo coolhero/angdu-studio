@@ -97,6 +97,8 @@ Pipeline 실행 중 spec-kit-skills 개선이 필요한 사항을 `skill-feedbac
 
 ## Active Technologies
 (clean restart — no implementation yet)
+- TypeScript 5.8+ (strict mode) + Electron v40+, electron-vite, electron-updater, better-sqlite3, Zustand, React 19, Zod (001-app-shell)
+- better-sqlite3 for config persistence (main process) (001-app-shell)
 
 ## Recent Changes
 (clean restart — no implementation yet)
