@@ -695,3 +695,67 @@ SKF-009 반영으로 "entry point 수정 시 interaction surface 보존" 규칙�
 3. `reference/injection/verify.md`에 추가:
    - verify Phase 3에서 interaction surface inventory의 각 항목이 실제로 동작하는지 Playwright로 확인
    - "드래그 영역이 존재하고 충분한 크기인가", "윈도우 컨트롤이 클릭 가능한가" 등
+
+## [SKF-017] Electron CDP connection timing not documented — empty targets cause confusion
+
+- **Trigger**: A (자각)
+- **Phase**: reverse-spec Phase 1.5-0 (Playwright Availability Check)
+- **Category**: MISSING_RULE
+- **Severity**: Major (결과물 품질 저하)
+- **Timestamp**: 2026-03-15 12:20
+- **Status**: ✅ Reflected — `analyze.md` Phase 1.5-4 Step 1b (env var alternative) + Step 2 (3-phase CDP polling + standalone browser warning)
+
+### Skill Trace
+- **File**: `.claude/skills/reverse-spec/commands/analyze.md`
+- **Rule**: Phase 1.5-0 Step 1b (Detect Playwright MCP) and Phase 1.5-4 Step 2 (Run and wait for readiness) — Readiness check monitors stdout for "ready" signals and polls the app port, but has NO guidance on CDP-specific readiness
+- **Line**: ~475-596
+
+### Problem
+Electron app의 CDP 연결에서 세 가지 문제를 겪었다:
+
+**1. CDP HTTP API 타이밍 문제**:
+- `--remote-debugging-port=9222`로 Electron을 시작하면 포트가 즉시 열리고 `lsof -i :9222`에 나타나지만, HTTP API (`/json/version`, `/json`)가 응답하기까지 추가 시간이 필요하다.
+- 앱이 BrowserWindow를 생성하고 renderer가 로드를 완료한 후에야 CDP targets에 페이지가 나타남.
+- 여러 차례 `curl -m 3 -s http://127.0.0.1:9222/json/version`이 타임아웃되어 "CDP가 작동하지 않는다"고 잘못 판단함.
+- **실제 원인**: electron-vite dev는 main process 빌드(~18초) → preload 빌드(~1초) → renderer dev server(~5초) → Electron 시작 → BrowserWindow 생성 → renderer 로드의 단계를 거치며, CDP가 완전히 응답하기까지 총 45-60초가 소요됨.
+
+**2. CDP targets 빈 배열 문제**:
+- CDP `/json/version`이 응답하더라도 `/json` (targets list)은 빈 배열 `[]`을 반환하는 구간이 있음.
+- BrowserWindow가 생성되고 renderer가 로드를 시작해야 targets에 페이지가 나타남.
+- 이 구간에서 `chromium.connectOverCDP()`를 호출하면 contexts는 있으나 pages가 0개로 보임.
+- **해결**: BrowserWindow 로드 완료까지 추가 10-15초 대기 후 targets가 나타남.
+
+**3. electron-vite의 CDP 전달 방식**:
+- electron-vite 5.0.0은 `REMOTE_DEBUGGING_PORT` 환경변수와 `-- --remote-debugging-port=NNNN` 둘 다 지원.
+- 두 방식 모두 Electron 프로세스에 `--remote-debugging-port=9222`를 전달하는 것을 ps 명령으로 확인.
+- 그러나 analyze.md의 테이블에는 electron-vite의 CDP 명령이 `npx electron-vite dev -- --remote-debugging-port=9222`로만 기재되어 있고, env var 방식은 언급 없음.
+
+**4. Standalone browser로 renderer 접속 실패**:
+- `http://localhost:5173`을 일반 Chromium으로 접속하면 splash screen(Cherry Studio 로고)만 표시됨.
+- Electron의 preload bridge (`window.api`)가 없어 React app이 초기화되지 않음.
+- 이는 Electron 앱의 본질적 제한이지만, analyze.md에 이 제한에 대한 경고가 없어 시간을 낭비함.
+
+### Expected
+Phase 1.5의 Electron CDP 연결 절차에 다음이 포함되어야 한다:
+1. CDP readiness 폴링: 포트 오픈 확인 → `/json/version` 응답 확인 → `/json` targets 비어있지 않음 확인 (3단계)
+2. electron-vite 전체 빌드+시작 시간 고려 (최소 60초 대기)
+3. Standalone browser로 renderer URL 접속은 Electron preload 미제공으로 실패한다는 경고
+
+### Workaround
+여러 차례 재시작 및 대기 시간 조절 끝에 성공. 핵심은 충분한 대기 시간(45-60초)과 3단계 폴링.
+
+### Suggested Fix
+`reverse-spec/commands/analyze.md` Phase 1.5-4 Step 2에 Electron CDP 전용 보조 절차 추가:
+
+```
+**Electron CDP readiness (3-phase polling)**:
+1. Port open: `lsof -i :9222` (즉시 ~ 5초)
+2. CDP HTTP API: `curl -m 5 http://127.0.0.1:9222/json/version` (빌드 시간 후 ~ 30-45초)
+3. Targets available: `curl -m 5 http://127.0.0.1:9222/json` returns non-empty array (renderer 로드 후 ~ 45-60초)
+
+Timeout: 총 120초. 각 단계 실패 시 5초 간격 재시도.
+⚠️ Phase 2가 아닌 Phase 3에서야 targets가 나타나는 것은 정상 — BrowserWindow 생성 대기.
+⚠️ Standalone browser로 localhost:5173 접속은 Electron preload 미제공으로 실패 — 시도하지 말 것.
+```
+
+Also add `REMOTE_DEBUGGING_PORT=9222 npx electron-vite dev` as an alternative form in the Phase 1.5-4 Step 1b table.
