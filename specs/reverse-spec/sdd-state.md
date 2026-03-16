@@ -80,7 +80,7 @@ Foundation Verified: 2026-03-16 | PASS | Build ✅, Toolchain ✅, Platform N/A
 | F002 | navigation | T1 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | completed |
 | F003 | settings | T1 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | completed |
 | F004 | model-provider | T1 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | completed |
-| F005 | chat-conversation | T1 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ❌ 03-16 | | regression-implement |
+| F005 | chat-conversation | T1 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-17 | ✅ 03-17 | completed |
 | F006 | knowledge-memory | T2 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | deferred |
 | F007 | mcp-tools | T2 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | deferred |
 | F008 | content-management | T2 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | deferred |
@@ -145,7 +145,7 @@ Foundation Verified: 2026-03-16 | PASS | Build ✅, Toolchain ✅, Platform N/A
 | tasks | completed | 2026-03-16T19:30:00 | 2026-03-16T20:00:00 | 88 tasks, 14 phases, 12 user stories |
 | analyze | completed | 2026-03-16T20:00:00 | 2026-03-16T20:15:00 | 0 critical, 0 high, 1 medium (FR-038 reasoning effort cache detail), 38/38 FR coverage |
 | implement | completed | 2026-03-16T20:15:00 | 2026-03-16T22:00:00 | 40+ new files, 6 modified files, build ✅. 6 stores, 3 services, 8 block components, 8 chat components, 4 page components. TipTap editor, Shiki highlighting, @tanstack/react-virtual. Demo script created |
-| verify | failure | 2026-03-16T22:00:00 | 2026-03-16T23:30:00 | Build ✅, TS ✅, Playwright E2E: 6/6+4/4 pass (render only). BLOCKING: (1) model selector 없음 — 채팅해도 모델 선택 불가→응답 없음, (2) UI 구조 cherry-studio와 완전 다름 — source reference 미참조. Fixed: TipTap editor.view.dom crash. ↩️ REGRESSION to implement 필요 |
+| verify | completed | 2026-03-16T22:00:00 | 2026-03-17T05:00:00 | Build ✅, TS ✅, Playwright E2E 6/6+4/4 pass. 채팅 동작 확인 (사용자 환경). Fixed: TipTap crash, ModelSelector 추가, HomeSidebar 탭 전환, AI SDK .chat() API, baseURL /v1, provider hydrate, block upsert, min-h-0 레이아웃. SKF-037~041 기록 |
 
 ---
 
