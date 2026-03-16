@@ -2036,3 +2036,143 @@ verify-phases.md에 **실제 사용자 환경 검증** 규칙 추가:
    사용자의 실제 환경(persist data, dev mode)과 다를 수 있음.
    verify 시 양쪽 환경 모두 검증 필수.
    ```
+
+---
+
+## [SKF-044] 종합: rebuild 프로젝트에서 source app UI와 동일한 구조로 개발이 진행되지 않는 구조적 원인과 해결책
+
+- **Trigger**: B (사용자 지적) — "처음부터 확실하게 cherry studio와 동일한UI 구조로 개발이 진행되게 하려면 어떻게 해야하는지까지 포함해서 모든 문제를 skill feedback에 반영해"
+- **Phase**: smart-sdd pipeline 전체 (reverse-spec → specify → plan → tasks → implement → verify)
+- **Category**: MISSING_RULE (복합 — 파이프라인 전체에 걸친 구조적 gap)
+- **Severity**: Critical
+- **Timestamp**: 2026-03-17 04:00
+
+### Skill Trace
+파이프라인의 6개 단계에 각각 구조적 gap이 있으며, 이것들이 누적되어 source app과 완전히 다른 UI를 생산한다.
+
+| 단계 | Skill File | Gap |
+|------|-----------|-----|
+| reverse-spec | `reverse-spec/commands/analyze.md` | pre-context가 **컴포넌트 계층 구조**를 기록하지 않음. 파일 목록과 SBI만 추출하고, 컴포넌트 간 부모-자식/형제 관계, 조건부 렌더링 분기, 패널 시스템 구조를 기록하는 규칙이 없음 |
+| specify | `injection/specify.md` | FR이 **UI 구조 요구사항**을 강제하지 않음. "model selector dropdown" 같은 interactive 요소가 FR에 명시되어도, plan/tasks에 전달되는 강제력이 없음 |
+| plan | `injection/plan.md` | **source app 컴포넌트 트리와 target 컴포넌트 트리의 1:1 매핑**을 강제하지 않음. plan이 독자적 아키텍처를 설계할 수 있는 자유도가 너무 높음 |
+| tasks | `injection/tasks.md` | **source 컴포넌트별 구현 태스크**를 강제하지 않음. "ChatHeader 구현" 태스크가 source의 ChatNavBar(3개 서브컴포넌트)에 대응하는지 확인하지 않음 |
+| implement | `injection/implement.md` | Source Reference Injection 규칙은 있으나 **BLOCKING gate가 아님**. 에이전트가 source를 한 번도 읽지 않고 FR만 보고 구현 가능. 또한 **persist된 사용자 데이터**(큰 폰트, API 키 등)에서의 렌더링을 검증하지 않음 |
+| verify | `verify-phases.md` | **Playwright 격리 환경**(빈 데이터)에서만 테스트하고, 사용자의 **실제 환경**(persist data, dev mode)에서 검증하지 않음. Provides 인터페이스 검증도 없음 |
+
+### Problem
+F005에서 발견된 **모든 문제의 근본 원인**:
+
+1. **UI 구조가 cherry-studio와 다름**: source의 동적 패널 시스템(topicPosition 전환, 탭 전환, 이중 Navbar)이 고정 3-panel + 최소 ChatHeader로 대체됨. reverse-spec에서 컴포넌트 계층 구조를 추출하지 않았고, plan에서 source 구조를 참조하지 않았고, implement에서 source 코드를 읽지 않았음
+2. **모델 선택 불가**: FR-003에 "model selector dropdown"이 명시되었지만, plan→tasks→implement에서 누락됨. analyze가 FR 단위로만 매핑하고 기능적 요소 단위로 분해하지 않았음
+3. **API 키 persist 안 됨**: F004가 F005에 제공하는 인터페이스(provider hydrate, model list)를 F004 verify에서 검증하지 않았음
+4. **스크롤/짤림**: fontSize: 22(사용자 설정)에서 `min-h-0` 없이 flex 레이아웃이 깨짐. Playwright가 빈 데이터(fontSize: 14)에서만 테스트하여 발견 못함
+5. **streaming block 소실**: flushStreamingBlocks가 UPDATE-only로 새 block을 INSERT하지 않음. 데이터 왕복(write→read) 검증 규칙 부재
+6. **TipTap crash**: editor.view.dom 접근 시 view 미초기화. Pattern Constraints에 TipTap 규칙이 있었으나 implement agent가 무시
+
+### Expected: 처음부터 source와 동일한 UI 구조로 개발하려면
+
+**A. reverse-spec 단계에 "Component Tree Extraction" 추가**
+
+```
+reverse-spec Phase 2에 추가:
+1. source app의 주요 페이지별 컴포넌트 계층 구조(tree)를 추출
+2. 조건부 렌더링 분기(if/switch)를 명시
+3. 패널 시스템(동적 위치, 토글, 탭 전환) 구조를 기록
+4. pre-context.md에 "## Component Tree" 섹션으로 기록:
+
+   ## Component Tree
+   ```
+   HomePage
+   ├── Navbar (conditional: navbarPosition)
+   ├── HomeTabs (left sidebar with Assistants/Topics tab switcher)
+   └── Chat
+       ├── ChatNavBar (assistant name, model selector, tools)
+       ├── Messages (virtual scroll)
+       │   └── MessageItem → BlockRenderer → [TextBlock, CodeBlock, ...]
+       ├── Inputbar (TipTap + toolbar with 14 tool buttons)
+       └── TopicSidebar (conditional: topicPosition='right')
+   ```
+
+이 트리가 plan/implement의 기준선이 됨.
+```
+
+**B. plan 단계에 "Source Component Mapping Table" 추가**
+
+```
+plan.md에 필수 섹션:
+## Source → Target Component Mapping
+
+| Source Component | Source File | Target Component | Target File | Notes |
+|---|---|---|---|---|
+| HomeTabs | pages/home/Tabs/index.tsx | HomeSidebar | pages/home/HomeSidebar.tsx | Tab 전환 패턴 유지 |
+| ChatNavBar | components/ChatNavBar/index.tsx | ChatHeader | components/chat/ChatHeader.tsx | ModelSelector 포함 필수 |
+| SelectModelButton | components/ChatNavBar/SelectModelButton.tsx | ModelSelector | components/chat/ModelSelector.tsx | Popover with grouped list |
+| Inputbar | pages/home/Inputbar.tsx | MessageInput | components/chat/MessageInput.tsx | TipTap + toolbar |
+
+plan Review에서 이 매핑이 BLOCKING — source에 있는 컴포넌트가 target에 대응 없으면 merge 불가
+```
+
+**C. implement 단계에 "Source-First Implementation" 강제**
+
+```
+injection/implement.md에 추가:
+rebuild 모드 UI 태스크 실행 시:
+1. BEFORE writing any code: 대응하는 source 파일을 읽음
+2. source의 컴포넌트 구조, props, state 패턴을 파악
+3. new-stack 패턴으로 재구현 (복사 아님, 하지만 동일한 구조)
+4. AFTER writing: source와 target의 export 비교
+5. source에 있는 기능이 target에 없으면 → BLOCKING
+
+"Source Reference: [files] loaded" 메시지가 없는 UI 태스크는 BLOCKING 위반
+```
+
+**D. verify 단계에 "Real Environment Verification" 추가**
+
+```
+verify-phases.md Phase 3에 추가:
+A. 격리 환경 (Playwright _electron.launch): 빈 데이터 기본 검증
+B. 사용자 환경 시뮬레이션:
+   - fontSize를 극단값(12, 24)으로 변경 후 레이아웃 확인
+   - Provider에 mock API 키 설정 후 모델 선택 flow 확인
+   - 이전 세션 데이터가 있는 상태에서 앱 재시작 검증
+양쪽 모두 통과해야 verify pass
+```
+
+**E. verify 단계에 "Provides Interface Verification" 추가**
+
+```
+verify-phases.md Phase 2에 추가:
+Feature merge 전 Provides 인터페이스 검증:
+- plan.md Integration Contracts의 "Provides →" 항목별 검증
+- 앱 재시작 후 downstream Feature 관점에서 데이터 접근 가능 확인
+- renderer store hydrate → 데이터 표시 전체 경로 검증
+```
+
+**F. analyze 단계에 "FR Element Decomposition" 추가**
+
+```
+injection/analyze.md에 추가:
+FR → Task 매핑 시 FR을 기능적 요소로 분해:
+- "," 또는 "and"로 구분된 각 요소를 개별 확인
+- "selector", "dropdown", "picker" 등 interactive 키워드가 있으면
+  대응하는 Interaction Chain과 tasks.md 태스크가 반드시 존재
+- 요소 하나라도 누락이면 HIGH gap
+```
+
+### Workaround
+F005 세션에서 수동으로 발견한 모든 문제를 하나씩 수정:
+- ModelSelector 컴포넌트 추가
+- HomeSidebar 탭 전환 구현
+- useProviderStore hydrate() 추가
+- upsertBlocksBatch 추가
+- TipTap handleDOMEvents 수정
+- min-h-0 레이아웃 수정
+- ProviderEditPanel input key prop 수정
+
+### Suggested Fix
+위 A-F 항목을 각 skill 파일에 반영. 특히:
+1. `reverse-spec/commands/analyze.md` — Component Tree Extraction 섹션
+2. `injection/plan.md` — Source Component Mapping Table (BLOCKING)
+3. `injection/implement.md` — Source-First Implementation 게이트 (BLOCKING)
+4. `injection/analyze.md` — FR Element Decomposition 규칙
+5. `verify-phases.md` — Real Environment Verification + Provides Interface Verification
