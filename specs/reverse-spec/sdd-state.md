@@ -78,7 +78,7 @@ Foundation Verified: 2026-03-16 | PASS | Build ✅, Toolchain ✅, Platform N/A
 |------------|-------------|------|---------|------|-------|---------|-----------|--------|-------|--------|
 | F001 | app-shell | T1 | ✅ 03-15 | ✅ 03-15 | ✅ 03-15 | ✅ 03-15 | ✅ 03-15 | ✅ 03-15 | ✅ 03-15 | completed |
 | F002 | navigation | T1 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | completed |
-| F003 | settings | T1 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | | in_progress |
+| F003 | settings | T1 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | completed |
 | F004 | model-provider | T1 | | | | | | | | pending |
 | F005 | chat-conversation | T1 | | | | | | | | pending |
 | F006 | knowledge-memory | T2 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | deferred |
@@ -142,7 +142,7 @@ Foundation Verified: 2026-03-16 | PASS | Build ✅, Toolchain ✅, Platform N/A
 |------------|---------------|---------------|--------|--------|
 | F001 | 001-app-shell | specs/001-app-shell/ | 001-app-shell | ✅ |
 | F002 | 002-navigation | specs/002-navigation/ | 002-navigation | ✅ |
-| F003 | 003-settings | specs/003-settings/ | 003-settings | |
+| F003 | 003-settings | specs/003-settings/ | 003-settings | ✅ |
 | F004 | | | | |
 | F005 | | | | |
 | F006 | | | | |
