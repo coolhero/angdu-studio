@@ -8,6 +8,7 @@ import { shortcutService } from './services/ShortcutService'
 import { proxyService } from './services/ProxyService'
 import { powerService } from './services/PowerService'
 import { registerAllHandlers } from './ipc'
+import { ProviderService } from './services/ProviderService'
 
 export async function initializeServices(): Promise<void> {
   // Phase 1: Core infrastructure (order matters)
@@ -15,6 +16,9 @@ export async function initializeServices(): Promise<void> {
   logger.info('[Bootstrap] Starting Angdu Studio...')
 
   configService.initialize()
+
+  // Phase 1b: Initialize provider service (loads system providers)
+  await ProviderService.getInstance().initialize()
 
   // Phase 2: Register all IPC handlers BEFORE window loads content
   registerAllHandlers()

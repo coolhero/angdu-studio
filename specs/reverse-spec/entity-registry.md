@@ -293,8 +293,8 @@ theme ('light'|'dark'|'system'), language, proxyUrl, autoUpdate, updateInterval,
 
 ## E005: Model
 
-**Owner**: F004 (model-provider)
-**Source**: `src/renderer/src/types/index.ts`
+**Owner**: F004 (model-provider) — **FINALIZED** (plan complete)
+**Storage**: Embedded in Provider.models array, cached via Zustand persist
 
 ### Fields
 
@@ -346,8 +346,8 @@ theme ('light'|'dark'|'system'), language, proxyUrl, autoUpdate, updateInterval,
 
 ## E006: Provider
 
-**Owner**: F004 (model-provider)
-**Source**: `src/renderer/src/types/provider.ts`
+**Owner**: F004 (model-provider) — **FINALIZED** (plan complete)
+**Storage**: Zustand persist (localStorage), API keys encrypted via safeStorage
 
 ### Fields
 

@@ -18,12 +18,16 @@ const INVOKE_CHANNELS: InvokeChannel[] = [
   'app:getVersion', 'app:getPlatform', 'app:getPath', 'app:relaunch', 'app:quit',
   'data:export', 'data:import', 'data:clear', 'data:getStoragePath',
   'shortcuts:register', 'shortcuts:unregister', 'shortcuts:unregisterAll',
-  'startup:setLoginItem'
+  'startup:setLoginItem',
+  'provider:list', 'provider:add', 'provider:update', 'provider:delete',
+  'provider:test-connection', 'provider:fetch-models', 'provider:add-custom-model',
+  'ai:chat', 'ai:abort'
 ]
 
 const EVENT_CHANNELS: EventChannel[] = [
   'theme:changed', 'window:focus', 'window:blur', 'window:state-changed',
-  'update:available', 'update:progress', 'update:ready', 'deep-link:received'
+  'update:available', 'update:progress', 'update:ready', 'deep-link:received',
+  'ai:stream-chunk', 'ai:stream-complete', 'ai:stream-error'
 ]
 
 function createInvoke() {

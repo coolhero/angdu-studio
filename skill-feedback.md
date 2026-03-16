@@ -1570,3 +1570,75 @@ i18n 초기 언어가 persist된 config 값과 일치해야 함. hydrate 완료 
 `reference/injection/implement.md`에 **Async Hydration Sync** 규칙 추가:
 - "비동기로 hydrate되는 store가 외부 시스템(i18n, theme, OS 설정 등)의 상태를 동기화하는 경우, hydrate 완료 시 해당 외부 시스템의 API를 **무조건** 호출하여 동기화. '이미 같은 값'이어도 호출해야 — 외부 시스템이 다른 경로로 다른 값을 가질 수 있음"
 - "i18n 특수 사례: i18next의 `lng` 초기값과 persist된 config.language는 다를 수 있다. hydrate에서 `i18n.changeLanguage(config.language)` 를 반드시 호출"
+
+---
+
+## [SKF-035] Verify Phase 3에서 Playwright UI 검증을 실행하지 않고 CI health check만 실행
+
+- **Trigger**: B (사용자 지적)
+- **Phase**: smart-sdd F004 verify Phase 3
+- **Category**: MISSING_RULE
+- **Severity**: Major (결과물 품질 저하)
+- **Timestamp**: 2026-03-16 16:30
+
+### Skill Trace
+- **File**: spec-kit-skills 내 `smart-sdd/commands/verify-phases.md`
+- **Rule**: "For GUI projects (MANDATORY): Take a Playwright snapshot and verify: The window is not blank, Layout structure is reasonable, Content is rendered"
+- **Line**: N/A — 규칙이 존재하지만 verify Phase 3 demo 실행과 Playwright UI 검증을 분리하는 명확한 강제 규칙이 없음
+
+### Problem
+Verify Phase 3에서 demo script CI 모드(`--ci`)만 실행하고 Playwright로 실제 UI 요소(Switch, provider list, edit panel)를 검증하지 않았다. 에이전트는 Build ✅, TS ✅, Smoke Launch ✅만으로 verify success를 판단하고 Review를 제시했다. 실제 UI가 렌더링되고 상호작용 가능한지는 Playwright 없이 확인 불가능하다. 사용자가 직접 "toggle switch를 찾을 수 없는데" 질문으로 문제를 발견.
+
+### Expected
+Verify Phase 3에서 반드시 Playwright `_electron.launch()`로 앱을 실행하고:
+1. 해당 Feature의 UI 경로로 네비게이션 (예: `#/settings/provider`)
+2. 핵심 UI 요소 존재 확인 (예: `button[role=switch]` count > 0, provider list items, "Add" button)
+3. 스크린샷 캡처 후 사용자에게 표시
+4. 최소 1개의 상호작용 테스트 (예: provider 클릭 → edit panel 표시)
+
+### Workaround
+사용자 지적 후 Playwright `_electron.launch()` 실행. Switch 33개, provider 목록, Add 버튼 모두 확인됨. UI 정상 작동.
+
+### Suggested Fix
+`verify-phases.md`에 다음 규칙 추가:
+- "Phase 3 Demo 이후, GUI Feature의 경우 **반드시** Playwright `_electron.launch()`로 앱을 실행하고 Feature의 핵심 UI 요소가 렌더링되는지 검증해야 한다. Demo CI 모드의 build/TS/smoke 결과만으로는 UI 검증을 대체할 수 없다."
+- "검증 항목: (1) Feature 경로 네비게이션 성공, (2) 핵심 interactive 요소 카운트 > 0, (3) 스크린샷 캡처 및 사용자 표시, (4) 최소 1개 상호작용 (click → 결과 확인)"
+- 이를 Phase 3c 또는 Phase 3-post로 분리하여, demo script 실행과 Playwright UI 검증이 별도의 mandatory step이 되도록 구조화
+
+---
+
+## [SKF-036] Tailwind CSS 4 @theme 매핑 누락 — shadcn/ui 컴포넌트가 무스타일로 렌더링
+
+- **Trigger**: B (사용자 지적)
+- **Phase**: smart-sdd F004 implement → verify
+- **Category**: MISSING_RULE
+- **Severity**: Critical (pipeline 중단 — UI가 사실상 작동하지 않음)
+- **Timestamp**: 2026-03-16 17:00
+
+### Skill Trace
+- **File**: spec-kit-skills 내 `smart-sdd/commands/pipeline.md` § Pattern Constraints 및 `smart-sdd/reference/injection/implement.md`
+- **Rule**: Pattern Constraints 테이블에 "Build-time plugin" 항목: "@tailwindcss/vite MUST be registered in renderer vite config plugins" — 플러그인 등록은 검증하지만 **@theme 블록 존재 여부**는 검증하지 않음
+- **Line**: N/A
+
+### Problem
+F004 implement에서 shadcn/ui 컴포넌트(Switch, Button, Input, Dialog 등)를 작성했다. 이 컴포넌트들은 Tailwind 유틸리티 클래스(`bg-primary`, `bg-muted`, `text-foreground` 등)를 사용한다. 빌드는 통과하고 앱도 실행되지만, Tailwind CSS 4에서는 CSS 변수(`--primary: 240 5.9% 10%`)를 `@theme` 블록 없이 정의하면 `bg-primary` 같은 유틸리티 클래스가 아무 스타일도 적용하지 않는다.
+
+결과: Switch 컴포넌트가 렌더링되지만 checked/unchecked 상태 모두 동일한 투명 배경으로 보여 사용자가 토글 상태를 구분할 수 없음. Playwright `button[role=switch]` 카운트 33개로 요소는 존재하지만 시각적으로 "보이지 않는" 상태.
+
+에이전트는 Build ✅, TS ✅, Smoke Launch ✅만으로 verify success를 판단하려 했으나, 사용자가 "toggle switch가 어딨는거야?"로 문제를 발견.
+
+### Expected
+1. Pattern Constraints에 Tailwind CSS 4 전용 규칙 추가: **"CSS 변수 기반 테마를 사용하는 프로젝트에서는 `@theme` 블록이 `globals.css`에 존재해야 하며, `bg-primary`, `bg-muted` 등 유틸리티 클래스가 CSS 변수를 올바르게 참조하는지 빌드 후 런타임에서 검증해야 한다"**
+2. Verify Phase에서 UI Feature의 경우 최소 1개 interactive 요소의 computed style을 확인 (예: `getComputedStyle(switch).backgroundColor !== 'rgba(0, 0, 0, 0)'`)
+3. Implement 단계에서 shadcn/ui 컴포넌트 추가 시 `@theme` 매핑 유무를 자동 확인하는 규칙
+
+### Workaround
+`globals.css`에 `@theme inline` 블록을 추가하고, CSS 변수를 `hsl()` 함수로 감싼 중간 변수(`--color-primary-val`)로 매핑. 기존 코드와의 호환성을 위해 legacy 변수도 유지.
+
+### Suggested Fix
+1. `smart-sdd/domains/concerns/gui.md` 또는 `_core.md`에 S7 Bug Prevention 규칙 추가:
+   - "**Tailwind CSS 4 Theme Mapping**: 프로젝트가 Tailwind CSS 4 + CSS 변수 테마를 사용하는 경우, `@theme` 블록이 필수. `bg-primary` 등의 유틸리티가 `rgba(0,0,0,0)`을 반환하면 테마 매핑 누락. 런타임 스타일 검증 필수"
+2. `verify-phases.md` Phase 3에 추가:
+   - "GUI Feature verify 시 최소 1개 styled interactive 요소의 `getComputedStyle().backgroundColor`가 `transparent`/`rgba(0,0,0,0)`이 아닌지 확인"
+3. `injection/implement.md` Pattern Constraints Injection에 추가:
+   - "shadcn/ui 컴포넌트를 새로 추가하는 Feature에서는 `@theme` 블록에 해당 컴포넌트가 사용하는 색상 토큰이 매핑되어 있는지 확인"

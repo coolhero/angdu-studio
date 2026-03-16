@@ -8,6 +8,16 @@ const GeneralSettings = lazy(() => import('./pages/settings/GeneralSettings'))
 const DisplaySettings = lazy(() => import('./pages/settings/DisplaySettings'))
 const DataSettings = lazy(() => import('./pages/settings/DataSettings'))
 const ShortcutSettings = lazy(() => import('./pages/settings/ShortcutSettings'))
+const ProviderSettings = lazy(() =>
+  import('./pages/settings/ProviderSettings/ProviderList').then((m) => ({
+    default: m.ProviderList
+  }))
+)
+const ModelSettings = lazy(() =>
+  import('./pages/settings/ModelSettings/ModelList').then((m) => ({
+    default: m.ModelList
+  }))
+)
 const ChatPage = lazy(() => import('./pages/ChatPage'))
 const TranslatePage = lazy(() => import('./pages/TranslatePage'))
 const KnowledgePage = lazy(() => import('./pages/KnowledgePage'))
@@ -44,7 +54,23 @@ const router = createHashRouter([
         children: [
           {
             index: true,
-            element: <Navigate to="/settings/general" replace />
+            element: <Navigate to="/settings/provider" replace />
+          },
+          {
+            path: 'provider',
+            element: (
+              <Suspense fallback={<LoadingFallback />}>
+                <ProviderSettings />
+              </Suspense>
+            )
+          },
+          {
+            path: 'models',
+            element: (
+              <Suspense fallback={<LoadingFallback />}>
+                <ModelSettings />
+              </Suspense>
+            )
           },
           {
             path: 'general',

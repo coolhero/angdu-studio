@@ -9,6 +9,7 @@ import { registerAppHandlers } from './app'
 import { registerDataHandlers } from './data'
 import { registerShortcutHandlers } from './shortcuts'
 import { registerStartupHandlers } from './startup'
+import { registerProviderHandlers } from './provider'
 
 export function registerAllHandlers(): void {
   registerConfigHandlers()
@@ -22,4 +23,5 @@ export function registerAllHandlers(): void {
   registerDataHandlers()
   registerShortcutHandlers()
   registerStartupHandlers()
+  registerProviderHandlers()
 }

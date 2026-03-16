@@ -1,9 +1,11 @@
 import { NavLink } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Settings, Monitor, Database, Keyboard } from 'lucide-react'
+import { Settings, Monitor, Database, Keyboard, Cpu, Box } from 'lucide-react'
 import { cn } from '@renderer/lib/utils'
 
 const NAV_ITEMS = [
+  { to: '/settings/provider', icon: Cpu, labelKey: 'settings.sidebar.provider' },
+  { to: '/settings/models', icon: Box, labelKey: 'settings.sidebar.models' },
   { to: '/settings/general', icon: Settings, labelKey: 'settings.sidebar.general' },
   { to: '/settings/display', icon: Monitor, labelKey: 'settings.sidebar.display' },
   { to: '/settings/data', icon: Database, labelKey: 'settings.sidebar.data' },

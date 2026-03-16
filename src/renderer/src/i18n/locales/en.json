@@ -2,6 +2,8 @@
   "settings": {
     "title": "Settings",
     "sidebar": {
+      "provider": "Model Provider",
+      "models": "Models",
       "general": "General",
       "display": "Display",
       "data": "Data",

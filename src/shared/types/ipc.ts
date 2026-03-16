@@ -1,5 +1,7 @@
 import type { AppConfig, ConfigKey } from './config'
 import type { WindowState } from './window'
+import type { Provider, Model } from './provider'
+import type { ChatMessage, ChatOptions, ConnectionTestResult, ModelFetchResult, NormalizedChunk, SerializedError, TokenUsage } from './ai-core'
 
 // --- Invoke Channels (request/response) ---
 
@@ -68,6 +70,21 @@ export interface InvokeChannelMap {
 
   // Startup (F003)
   'startup:setLoginItem': { args: [enabled: boolean]; return: void }
+
+  // Provider (F004)
+  'provider:list': { args: []; return: Provider[] }
+  'provider:add': { args: [provider: Omit<Provider, 'id' | 'models' | 'isAuthed'>]; return: Provider }
+  'provider:update': { args: [id: string, updates: Partial<Provider>]; return: Provider }
+  'provider:delete': { args: [id: string]; return: void }
+  'provider:test-connection': { args: [id: string]; return: ConnectionTestResult }
+
+  // Model (F004)
+  'provider:fetch-models': { args: [providerId: string]; return: ModelFetchResult }
+  'provider:add-custom-model': { args: [providerId: string, model: Omit<Model, 'provider'>]; return: Model }
+
+  // AI Core (F004)
+  'ai:chat': { args: [providerId: string, modelId: string, messages: ChatMessage[], options: ChatOptions]; return: void }
+  'ai:abort': { args: [requestId: string]; return: void }
 }
 
 // --- Event Channels (main → renderer) ---
@@ -83,6 +100,11 @@ export interface EventChannelMap {
   }
   'update:ready': { payload: { version: string } }
   'deep-link:received': { payload: { url: string } }
+
+  // AI Core streaming (F004)
+  'ai:stream-chunk': { payload: { requestId: string; chunk: NormalizedChunk } }
+  'ai:stream-complete': { payload: { requestId: string; usage?: TokenUsage } }
+  'ai:stream-error': { payload: { requestId: string; error: SerializedError } }
 }
 
 // --- Type utilities ---

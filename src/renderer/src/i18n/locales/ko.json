@@ -2,6 +2,8 @@
   "settings": {
     "title": "설정",
     "sidebar": {
+      "provider": "모델 제공자",
+      "models": "모델",
       "general": "일반",
       "display": "화면",
       "data": "데이터",

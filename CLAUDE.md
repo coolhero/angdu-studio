@@ -121,6 +121,8 @@ SKF 항목은 **spec-kit-skills의 구조적 문제**에 초점을 맞춘다:
 - F001's AppConfig via IPC (config:get/set) for tab and navbar persistence (002-navigation)
 - TypeScript 5.8+ (strict mode) + React 19, Zustand, shadcn/ui, Tailwind CSS 4, i18next, react-i18next, JSZip, react-router-dom v7 (003-settings)
 - electron-store via F001 Config API (IPC) (003-settings)
+- TypeScript 5.8+ (strict mode) + Vercel AI SDK v4+ (@ai-sdk/openai, @ai-sdk/anthropic, @ai-sdk/google, @ai-sdk/azure, @ai-sdk/mistral, @ai-sdk/amazon-bedrock), Zustand, React 19, Zod, shadcn/ui (004-model-provider)
+- Zustand persist (localStorage) for provider configs + model cache. API keys encrypted via Electron safeStorage. (004-model-provider)
 
 ## Recent Changes
 (clean restart — no implementation yet)
