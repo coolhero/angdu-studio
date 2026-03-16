@@ -85,7 +85,8 @@ export class AICoreService {
         abortSignal: controller.signal
       })
 
-      for await (const part of (await result).textStream) {
+      // AI SDK v4: streamText returns result directly (not a Promise)
+      for await (const part of result.textStream) {
         if (controller.signal.aborted) break
 
         const chunk: NormalizedChunk = { type: 'text', content: part }
@@ -95,8 +96,8 @@ export class AICoreService {
         })
       }
 
-      const finalResult = await result
-      const usage = await finalResult.usage
+      // Get final usage after stream completes
+      const usage = await result.usage
 
       window.webContents.send('ai:stream-complete', {
         requestId: options.requestId,
@@ -111,6 +112,7 @@ export class AICoreService {
     } catch (err) {
       if (controller.signal.aborted) return
 
+      console.error('[AICoreService] Chat error:', err)
       const serialized = this.serializeError(err, provider)
       window.webContents.send('ai:stream-error', {
         requestId: options.requestId,
@@ -135,12 +137,17 @@ export class AICoreService {
 
     switch (provider.type) {
       case 'openai':
-      case 'openai-response':
       case 'new-api':
       case 'gateway':
       case 'ollama': {
         const { createOpenAI } = await import('@ai-sdk/openai')
-        return createOpenAI(opts)(model.id)
+        // Use .chat() to force /v1/chat/completions (not /responses)
+        return createOpenAI(opts).chat(model.id)
+      }
+      case 'openai-response': {
+        // Explicitly use OpenAI Responses API
+        const { createOpenAI } = await import('@ai-sdk/openai')
+        return createOpenAI(opts).responses(model.id)
       }
       case 'anthropic': {
         const { createAnthropic } = await import('@ai-sdk/anthropic')
@@ -163,9 +170,9 @@ export class AICoreService {
         return createAmazonBedrock({})(model.id)
       }
       default: {
-        // Fallback to OpenAI-compatible
+        // Fallback to OpenAI-compatible chat completions
         const { createOpenAI } = await import('@ai-sdk/openai')
-        return createOpenAI(opts)(model.id)
+        return createOpenAI(opts).chat(model.id)
       }
     }
   }
@@ -183,7 +190,17 @@ export class AICoreService {
     // Strip trailing slash first
     const normalized = url.replace(/\/+$/, '')
     const transform = URL_TRANSFORM_RULES[type]
-    return transform ? transform(normalized) : normalized
+    const transformed = transform ? transform(normalized) : normalized
+
+    // For OpenAI-compatible providers: ensure /v1 suffix for chat completions
+    if (
+      (type === 'openai' || type === 'new-api' || type === 'gateway') &&
+      !transformed.endsWith('/v1') &&
+      !transformed.includes('/v1/')
+    ) {
+      return `${transformed}/v1`
+    }
+    return transformed
   }
 
   private getAuthHeaders(type: ProviderType, apiKey: string): Record<string, string> {
