@@ -11,7 +11,6 @@ import { useDraftStore } from '@renderer/stores/useDraftStore'
 import { useTopicStore } from '@renderer/stores/useTopicStore'
 
 interface MessageInputProps {
-  /** Pre-fill the editor with text (for edit mode) */
   editText?: string
   editMessageId?: string
   onCancelEdit?: () => void
@@ -23,7 +22,12 @@ export function MessageInput({ editText, editMessageId, onCancelEdit }: MessageI
   const sendKey = useSettingsStore((s) => s.sendKey)
   const activeTopicId = useTopicStore((s) => s.activeTopicId)
   const draftTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const [isComposing, setIsComposing] = useState(false)
+  const isComposingRef = useRef(false)
+  const sendKeyRef = useRef(sendKey)
+  sendKeyRef.current = sendKey
+
+  // Use ref for handleSend to avoid stale closure in useEditor
+  const handleSendRef = useRef<() => void>(() => {})
 
   const editor = useEditor({
     extensions: [
@@ -41,28 +45,38 @@ export function MessageInput({ editText, editMessageId, onCancelEdit }: MessageI
         class: 'outline-none min-h-[40px] max-h-[200px] overflow-y-auto px-3 py-2 text-sm'
       },
       handleKeyDown: (_view, event) => {
-        if (isComposing) return false
+        if (isComposingRef.current) return false
 
         const isEnter = event.key === 'Enter'
         const hasModifier = event.ctrlKey || event.metaKey
+        const currentSendKey = sendKeyRef.current
 
-        if (sendKey === 'enter' && isEnter && !event.shiftKey && !hasModifier) {
+        if (currentSendKey === 'enter' && isEnter && !event.shiftKey && !hasModifier) {
           event.preventDefault()
-          handleSend()
+          handleSendRef.current()
           return true
         }
 
-        if (sendKey === 'ctrl+enter' && isEnter && hasModifier) {
+        if (currentSendKey === 'ctrl+enter' && isEnter && hasModifier) {
           event.preventDefault()
-          handleSend()
+          handleSendRef.current()
           return true
         }
 
         return false
+      },
+      handleDOMEvents: {
+        compositionstart: () => {
+          isComposingRef.current = true
+          return false
+        },
+        compositionend: () => {
+          isComposingRef.current = false
+          return false
+        }
       }
     },
     onUpdate: ({ editor: ed }) => {
-      // Debounced draft save
       if (draftTimerRef.current) clearTimeout(draftTimerRef.current)
       draftTimerRef.current = setTimeout(() => {
         const topicId = useTopicStore.getState().activeTopicId
@@ -81,6 +95,8 @@ export function MessageInput({ editText, editMessageId, onCancelEdit }: MessageI
   // Restore draft on topic switch
   useEffect(() => {
     if (!editor || editText !== undefined) return
+    // Wait for editor to be ready
+    if (!editor.isEditable) return
 
     if (activeTopicId) {
       const draft = useDraftStore.getState().loadDraft(activeTopicId)
@@ -92,29 +108,15 @@ export function MessageInput({ editText, editMessageId, onCancelEdit }: MessageI
     } else {
       editor.commands.clearContent()
     }
-  }, [activeTopicId, editor]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [activeTopicId, editor, editText])
 
   // Set edit text
   useEffect(() => {
-    if (editor && editText !== undefined) {
+    if (editor?.isEditable && editText !== undefined) {
       editor.commands.setContent(editText)
       editor.commands.focus('end')
     }
   }, [editText, editor])
-
-  // Handle IME composition
-  useEffect(() => {
-    if (!editor) return
-    const el = editor.view.dom
-    const handleCompositionStart = () => setIsComposing(true)
-    const handleCompositionEnd = () => setIsComposing(false)
-    el.addEventListener('compositionstart', handleCompositionStart)
-    el.addEventListener('compositionend', handleCompositionEnd)
-    return () => {
-      el.removeEventListener('compositionstart', handleCompositionStart)
-      el.removeEventListener('compositionend', handleCompositionEnd)
-    }
-  }, [editor])
 
   const handleSend = useCallback(() => {
     if (!editor || isStreaming) return
@@ -122,22 +124,22 @@ export function MessageInput({ editText, editMessageId, onCancelEdit }: MessageI
     if (!text) return
 
     if (editMessageId && onCancelEdit) {
-      // Edit mode — edit and resend
       useChatStore.getState().editAndResend(editMessageId, text)
       onCancelEdit()
     } else {
-      // Normal send
       useChatStore.getState().sendMessage(text)
     }
 
     editor.commands.clearContent()
 
-    // Clear draft
     const topicId = useTopicStore.getState().activeTopicId
     if (topicId) {
       useDraftStore.getState().clearDraft(topicId)
     }
   }, [editor, isStreaming, editMessageId, onCancelEdit])
+
+  // Keep ref in sync
+  handleSendRef.current = handleSend
 
   const handleStop = useCallback(() => {
     useChatStore.getState().stopGeneration()
@@ -148,7 +150,6 @@ export function MessageInput({ editText, editMessageId, onCancelEdit }: MessageI
       properties: ['openFile', 'multiSelections']
     })
     if (result) {
-      // TODO: Handle file attachments in future phase
       console.log('Files selected:', result)
     }
   }, [])
@@ -159,6 +160,14 @@ export function MessageInput({ editText, editMessageId, onCancelEdit }: MessageI
       if (draftTimerRef.current) clearTimeout(draftTimerRef.current)
     }
   }, [])
+
+  // Track editor ready state for disabled button
+  const [editorReady, setEditorReady] = useState(false)
+  useEffect(() => {
+    if (editor?.isEditable) {
+      setEditorReady(true)
+    }
+  }, [editor])
 
   return (
     <div className="shrink-0 border-t border-border bg-background p-3">
@@ -200,7 +209,7 @@ export function MessageInput({ editText, editMessageId, onCancelEdit }: MessageI
               size="icon"
               className="h-8 w-8"
               onClick={handleSend}
-              disabled={!editor?.getText().trim()}
+              disabled={!editorReady}
               title={t('chat.send', '전송')}
             >
               <Send className="h-4 w-4" />

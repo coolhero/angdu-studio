@@ -1707,8 +1707,13 @@ F004 implement에서 shadcn/ui 컴포넌트(Switch, Button, Input, Dialog 등)�
    - Dev server URL은 항상 웹 브라우저로 접근 가능 → "웹 전용" 가정 금지
    - Playwright MCP `browser_navigate(devServerUrl)` → SC 검증 가능
 
+**4. Cherry-studio와 화면 구조 차이**
+Cherry-studio의 HomePage는 동적 패널 시스템(topicPosition left/right 전환, 좌측 Assistants↔Topics 탭 전환, NavBar position left/top)인 반면, F005 implement agent는 고정 3-panel 레이아웃(좌=Assistants, 중=Chat, 우=Topics)을 생성했다. 이 차이는 source reference를 읽지 않았거나, pre-context.md의 Interaction Behavior Inventory를 충분히 반영하지 않은 결과이다.
+
+원인: implement agent가 source app의 런타임 구조를 확인하지 않고 spec의 FR-001("flexible layout with togglable panels")을 자의적으로 해석. Cherry-studio의 패널 전환 로직(showAssistants/showTopics/topicPosition)은 pre-context에 기술되었으나 implement 시 참조되지 않았다.
+
 ### Workaround
-사용자 지적 후 Playwright E2E 테스트를 수동 생성 시도. `_electron.launch` 경로 문제로 추가 디버깅 중.
+사용자 지적 후 TipTap `editor.view.dom` 에러를 수정하고 Playwright E2E로 전체 UI 렌더링을 검증. 화면 구조 차이는 향후 iteration에서 보완 예정.
 
 ### Suggested Fix
 1. `verify-phases.md` Phase 3 앞에 **Playwright Setup Gate** 추가 (BLOCKING):
