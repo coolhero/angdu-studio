@@ -102,16 +102,13 @@ export const useBlockStore = create<BlockState & BlockActions>((set, get) => ({
     const { streamingBlocks } = get()
     if (streamingBlocks.size === 0) return
 
-    const updates: Array<{ id: string; updates: Partial<MessageBlock> }> = []
-    for (const [id, block] of streamingBlocks) {
-      updates.push({
-        id,
-        updates: { content: block.content, status: block.status } as Partial<MessageBlock>
-      })
+    const blocks: MessageBlock[] = []
+    for (const [, block] of streamingBlocks) {
+      blocks.push(block)
     }
 
     try {
-      await window.api.invoke['chat:updateBlocksBatch'](updates)
+      await window.api.invoke['chat:upsertBlocksBatch'](blocks)
     } catch (err) {
       console.error('[useBlockStore] Failed to flush streaming blocks', err)
     }

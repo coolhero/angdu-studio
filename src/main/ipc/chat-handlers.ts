@@ -93,6 +93,13 @@ export function registerChatHandlers(): void {
     }
   )
 
+  ipcMain.handle(
+    'chat:upsertBlocksBatch',
+    (_event, blocks: MessageBlock[]) => {
+      chatService.upsertBlocksBatch(blocks)
+    }
+  )
+
   // --- Topic naming ---
 
   ipcMain.handle(

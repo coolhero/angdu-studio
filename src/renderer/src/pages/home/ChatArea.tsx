@@ -8,18 +8,10 @@ import { useChatStore } from '@renderer/stores/useChatStore'
 import { useAssistantStore } from '@renderer/stores/useAssistantStore'
 
 interface ChatAreaProps {
-  onToggleAssistantPanel: () => void
-  onToggleTopicSidebar: () => void
-  assistantPanelVisible: boolean
-  topicSidebarVisible: boolean
+  onToggleSidebar: () => void
 }
 
-export function ChatArea({
-  onToggleAssistantPanel,
-  onToggleTopicSidebar,
-  assistantPanelVisible,
-  topicSidebarVisible
-}: ChatAreaProps) {
+export function ChatArea({ onToggleSidebar }: ChatAreaProps) {
   const { t } = useTranslation()
   const [editState, setEditState] = useState<{ messageId: string; text: string } | null>(null)
   const error = useChatStore((s) => s.error)
@@ -36,18 +28,13 @@ export function ChatArea({
 
   return (
     <div className="flex min-w-0 flex-1 flex-col">
-      <ChatHeader
-        onToggleAssistantPanel={onToggleAssistantPanel}
-        onToggleTopicSidebar={onToggleTopicSidebar}
-        assistantPanelVisible={assistantPanelVisible}
-        topicSidebarVisible={topicSidebarVisible}
-      />
+      <ChatHeader onToggleSidebar={onToggleSidebar} />
 
       {/* Model not selected warning */}
       {!hasModel && (
         <div className="mx-4 mt-2 flex items-center gap-2 rounded-lg border border-destructive/50 bg-destructive/10 px-3 py-2 text-sm text-destructive">
           <AlertCircle className="h-4 w-4 shrink-0" />
-          <span>{t('chat.noModelWarning', '모델이 선택되지 않았습니다. 헤더의 "모델 선택"을 클릭하여 모델을 선택하세요.')}</span>
+          <span>{t('chat.noModelWarning', 'No model selected. Click "Select Model" in the header to choose a model.')}</span>
         </div>
       )}
 

@@ -108,6 +108,7 @@ export interface InvokeChannelMap {
   'chat:addBlock': { args: [data: Omit<MessageBlock, 'id' | 'createdAt' | 'updatedAt'>]; return: MessageBlock }
   'chat:updateBlock': { args: [id: string, updates: Partial<MessageBlock>]; return: MessageBlock }
   'chat:updateBlocksBatch': { args: [blocks: Array<{ id: string; updates: Partial<MessageBlock> }>]; return: void }
+  'chat:upsertBlocksBatch': { args: [blocks: MessageBlock[]]; return: void }
 
   // Topic Naming (F005)
   'chat:generateTopicName': { args: [topicId: string, messages: Array<{ role: string; content: string }>]; return: { name: string } }

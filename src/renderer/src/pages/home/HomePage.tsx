@@ -1,12 +1,11 @@
-import { Component, useEffect, useState, useCallback, type ReactNode } from 'react'
+import { Component, useEffect, useCallback, type ReactNode } from 'react'
 import { useAssistantStore } from '@renderer/stores/useAssistantStore'
-import { useTopicStore, useSidebarVisible } from '@renderer/stores/useTopicStore'
+import { useTopicStore } from '@renderer/stores/useTopicStore'
 import { useMessageStore } from '@renderer/stores/useMessageStore'
 import { useBlockStore } from '@renderer/stores/useBlockStore'
 import { initChatStreamListeners } from '@renderer/services/ChatStreamService'
-import { AssistantPanel } from './AssistantPanel'
+import { HomeSidebar } from './HomeSidebar'
 import { ChatArea } from './ChatArea'
-import { TopicSidebar } from './TopicSidebar'
 
 // Route-level error boundary (Pattern Constraint)
 class ChatErrorBoundary extends Component<
@@ -42,9 +41,6 @@ class ChatErrorBoundary extends Component<
 }
 
 function HomePageContent() {
-  const [assistantPanelVisible, setAssistantPanelVisible] = useState(true)
-  const topicSidebarVisible = useSidebarVisible()
-
   // Initialize chat stream listeners and hydrate stores
   useEffect(() => {
     const cleanupStream = initChatStreamListeners()
@@ -67,39 +63,19 @@ function HomePageContent() {
     }
   }, [])
 
-  const toggleAssistantPanel = useCallback(() => {
-    setAssistantPanelVisible((v) => !v)
-  }, [])
-
-  const toggleTopicSidebar = useCallback(() => {
+  const toggleSidebar = useCallback(() => {
     useTopicStore.getState().toggleSidebar()
   }, [])
 
   return (
     <div className="flex h-full">
-      {/* Assistant Panel — left sidebar with slide transition */}
-      <div
-        className="overflow-hidden transition-all duration-200 ease-in-out"
-        style={{ width: assistantPanelVisible ? 256 : 0 }}
-      >
-        {assistantPanelVisible && <AssistantPanel />}
-      </div>
+      {/* Left sidebar with tab switcher (Assistants / Topics) */}
+      <HomeSidebar />
 
-      {/* Chat Area — center */}
+      {/* Chat Area — center, flex-1 */}
       <ChatArea
-        onToggleAssistantPanel={toggleAssistantPanel}
-        onToggleTopicSidebar={toggleTopicSidebar}
-        assistantPanelVisible={assistantPanelVisible}
-        topicSidebarVisible={topicSidebarVisible}
+        onToggleSidebar={toggleSidebar}
       />
-
-      {/* Topic Sidebar — right with slide transition */}
-      <div
-        className="overflow-hidden transition-all duration-200 ease-in-out"
-        style={{ width: topicSidebarVisible ? 240 : 0 }}
-      >
-        {topicSidebarVisible && <TopicSidebar />}
-      </div>
     </div>
   )
 }

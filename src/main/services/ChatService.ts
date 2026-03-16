@@ -415,6 +415,49 @@ export class ChatService {
     })
   }
 
+  /**
+   * Batch upsert blocks — INSERT new blocks or UPDATE existing ones.
+   * Used by flushStreamingBlocks to persist in-memory streaming blocks to DB.
+   */
+  upsertBlocksBatch(blocks: MessageBlock[]): void {
+    if (blocks.length === 0) return
+    const db = getDb()
+
+    db.transaction((tx) => {
+      for (const block of blocks) {
+        const existing = tx
+          .select({ id: messageBlocks.id })
+          .from(messageBlocks)
+          .where(eq(messageBlocks.id, block.id))
+          .get()
+
+        if (existing) {
+          tx.update(messageBlocks)
+            .set({
+              content: block.content as Record<string, unknown>,
+              status: block.status,
+              updatedAt: new Date().toISOString()
+            })
+            .where(eq(messageBlocks.id, block.id))
+            .run()
+        } else {
+          tx.insert(messageBlocks)
+            .values({
+              id: block.id,
+              messageId: block.messageId,
+              type: block.type,
+              status: block.status,
+              content: block.content as Record<string, unknown>,
+              sortOrder: block.sortOrder,
+              createdAt: block.createdAt,
+              updatedAt: block.updatedAt
+            })
+            .run()
+        }
+      }
+    })
+  }
+
   // --- Row mappers ---
 
   private rowToTopic(row: typeof topics.$inferSelect): Topic {

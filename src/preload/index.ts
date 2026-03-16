@@ -28,6 +28,7 @@ const INVOKE_CHANNELS: InvokeChannel[] = [
   'chat:deleteMessagesAfter',
   'chat:getBlocks', 'chat:getBlocksBatch', 'chat:addBlock', 'chat:updateBlock',
   'chat:updateBlocksBatch',
+  'chat:upsertBlocksBatch',
   'chat:generateTopicName',
   // F005 — Assistant
   'assistant:getAll', 'assistant:add', 'assistant:update', 'assistant:delete',
