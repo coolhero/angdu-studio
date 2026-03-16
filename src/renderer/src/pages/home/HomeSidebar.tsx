@@ -139,7 +139,7 @@ export function HomeSidebar() {
       style={{ width: sidebarVisible ? 260 : 0 }}
     >
       {sidebarVisible && (
-        <div className="flex h-full w-[260px] shrink-0 flex-col border-r border-border bg-background">
+        <div className="flex h-full min-h-0 w-[260px] shrink-0 flex-col border-r border-border bg-background">
           {/* Tab switcher — like cherry-studio */}
           <div className="flex border-b border-border px-3 pt-1.5 pb-0">
             <button

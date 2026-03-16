@@ -100,7 +100,7 @@ export function MessageList({ onEditMessage }: MessageListProps) {
   }
 
   return (
-    <div className="relative flex-1">
+    <div className="relative min-h-0 flex-1">
       <div
         ref={parentRef}
         className="h-full overflow-auto"
