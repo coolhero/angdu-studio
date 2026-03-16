@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Button } from '@renderer/components/ui/button'
 import { useAssistantStore } from '@renderer/stores/useAssistantStore'
 import { useTopicStore } from '@renderer/stores/useTopicStore'
+import { ModelSelector } from './ModelSelector'
 
 interface ChatHeaderProps {
   onToggleAssistantPanel: () => void
@@ -22,10 +23,10 @@ export const ChatHeader = memo(function ChatHeader({
   const assistant = useAssistantStore((s) => s.getActiveAssistant())
   const activeTopicId = useTopicStore((s) => s.activeTopicId)
   const topics = useTopicStore((s) => s.topics)
-  const activeTopic = topics.find((t) => t.id === activeTopicId)
+  const activeTopic = topics.find((tp) => tp.id === activeTopicId)
 
   return (
-    <div className="flex h-12 shrink-0 items-center justify-between border-b border-border px-4">
+    <div className="flex h-12 shrink-0 items-center justify-between border-b border-border px-3">
       <div className="flex items-center gap-2">
         <Button
           variant="ghost"
@@ -36,16 +37,13 @@ export const ChatHeader = memo(function ChatHeader({
         >
           <PanelLeft className={`h-4 w-4 ${assistantPanelVisible ? 'text-primary' : ''}`} />
         </Button>
-        <div className="flex items-center gap-2">
-          <span className="text-lg">{assistant.emoji ?? ''}</span>
+        <div className="flex items-center gap-1.5">
+          <span className="text-base">{assistant.emoji ?? ''}</span>
           {!assistant.emoji && <Bot className="h-4 w-4 text-muted-foreground" />}
           <span className="text-sm font-medium">{assistant.name}</span>
-          {assistant.model && (
-            <span className="text-xs text-muted-foreground">
-              {assistant.model.displayName ?? assistant.model.modelId}
-            </span>
-          )}
         </div>
+        <div className="mx-1 h-4 w-px bg-border" />
+        <ModelSelector />
       </div>
       <div className="flex items-center gap-2">
         {activeTopic && (

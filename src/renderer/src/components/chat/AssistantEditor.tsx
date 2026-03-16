@@ -1,6 +1,15 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { Assistant, AssistantSettings } from '@shared/types/assistant'
+import { Cpu, ChevronDown, Search } from 'lucide-react'
+import type { Assistant, AssistantSettings, ModelReference } from '@shared/types/assistant'
+import type { Model, Provider } from '@shared/types/provider'
+import { useProviderStore } from '@renderer/stores/useProviderStore'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger
+} from '@renderer/components/ui/popover'
+import { ScrollArea } from '@renderer/components/ui/scroll-area'
 import {
   Dialog,
   DialogContent,
@@ -31,6 +40,10 @@ export function AssistantEditor({ assistant, open, onClose, onSave }: AssistantE
   const [prompt, setPrompt] = useState(assistant?.prompt ?? 'You are a helpful assistant.')
   const [category, setCategory] = useState(assistant?.category ?? '')
   const [tags, setTags] = useState(assistant?.tags?.join(', ') ?? '')
+  const [model, setModel] = useState<ModelReference | undefined>(assistant?.model)
+  const [modelPopoverOpen, setModelPopoverOpen] = useState(false)
+  const [modelSearch, setModelSearch] = useState('')
+  const providers = useProviderStore((s) => s.providers)
   const [settings, setSettings] = useState<AssistantSettings>(
     assistant?.settings ?? {
       temperature: 0.7,
@@ -41,6 +54,21 @@ export function AssistantEditor({ assistant, open, onClose, onSave }: AssistantE
     }
   )
 
+  const groupedModels = useMemo(() => {
+    const groups: { provider: Provider; models: Model[] }[] = []
+    for (const p of providers) {
+      if (!p.enabled) continue
+      const chatModels = p.models.filter(
+        (m) => m.enabled && m.endpoint_type !== 'image-generation' && m.endpoint_type !== 'jina-rerank'
+      )
+      const filtered = modelSearch
+        ? chatModels.filter((m) => m.name.toLowerCase().includes(modelSearch.toLowerCase()))
+        : chatModels
+      if (filtered.length > 0) groups.push({ provider: p, models: filtered })
+    }
+    return groups
+  }, [providers, modelSearch])
+
   const handleSave = useCallback(() => {
     if (!name.trim()) return
 
@@ -50,7 +78,7 @@ export function AssistantEditor({ assistant, open, onClose, onSave }: AssistantE
       description: description.trim() || undefined,
       prompt,
       topics: assistant?.topics ?? [],
-      model: assistant?.model,
+      model,
       settings,
       tags: tags
         .split(',')
@@ -116,6 +144,70 @@ export function AssistantEditor({ assistant, open, onClose, onSave }: AssistantE
             <p className="mt-1 text-xs text-muted-foreground">
               {t('chat.systemPromptVars', '변수: {{date}}, {{time}}, {{model}}')}
             </p>
+          </div>
+
+          {/* Model Selector */}
+          <div>
+            <Label>{t('chat.model', '모델')}</Label>
+            <Popover open={modelPopoverOpen} onOpenChange={setModelPopoverOpen}>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="mt-1 w-full justify-between text-sm">
+                  <div className="flex items-center gap-2">
+                    <Cpu className="h-3.5 w-3.5 text-muted-foreground" />
+                    {model ? (
+                      <span className="truncate">{model.displayName ?? model.modelId}</span>
+                    ) : (
+                      <span className="text-muted-foreground">{t('chat.selectModel', '모델 선택')}</span>
+                    )}
+                  </div>
+                  <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80 p-0" align="start">
+                <div className="border-b p-2">
+                  <div className="relative">
+                    <Search className="absolute left-2 top-2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder={t('chat.searchModel', '모델 검색...')}
+                      value={modelSearch}
+                      onChange={(e) => setModelSearch(e.target.value)}
+                      className="h-8 pl-8 text-sm"
+                    />
+                  </div>
+                </div>
+                <ScrollArea className="max-h-[300px]">
+                  {groupedModels.length === 0 ? (
+                    <div className="p-4 text-center text-sm text-muted-foreground">
+                      {t('chat.noModels', '모델을 찾을 수 없습니다.')}
+                    </div>
+                  ) : (
+                    groupedModels.map(({ provider: prov, models: mdls }) => (
+                      <div key={prov.id}>
+                        <div className="sticky top-0 bg-muted/80 px-3 py-1 text-xs font-semibold text-muted-foreground">
+                          {prov.name}
+                        </div>
+                        {mdls.map((m) => (
+                          <button
+                            key={m.id}
+                            className={`flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm hover:bg-accent ${
+                              model?.modelId === m.id && model?.providerId === prov.id ? 'bg-accent' : ''
+                            }`}
+                            onClick={() => {
+                              setModel({ providerId: prov.id, modelId: m.id, displayName: m.name })
+                              setModelPopoverOpen(false)
+                              setModelSearch('')
+                            }}
+                          >
+                            <Cpu className="h-3 w-3 text-muted-foreground" />
+                            <span className="truncate">{m.name}</span>
+                          </button>
+                        ))}
+                      </div>
+                    ))
+                  )}
+                </ScrollArea>
+              </PopoverContent>
+            </Popover>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
