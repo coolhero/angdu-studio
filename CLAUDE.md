@@ -123,6 +123,8 @@ SKF 항목은 **spec-kit-skills의 구조적 문제**에 초점을 맞춘다:
 - electron-store via F001 Config API (IPC) (003-settings)
 - TypeScript 5.8+ (strict mode) + Vercel AI SDK v4+ (@ai-sdk/openai, @ai-sdk/anthropic, @ai-sdk/google, @ai-sdk/azure, @ai-sdk/mistral, @ai-sdk/amazon-bedrock), Zustand, React 19, Zod, shadcn/ui (004-model-provider)
 - Zustand persist (localStorage) for provider configs + model cache. API keys encrypted via Electron safeStorage. (004-model-provider)
+- TypeScript 5.8+ (strict mode) + @tiptap/react, @tiptap/starter-kit, @tiptap/extension-placeholder, @tiptap/extension-mention, react-markdown, remark-gfm, rehype-raw, shiki, @tanstack/react-virtual, Zustand, React 19, Zod, shadcn/ui (005-chat-conversation)
+- better-sqlite3 via Drizzle ORM (messages, topics, blocks — main process); Zustand persist to localStorage (assistants, drafts, UI state — renderer) (005-chat-conversation)
 
 ## Recent Changes
 (clean restart — no implementation yet)

@@ -9,6 +9,8 @@ import { proxyService } from './services/ProxyService'
 import { powerService } from './services/PowerService'
 import { registerAllHandlers } from './ipc'
 import { ProviderService } from './services/ProviderService'
+import { AssistantService } from './services/AssistantService'
+import { initializeDatabase } from './db'
 
 export async function initializeServices(): Promise<void> {
   // Phase 1: Core infrastructure (order matters)
@@ -17,8 +19,14 @@ export async function initializeServices(): Promise<void> {
 
   configService.initialize()
 
+  // Phase 1a: Initialize database (F005 — SQLite + Drizzle)
+  initializeDatabase()
+
   // Phase 1b: Initialize provider service (loads system providers)
   await ProviderService.getInstance().initialize()
+
+  // Phase 1c: Initialize assistant service (F005)
+  AssistantService.getInstance().initialize()
 
   // Phase 2: Register all IPC handlers BEFORE window loads content
   registerAllHandlers()

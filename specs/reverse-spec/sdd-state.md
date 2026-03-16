@@ -80,7 +80,7 @@ Foundation Verified: 2026-03-16 | PASS | Build ✅, Toolchain ✅, Platform N/A
 | F002 | navigation | T1 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | completed |
 | F003 | settings | T1 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | completed |
 | F004 | model-provider | T1 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | completed |
-| F005 | chat-conversation | T1 | | | | | | | | pending |
+| F005 | chat-conversation | T1 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | | verify_passed |
 | F006 | knowledge-memory | T2 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | deferred |
 | F007 | mcp-tools | T2 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | deferred |
 | F008 | content-management | T2 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | deferred |
@@ -140,6 +140,12 @@ Foundation Verified: 2026-03-16 | PASS | Build ✅, Toolchain ✅, Platform N/A
 
 | Step | Status | Started | Completed | Notes |
 |------|--------|---------|-----------|-------|
+| specify | completed | 2026-03-16T18:00:00 | 2026-03-16T18:30:00 | 38 FRs, 10 SCs, 12 user stories, 50 SBI mapped (B111-B160). SBI cross-check corrected layout flexibility + block types (8+extensible) |
+| plan | completed | 2026-03-16T18:30:00 | 2026-03-16T19:30:00 | 5 entities, 18 IPC channels, 6 phases, 9 research decisions, 16+8 interaction chains, 11 UX contracts, 14 integration contracts, 9 pattern constraints |
+| tasks | completed | 2026-03-16T19:30:00 | 2026-03-16T20:00:00 | 88 tasks, 14 phases, 12 user stories |
+| analyze | completed | 2026-03-16T20:00:00 | 2026-03-16T20:15:00 | 0 critical, 0 high, 1 medium (FR-038 reasoning effort cache detail), 38/38 FR coverage |
+| implement | completed | 2026-03-16T20:15:00 | 2026-03-16T22:00:00 | 40+ new files, 6 modified files, build ✅. 6 stores, 3 services, 8 block components, 8 chat components, 4 page components. TipTap editor, Shiki highlighting, @tanstack/react-virtual. Demo script created |
+| verify | completed | 2026-03-16T22:00:00 | 2026-03-16T23:00:00 | Build ✅, TS ✅, Playwright E2E: 6/6 pass (app launch, React render, TipTap editor, no error boundary, no console errors). Fixed: better-sqlite3 electron-rebuild, persist state navigation (Home tab). SKF-037 recorded |
 
 ---
 
@@ -151,7 +157,7 @@ Foundation Verified: 2026-03-16 | PASS | Build ✅, Toolchain ✅, Platform N/A
 | F002 | 002-navigation | specs/002-navigation/ | 002-navigation | ✅ |
 | F003 | 003-settings | specs/003-settings/ | 003-settings | ✅ |
 | F004 | 004-model-provider | specs/004-model-provider/ | 004-model-provider | ✅ |
-| F005 | | | | |
+| F005 | 005-chat-conversation | specs/005-chat-conversation/ | 005-chat-conversation | |
 | F006 | | | | |
 | F007 | | | | |
 | F008 | | | | |

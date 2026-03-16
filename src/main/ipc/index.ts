@@ -10,6 +10,8 @@ import { registerDataHandlers } from './data'
 import { registerShortcutHandlers } from './shortcuts'
 import { registerStartupHandlers } from './startup'
 import { registerProviderHandlers } from './provider'
+import { registerChatHandlers } from './chat-handlers'
+import { registerAssistantHandlers } from './assistant-handlers'
 
 export function registerAllHandlers(): void {
   registerConfigHandlers()
@@ -24,4 +26,6 @@ export function registerAllHandlers(): void {
   registerShortcutHandlers()
   registerStartupHandlers()
   registerProviderHandlers()
+  registerChatHandlers()
+  registerAssistantHandlers()
 }

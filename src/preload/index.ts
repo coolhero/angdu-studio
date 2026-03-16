@@ -21,7 +21,17 @@ const INVOKE_CHANNELS: InvokeChannel[] = [
   'startup:setLoginItem',
   'provider:list', 'provider:add', 'provider:update', 'provider:delete',
   'provider:test-connection', 'provider:fetch-models', 'provider:add-custom-model',
-  'ai:chat', 'ai:abort'
+  'ai:chat', 'ai:abort',
+  // F005 — Chat Conversation
+  'chat:getTopics', 'chat:createTopic', 'chat:deleteTopic', 'chat:renameTopic',
+  'chat:getMessages', 'chat:addMessage', 'chat:updateMessage', 'chat:deleteMessage',
+  'chat:deleteMessagesAfter',
+  'chat:getBlocks', 'chat:getBlocksBatch', 'chat:addBlock', 'chat:updateBlock',
+  'chat:updateBlocksBatch',
+  'chat:generateTopicName',
+  // F005 — Assistant
+  'assistant:getAll', 'assistant:add', 'assistant:update', 'assistant:delete',
+  'assistant:import', 'assistant:export'
 ]
 
 const EVENT_CHANNELS: EventChannel[] = [

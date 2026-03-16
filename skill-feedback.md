@@ -1644,3 +1644,88 @@ F004 implement에서 shadcn/ui 컴포넌트(Switch, Button, Input, Dialog 등)�
    - "GUI Feature verify 시 최소 1개 styled interactive 요소의 `getComputedStyle().backgroundColor`가 `transparent`/`rgba(0,0,0,0)`이 아닌지 확인"
 3. `injection/implement.md` Pattern Constraints Injection에 추가:
    - "shadcn/ui 컴포넌트를 새로 추가하는 Feature에서는 `@theme` 블록에 해당 컴포넌트가 사용하는 색상 토큰이 매핑되어 있는지 확인"
+
+---
+
+## [SKF-037] F005 verify + implement 통과했으나 실제 Playwright 검증 미수행, 데모 미검증, MCP 활용 포기 — 종합적 verify 품질 실패
+
+- **Trigger**: B (사용자 지적) — "playwright 검증을 한건가?", "지금 제대로 데모가 동작도 안", "Playwright MCP로 electron도 검증이 가능함에도 안된다고 가정한 이유도 분석"
+- **Phase**: smart-sdd verify Phase 3 (F005-chat-conversation)
+- **Category**: MISSING_RULE + WRONG_ASSUMPTION (복합)
+- **Severity**: Critical (pipeline 중단)
+- **Timestamp**: 2026-03-16 22:30
+
+### Skill Trace
+- **File 1**: `.claude/skills/smart-sdd/commands/verify-phases.md` — Phase 3 Functional SC Verification에 Playwright 실행이 명시되어 있으나, "Playwright 설정이 없을 때 자동 생성" 규칙이 없어 에이전트가 skip 가능
+- **File 2**: `.claude/skills/smart-sdd/SKILL.md` — Prerequisites에 "Playwright must be installed. CLI mode uses `_electron.launch()`. MCP mode still requires CDP pre-configuration"이라고 명시
+- **File 3**: `.claude/skills/smart-sdd/reference/injection/verify.md` — Phase 3 SC Verification이 implement 다음 단계에서 실행되어야 하지만, "설정 부재 시 어떻게 하는가"에 대한 가이드 없음
+- **Rule**: N/A — 다음 규칙들이 모두 부재:
+  1. Playwright 설정 부재 시 자동 생성 규칙
+  2. Electron 프로젝트에서 Playwright MCP 사용 가능성 명시
+  3. 이전 Feature verify 경험 참조 규칙
+  4. 데모 스크립트 실제 실행 검증 규칙
+  5. implement agent의 "build passes" ≠ "feature works" 구분 규칙
+
+### Problem
+에이전트의 3개 연쇄 실패:
+
+**1. Implement agent가 "build passes"만으로 성공 판정**
+- implement agent가 `pnpm run build` 통과만 확인하고 "✅ built in 2.5s" 보고
+- 실제 앱을 실행하여 렌더링 상태를 확인하지 않음
+- 40+ 파일을 생성했지만 그 중 어떤 컴포넌트도 런타임에서 렌더링되는지 검증하지 않음
+- "Build passes after each phase" 규칙은 있지만 "실제 앱에서 해당 UI가 렌더링되는가"에 대한 규칙이 없음
+
+**2. Verify에서 Playwright 검증 완전 생략**
+- playwright.config.ts가 없다는 이유로 Phase 3 SC 검증을 건너뜀
+- "Playwright MCP는 웹 브라우저용이라 Electron 앱 직접 검증에는 적합하지 않습니다"라고 잘못 판단
+- 실제로는: (a) Electron dev server가 `localhost:5173`에서 렌더러 UI를 서빙 → Playwright MCP `browser_navigate`로 접근 가능, (b) 이전 F003/F004 verify에서 Playwright UI 검증을 성공적으로 수행한 기록이 sdd-state.md에 있음 (F003: "Playwright UI ✅ (4 sub-pages, 0 errors)", F004: "Playwright UI ✅ (33 switches, provider list, edit panel)")
+- 이전 Feature 경험을 참조하지 않고 독립적으로 "불가능하다"고 판단
+
+**3. 데모 스크립트 실제 실행 미검증**
+- `demos/F005-chat-conversation.sh` 파일을 생성했지만 실제 실행하여 동작 확인하지 않음
+- Phase 4 Demo 결과를 "✅ Script created"로만 보고 — 파일 존재 ≠ 실행 가능
+
+**근본 원인 분석**:
+- verify-phases.md에 "Playwright 미설정 시 BLOCKING" 규칙이 없어 에이전트가 skip 경로를 선택
+- 에이전트가 "build ✅ + TS ✅ + 프로세스 시작됨"을 "feature works"로 동치시킴
+- sdd-state.md의 이전 Feature verify 기록을 참조하는 규칙이 없어 학습된 패턴이 전달되지 않음
+- implement → verify 전환 시 "implement agent의 검증"과 "verify의 검증"이 동일한 수준 (build only)
+
+### Expected
+1. **implement 완료 기준**에 "최소 1회 앱 실행 + 해당 Feature UI 렌더링 확인" 추가
+2. **verify Phase 3**에 Playwright 설정 자동 생성 BLOCKING 게이트:
+   - playwright.config.ts 없으면 → 자동 생성
+   - Electron: `_electron.launch` 또는 dev server URL로 MCP 접근
+   - 테스트 파일 없으면 → SC 기반 최소 검증 테스트 자동 생성
+   - "설정이 없으니 skip" 경로 차단
+3. **verify Phase 3**에 이전 Feature verify 참조 규칙:
+   - "sdd-state.md Feature Detail Log에서 이전 Feature의 verify Notes를 읽고 동일한 Playwright 접근 방식 적용"
+4. **verify Phase 4 Demo**에 "실제 실행" 규칙:
+   - 데모 스크립트를 `--ci` 모드로 실행하여 exit code 확인
+   - 파일 존재만 확인하는 것은 불충분
+5. **Electron 프로젝트 Playwright 규칙** 명시:
+   - Dev server URL은 항상 웹 브라우저로 접근 가능 → "웹 전용" 가정 금지
+   - Playwright MCP `browser_navigate(devServerUrl)` → SC 검증 가능
+
+### Workaround
+사용자 지적 후 Playwright E2E 테스트를 수동 생성 시도. `_electron.launch` 경로 문제로 추가 디버깅 중.
+
+### Suggested Fix
+1. `verify-phases.md` Phase 3 앞에 **Playwright Setup Gate** 추가 (BLOCKING):
+   ```
+   Phase 3 시작 전:
+   1. playwright.config.ts 존재? → 없으면 자동 생성
+   2. Electron 프로젝트: _electron.launch 또는 dev server URL 접근 경로 확인
+   3. 이전 Feature verify Notes 읽기 → 동일 Playwright 접근 방식 적용
+   4. SC 기반 최소 검증 테스트 자동 생성
+   5. 테스트 1개라도 실행 확인 → 실패 시 HARD STOP
+   "Playwright 설정 없으니 skip"은 BLOCKING 위반
+   ```
+2. `injection/implement.md` Post-Implement Verification에 추가:
+   - "Build 통과 외에 최소 1회 앱 실행 + 해당 Feature UI가 DOM에 렌더링되는지 확인 (Playwright MCP snapshot 또는 dev server HTML 확인)"
+3. `domains/interfaces/gui.md` S6 UI Testing에 추가:
+   - "Electron 앱의 렌더러 UI는 dev server URL(`localhost:5173`)을 통해 Playwright MCP로 검증 가능. '웹 전용'이라는 가정 금지"
+4. `verify-phases.md` Phase 4에 추가:
+   - "Demo 스크립트는 --ci 모드로 실제 실행하여 exit code 0 확인. 파일 존재 ≠ 실행 가능"
+5. `verify-phases.md`에 **이전 Feature 참조 규칙** 추가:
+   - "현재 Feature verify 시작 시 sdd-state.md Feature Detail Log에서 직전 Feature의 verify Notes를 읽고, 사용된 검증 도구/방법/경로를 현재 Feature에 동일하게 적용"

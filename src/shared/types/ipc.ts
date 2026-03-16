@@ -2,6 +2,9 @@ import type { AppConfig, ConfigKey } from './config'
 import type { WindowState } from './window'
 import type { Provider, Model } from './provider'
 import type { ChatMessage, ChatOptions, ConnectionTestResult, ModelFetchResult, NormalizedChunk, SerializedError, TokenUsage } from './ai-core'
+import type { Message, MessageBlock } from './message'
+import type { Topic } from './topic'
+import type { Assistant } from './assistant'
 
 // --- Invoke Channels (request/response) ---
 
@@ -85,6 +88,37 @@ export interface InvokeChannelMap {
   // AI Core (F004)
   'ai:chat': { args: [providerId: string, modelId: string, messages: ChatMessage[], options: ChatOptions]; return: void }
   'ai:abort': { args: [requestId: string]; return: void }
+
+  // Chat Topics (F005)
+  'chat:getTopics': { args: [assistantId: string]; return: Topic[] }
+  'chat:createTopic': { args: [assistantId: string, name?: string]; return: Topic }
+  'chat:deleteTopic': { args: [topicId: string]; return: void }
+  'chat:renameTopic': { args: [topicId: string, name: string]; return: void }
+
+  // Chat Messages (F005)
+  'chat:getMessages': { args: [topicId: string, offset?: number, limit?: number]; return: { messages: Message[]; hasMore: boolean } }
+  'chat:addMessage': { args: [data: Omit<Message, 'id' | 'createdAt' | 'updatedAt'>]; return: Message }
+  'chat:updateMessage': { args: [id: string, updates: Partial<Message>]; return: Message }
+  'chat:deleteMessage': { args: [id: string]; return: void }
+  'chat:deleteMessagesAfter': { args: [topicId: string, afterMessageId: string]; return: { deletedCount: number } }
+
+  // Chat Blocks (F005)
+  'chat:getBlocks': { args: [messageId: string]; return: MessageBlock[] }
+  'chat:getBlocksBatch': { args: [messageIds: string[]]; return: Record<string, MessageBlock[]> }
+  'chat:addBlock': { args: [data: Omit<MessageBlock, 'id' | 'createdAt' | 'updatedAt'>]; return: MessageBlock }
+  'chat:updateBlock': { args: [id: string, updates: Partial<MessageBlock>]; return: MessageBlock }
+  'chat:updateBlocksBatch': { args: [blocks: Array<{ id: string; updates: Partial<MessageBlock> }>]; return: void }
+
+  // Topic Naming (F005)
+  'chat:generateTopicName': { args: [topicId: string, messages: Array<{ role: string; content: string }>]; return: { name: string } }
+
+  // Assistant (F005)
+  'assistant:getAll': { args: []; return: Assistant[] }
+  'assistant:add': { args: [data: Omit<Assistant, 'id' | 'createdAt' | 'updatedAt'>]; return: Assistant }
+  'assistant:update': { args: [id: string, updates: Partial<Assistant>]; return: Assistant }
+  'assistant:delete': { args: [id: string]; return: void }
+  'assistant:import': { args: [data: string]; return: Assistant[] }
+  'assistant:export': { args: [ids: string[]]; return: string }
 }
 
 // --- Event Channels (main → renderer) ---
