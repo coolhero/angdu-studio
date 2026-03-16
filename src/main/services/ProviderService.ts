@@ -171,7 +171,7 @@ export class ProviderService {
         })
         return { ...newModel, capabilities: caps, enabled: old.enabled }
       }
-      return { ...newModel, enabled: true }
+      return newModel // preserve enabled from AICoreService.listModels() (chat-capable → true, others → false)
     })
 
     this.providers[idx].models = merged

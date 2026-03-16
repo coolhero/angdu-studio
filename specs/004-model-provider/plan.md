@@ -250,3 +250,22 @@ Model selected → Provider lookup by model.provider
 ## Complexity Tracking
 
 No constitution violations. All decisions align with existing principles.
+
+## Source → Target Component Mapping
+
+| Source Component | Source File | Target Component | Target File | Notes |
+|---|---|---|---|---|
+| Redux llm slice | `cherry-studio/.../store/llm.ts` | useProviderStore + useModelStore | `stores/useProviderStore.ts`, `useModelStore.ts` | Redux → Zustand, split into 2 stores |
+| ProviderSettings/ (37 files) | `cherry-studio/.../ProviderSettings/` | ProviderSettings/ (4 files) | `pages/settings/ProviderSettings/` | Simplified: removed OAuth, provider-specific settings |
+| ProviderSetting.tsx | source | ProviderEditPanel.tsx | target | Source: full page. Target: side panel in master-detail |
+| ModelList/ (13 files) | `cherry-studio/.../ModelList/` | ModelSettings/ (3 files) | `pages/settings/ModelSettings/` | Simplified: ModelList + ModelSearch + CustomModelDialog |
+| packages/ai-core/ | `cherry-studio/packages/ai-core/` | AICoreService | `src/main/services/AICoreService.ts` | Separate package → single service class |
+| packages/ai-sdk-provider/ | `cherry-studio/packages/ai-sdk-provider/` | AICoreService (createSdkModel) | target | Consolidated into switch statement |
+| AnthropicService | source | AI SDK @ai-sdk/anthropic | target | Provider-specific code eliminated |
+| VertexAIService | source | AI SDK @ai-sdk/google | target | Provider-specific code eliminated |
+| CopilotService | source | — | — | removed (out of scope) |
+| CherryINOAuth | source | — | — | removed (Cherry-specific) |
+| ManageModelsPopup | source | — | — | removed (bulk model toggle simplified) |
+| HealthCheckPopup | source | — | — | removed (test connection in ProviderEditPanel covers this) |
+| AddProviderPopup | source | ProviderAddDialog | target | AntD Modal → shadcn Dialog |
+| SelectProviderModelPopup | source | ModelSelector (in F005) | target | Moved to ChatHeader context |

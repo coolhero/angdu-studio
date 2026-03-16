@@ -92,6 +92,14 @@ function ProviderModelGroup({
     [provider.id, provider.models, updateProvider]
   )
 
+  const allEnabled = provider.models.length > 0 && provider.models.every((m) => m.enabled)
+  const handleToggleAll = useCallback(() => {
+    const newEnabled = !allEnabled
+    const updatedModels = provider.models.map((m) => ({ ...m, enabled: newEnabled }))
+    updateProvider(provider.id, { models: updatedModels })
+    providerClient.update(provider.id, { models: updatedModels })
+  }, [provider.id, provider.models, allEnabled, updateProvider])
+
   useEffect(() => {
     if (provider.enabled && provider.models.length === 0 && !fetching) {
       handleRefresh()
@@ -101,7 +109,19 @@ function ProviderModelGroup({
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
-        <h4 className="text-sm font-medium text-foreground">{provider.name}</h4>
+        <div className="flex items-center gap-2">
+          <h4 className="text-sm font-medium text-foreground">{provider.name}</h4>
+          {provider.models.length > 0 && (
+            <button
+              onClick={handleToggleAll}
+              className="text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {allEnabled
+                ? t('settings.models.deselectAll', 'Deselect all')
+                : t('settings.models.selectAll', 'Select all')}
+            </button>
+          )}
+        </div>
         <Button
           variant="ghost"
           size="sm"

@@ -219,3 +219,23 @@ src/
 | Violation | Why Needed | Simpler Alternative Rejected Because |
 |-----------|------------|-------------------------------------|
 | ARC-05 deviation: electron-store instead of SQLite for settings | F001 chose electron-store for AppConfig. F003 extends the same store. Key-value settings don't need relational queries. | Adding SQLite table for flat key-value config adds complexity without benefit. SQLite is used for relational data (conversations, messages) in later features. |
+
+## Source → Target Component Mapping
+
+| Source Component | Source File | Target Component | Target File | Notes |
+|---|---|---|---|---|
+| SettingsPage | `cherry-studio/.../SettingsPage.tsx` | SettingsPage | `pages/settings/SettingsPage.tsx` | Source: styled-components + AntD + Routes. Target: Tailwind + shadcn + Outlet |
+| Sidebar (14+ items) | `cherry-studio/.../SettingsPage.tsx` | SettingsSidebar (6 items) | `pages/settings/SettingsSidebar.tsx` | Reduced: 8+ source-only settings pages removed |
+| GeneralSettings | `cherry-studio/.../GeneralSettings.tsx` | GeneralSettings | `pages/settings/GeneralSettings.tsx` | Source: 15+ controls. Target: 8 controls. Removed: tray, spell check, hw accel, notifications, data collection |
+| DisplaySettings | source | DisplaySettings | target | AntD → shadcn/ui. Same control set |
+| DataSettings/ (subdir) | source | DataSettings (flat file) | target | Source: AntD + WebDAV sync. Target: simplified, no WebDAV |
+| ShortcutSettings | source | ShortcutSettings | target | Same concept |
+| MCPSettings/ (21 subdirs) | source | — | — | deferred (F007) |
+| WebSearchSettings/ (10 subdirs) | source | — | — | deferred (F009) |
+| MemorySettings/ | source | — | — | deferred (F006) |
+| QuickAssistantSettings/ | source | — | — | removed |
+| SelectionAssistantSettings/ (8 subdirs) | source | — | — | removed |
+| DocProcessSettings/ (12 subdirs) | source | — | — | removed |
+| AboutSettings | source | — | — | removed |
+| AgentSettings/ (8 subdirs) | source | — | — | deferred |
+| ApiServerSettings | source | — | — | deferred (F010) |

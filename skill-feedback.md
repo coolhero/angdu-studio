@@ -2454,3 +2454,61 @@ F005 세션에서 수동으로 발견한 모든 문제를 하나씩 수정:
 3. `injection/implement.md` — Source-First Implementation 게이트 (BLOCKING)
 4. `injection/analyze.md` — FR Element Decomposition 규칙
 5. `verify-phases.md` — Real Environment Verification + Provides Interface Verification
+
+---
+
+## [SKF-045] specify/plan이 source app의 모델 관리 패러다임(opt-in)을 분석하지 않아 opt-out 방식으로 구현됨
+
+- **Trigger**: B (사용자 지적) — "Models에 들어가면 전체 모델이 디폴트로 선택되는거같은데 이게 cherry studio와 동일한 방식이 맞나?"
+- **Phase**: smart-sdd specify/plan/implement (F004-model-provider)
+- **Category**: MISSING_RULE
+- **Severity**: Major (결과물 품질 저하)
+- **Timestamp**: 2026-03-17 13:00
+
+### Skill Trace
+- **File**: `.claude/skills/smart-sdd/reference/pipeline-integrity-guards.md` § Guard 7 (Rebuild Fidelity Chain)
+- **Rule**: "plan → Source Component Mapping Table (source→target, BLOCKING)" — 이 규칙이 **UI 컴포넌트 구조**만 다루고 **비즈니스 로직 패러다임**(opt-in vs opt-out 같은 UX 패턴)은 커버하지 않음
+- **Line**: Guard 7, line 208-209
+
+### Problem
+Cherry Studio의 모델 관리는 **opt-in** 패러다임:
+- 모델 fetch → Manage Models 팝업에 표시 (추가 안 됨)
+- 사용자가 (+) 클릭으로 개별 모델을 명시적으로 추가
+- Model 타입에 `enabled` 필드 없음 — 배열에 존재 = 활성
+
+Angdu Studio는 **opt-out** 패러다임으로 구현됨:
+- 모델 fetch → 전부 `enabled: true`로 자동 추가
+- `AICoreService.listModels()`에서 `enabled: true` 하드코딩 (line 52)
+- embedding, tts, whisper 등 non-chat 모델도 전부 enabled
+- ModelSelector에 수십 개 모델이 한꺼번에 표시되어 UX 열화
+
+**근본 원인**: Guard 7의 Fidelity Chain이 "컴포넌트 구조"(Component Tree, Source→Target Mapping)에 초점을 맞추고 있어서, source app의 **데이터 흐름 패러다임**(모델이 어떻게 추가/활성화되는지)을 캡처하지 못했음. pre-context.md에는 "ManageModelsPopup", "AddModelPopup" 같은 컴포넌트가 SBI로 기록되어 있었지만, 이것들의 **존재 이유**(opt-in 패턴)가 plan/specify에 전달되지 않았음.
+
+### Expected
+1. **reverse-spec Phase 2**에서 SBI 추출 시, "Manage" 패턴의 컴포넌트(ManageModelsPopup, AddModelPopup 등)가 발견되면 → 해당 데이터의 **lifecycle 패러다임**(opt-in/opt-out, CRUD 순서)을 pre-context에 명시
+2. **plan Phase**에서 Source Component Mapping 작성 시, UI 컴포넌트뿐만 아니라 **데이터 lifecycle 패턴**도 매핑 (예: "source: opt-in via ManageModelsPopup → target: 동일 패턴 또는 변경 사유 명시")
+3. **implement Phase**에서 `listModels()` 구현 시, source의 `ManageModelsPopup` 코드를 읽고 "fetch → 사용자 선택 → 추가" 패턴을 이해한 후 구현
+
+### Workaround
+3가지 코드 수정으로 opt-out 방식을 유지하면서 문제 완화:
+1. `isChatCapableModel()` 함수 추가 — non-chat 모델(embedding, tts, whisper, dall-e, moderation 등)의 ID 패턴을 감지하여 `enabled: false`로 설정
+2. `ModelSelector` 필터링에 `isChatCapableModel()` 추가 — 이중 안전망
+3. `ModelList`에 provider 단위 "Select all / Deselect all" 토글 추가
+
+### Suggested Fix
+Guard 7 (Rebuild Fidelity Chain)에 **Data Lifecycle Mapping** 단계를 추가:
+
+```
+reverse-spec → Component Tree + Data Lifecycle Patterns in pre-context.md
+    ↓
+specify → FR references data lifecycle (opt-in/opt-out/CRUD sequence)
+    ↓
+plan → Source Component Mapping + Data Lifecycle Mapping Table
+    ↓
+implement → Source-First: read lifecycle-related source code BEFORE implementing data flows
+```
+
+구체적으로:
+1. `reverse-spec/commands/analyze.md` Phase 2에: "Manage/Add/Remove 패턴 컴포넌트 발견 시 → 해당 엔티티의 lifecycle 패러다임(opt-in/opt-out, CRUD 순서)을 pre-context § Data Lifecycle에 기록"
+2. `injection/plan.md`에: Source Component Mapping 옆에 "## Data Lifecycle Mapping" 섹션 추가 — `| Entity | Source Pattern | Target Pattern | Justification |` 형식
+3. `injection/implement.md`에: "데이터 추가/삭제/활성화 로직 구현 시 source의 동일 흐름 코드를 BLOCKING으로 읽어야 함"

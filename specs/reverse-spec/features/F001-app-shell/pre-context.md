@@ -228,3 +228,52 @@
 - F001↔F005: File storage API must support attachment/image storage for chat
 - F001→ALL: Preload bridge must expose all IPC channels each feature requires
 - IPC handler count: Source has 274 handlers; rebuild should audit and reduce to essential set
+
+### Component Tree
+
+#### Source App (Cherry Studio)
+```
+Main Process Entry (src/main/index.ts)
+├── crashReporter.start()
+├── Hardware accel disable toggle
+├── Platform-specific switches (Linux Wayland, Windows animation)
+├── app.whenReady() → createWindow()
+│   ├── WindowService (BrowserWindow creation)
+│   ├── AppMenuService (native menu)
+│   ├── ConfigManager (electron-store)
+│   ├── TrayService (system tray)
+│   ├── ShortcutService (global shortcuts)
+│   ├── ProtocolClient (cherry:// deep links)
+│   ├── PowerMonitorService (suspend/resume)
+│   ├── AnalyticsService
+│   ├── LoggerService
+│   ├── MCPService [deferred]
+│   ├── ApiServerService [deferred]
+│   └── 200+ IPC handlers in single ipc.ts
+├── Single instance lock
+└── Devtools installer (dev mode)
+```
+
+#### Target App (Angdu Studio)
+```
+Main Process Entry (src/main/index.ts) — 57 lines
+├── app.whenReady() → bootstrap()
+│   └── bootstrap.ts (5-phase sequential init)
+│       ├── Phase 1: ConfigService (better-sqlite3)
+│       ├── Phase 2: WindowService, TrayService, UpdateService
+│       ├── Phase 3: ProtocolService, ShortcutService, ProxyService
+│       ├── Phase 4: ProviderService [F004], AssistantService [F005]
+│       └── Phase 5: Database init [F005], IPC registration
+├── IPC handlers (modular, src/main/ipc/)
+│   ├── app.ts, config.ts, window.ts, theme.ts
+│   ├── file.ts, dialog.ts, clipboard.ts, shell.ts
+│   ├── provider.ts, chat-handlers.ts, assistant-handlers.ts
+│   ├── shortcuts.ts, data.ts, startup.ts
+│   └── index.ts (registration)
+├── Preload bridge (preload/index.ts)
+│   └── contextBridge: 36 invoke + 11 event channels
+└── Single instance lock
+```
+
+#### UI Control Density Check
+F001 has no renderer-side UI components of its own (app-shell is main-process infrastructure). No SBI decomposition needed.

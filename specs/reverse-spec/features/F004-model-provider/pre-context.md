@@ -218,3 +218,58 @@
 - F004↔F005: Model capabilities must drive chat UI (e.g., show image upload only if vision supported)
 - API key migration from source (Cherry) configs must be handled in data import (F003)
 - Provider type extensibility: adding a new provider type should not require changes to F005
+
+### Component Tree
+
+#### Source App (Cherry Studio)
+```
+ProviderSettings/ (pages/settings/ProviderSettings/)
+├── ProviderList.tsx — master list with enable/disable switches
+├── ProviderSetting.tsx — per-provider config page
+│   ├── API key input (with show/hide)
+│   ├── Endpoint URL input
+│   ├── Provider-specific settings (Anthropic, VertexAI, Copilot, CherryIN OAuth, etc.)
+│   ├── ApiOptionsSettings/ — advanced API options
+│   └── ModelList/ (13 files)
+│       ├── ModelList.tsx — grouped model display
+│       ├── ManageModelsList.tsx — enable/disable models
+│       ├── ManageModelsPopup.tsx — bulk model management
+│       ├── AddModelPopup.tsx — custom model add
+│       ├── HealthCheckPopup.tsx — provider health check
+│       └── ...
+├── AddProviderPopup.tsx — add new provider
+└── SelectProviderModelPopup.tsx — cross-provider model picker
+
+AI Core:
+├── packages/ai-core/ — separate package
+├── packages/ai-sdk-provider/ — SDK adapter package
+└── Per-provider services (AnthropicService, VertexAIService, etc.)
+```
+
+#### Target App (Angdu Studio)
+```
+ProviderSettings/ (pages/settings/ProviderSettings/)
+├── ProviderList.tsx — master-detail layout
+│   └── ProviderItem (inline) [switch enable/disable, click select]
+├── ProviderAddDialog.tsx — add new provider (shadcn Dialog)
+├── ProviderEditPanel.tsx — API key, endpoint, test, notes, API options, delete
+├── ProviderApiOptions.tsx — advanced flags
+ModelSettings/ (pages/settings/ModelSettings/)
+├── ModelList.tsx — model list by provider
+├── ModelSearch.tsx — filter bar
+└── CustomModelDialog.tsx — manual model add
+
+AI Core:
+├── AICoreService.ts (main process, 251 lines) — consolidated
+│   └── createSdkModel().chat(id) — forces /v1/chat/completions
+├── ProviderService.ts — CRUD + safeStorage encryption
+├── ModelService.ts — model catalog
+Stores:
+├── useProviderStore.ts — Zustand + persist (keys stripped)
+├── useModelStore.ts — activeModels map
+Services:
+└── provider-client.ts — IPC wrapper (chat, abort)
+```
+
+#### UI Control Density Check
+- **ProviderEditPanel**: 6+ interactive controls (API key input, endpoint input, test button, notes textarea, API options, delete button) → At threshold. Each control independently verifiable.

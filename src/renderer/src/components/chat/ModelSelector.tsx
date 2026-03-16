@@ -13,6 +13,7 @@ import { useProviderStore } from '@renderer/stores/useProviderStore'
 import { useAssistantStore } from '@renderer/stores/useAssistantStore'
 import { useModelStore } from '@renderer/stores/useModelStore'
 import type { Model, Provider } from '@shared/types/provider'
+import { isChatCapableModel } from '@shared/types/provider'
 import type { ModelReference } from '@shared/types/assistant'
 
 interface ModelSelectorProps {
@@ -35,6 +36,7 @@ export function ModelSelector({ compact }: ModelSelectorProps) {
       const chatModels = provider.models.filter(
         (m) =>
           m.enabled &&
+          isChatCapableModel(m.id) &&
           m.endpoint_type !== 'image-generation' &&
           m.endpoint_type !== 'jina-rerank'
       )

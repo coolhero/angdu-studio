@@ -396,3 +396,48 @@ src/
 ## Complexity Tracking
 
 No constitution violations. All decisions align with existing architectural principles. Cross-boundary reference between Zustand-persisted assistants and SQLite-persisted topics is the primary complexity point — mitigated by cascade reassignment on assistant delete and advisory model references.
+
+## Source → Target Component Mapping
+
+| Source Component | Source File | Target Component | Target File | Notes |
+|---|---|---|---|---|
+| HomePage | `pages/home/HomePage.tsx` | HomePage | `pages/home/HomePage.tsx` | Source: flex row Navbar+Content. Target: flex row HomeSidebar+ChatArea, adds ChatErrorBoundary |
+| Navbar (header bar) | `pages/home/Navbar.tsx` | ChatHeader | `components/chat/ChatHeader.tsx` | Source: top-level navbar with sidebar toggles, search, narrow mode. Target: simplified header |
+| HomeTabs | `pages/home/Tabs/index.tsx` | HomeSidebar | `pages/home/HomeSidebar.tsx` | Source: standalone animated tab panel. Target: integrated sidebar with same tabs |
+| AssistantsTab | `Tabs/AssistantsTab.tsx` | HomeSidebar (assistants) | `pages/home/HomeSidebar.tsx` | Source: UnifiedList/TagGroups with DnD sort. Target: simpler AssistantList with category grouping |
+| TopicsTab | `Tabs/TopicsTab.tsx` | HomeSidebar (topics) | `pages/home/HomeSidebar.tsx` | Source: Topics + SessionsTab. Target: TopicList only (no agent sessions) |
+| Chat | `pages/home/Chat.tsx` | ChatArea | `pages/home/ChatArea.tsx` | Source: topic/session branches, content search, multi-select. Target: single branch |
+| ChatNavbar + ChatNavbarContent | `components/ChatNavBar/` | ChatHeader | `components/chat/ChatHeader.tsx` | Source: separate components. Target: merged into ChatHeader |
+| Messages | `Messages/Messages.tsx` | MessageList | `components/chat/MessageList.tsx` | Source: reverse-scroll InfiniteScroll + NarrowLayout. Target: forward @tanstack/react-virtual |
+| MessageGroup | `Messages/MessageGroup.tsx` | — | — | removed (target renders flat list, no date grouping) |
+| Message | `Messages/Message.tsx` | MessageItem | `components/chat/MessageItem.tsx` | Source: Header+Content+Menubar+Editor+Outline. Target: simplified avatar+blocks+hover actions |
+| MessageHeader | `Messages/MessageHeader.tsx` | MessageItem (inline) | `components/chat/MessageItem.tsx` | Source: separate with model avatar, name, timestamp. Target: User/Bot icon inline |
+| MessageContent | `Messages/MessageContent.tsx` | BlockRenderer[] (inline) | `components/chat/MessageItem.tsx` | Source: separate wrapper. Target: direct block rendering |
+| MessageMenubar | `Messages/MessageMenubar.tsx` | MessageActions | `components/chat/MessageActions.tsx` | Source: copy,edit,resend,regenerate,branch,translate,TTS,bookmark. Target: copy,edit,regenerate,delete |
+| MessageEditor | `Messages/MessageEditor.tsx` | ChatArea (edit state) | `pages/home/ChatArea.tsx` | Source: inline per-message editor. Target: edit fills MessageInput |
+| Blocks/index.tsx | `Messages/Blocks/index.tsx` | BlockRenderer | `blocks/BlockRenderer.tsx` | Same dispatch pattern |
+| MainTextBlock | `Messages/Blocks/MainTextBlock.tsx` | TextBlock | `blocks/TextBlock.tsx` | Both react-markdown |
+| ThinkingBlock | `Messages/Blocks/ThinkingBlock.tsx` | ThinkingBlock | `blocks/ThinkingBlock.tsx` | Both collapsible |
+| ToolBlock/ToolBlockGroup | `Messages/Blocks/ToolBlock.tsx` | ToolBlock | `blocks/ToolBlock.tsx` | Target is placeholder for F007 |
+| ImageBlock | `Messages/Blocks/ImageBlock.tsx` | ImageBlock | `blocks/ImageBlock.tsx` | — |
+| FileBlock | `Messages/Blocks/FileBlock.tsx` | FileBlock | `blocks/FileBlock.tsx` | — |
+| ErrorBlock | `Messages/Blocks/ErrorBlock.tsx` | ErrorBlock | `blocks/ErrorBlock.tsx` | Both have retry |
+| VideoBlock | `Messages/Blocks/VideoBlock.tsx` | — | — | deferred (video content out of T1 scope) |
+| TranslationBlock | `Messages/Blocks/TranslationBlock.tsx` | — | — | deferred (translation feature out of scope) |
+| CitationBlock | `Messages/Blocks/CitationBlock.tsx` | — | — | deferred (citation feature out of scope) |
+| PlaceholderBlock | `Messages/Blocks/PlaceholderBlock.tsx` | MessageItem pulse | `components/chat/MessageItem.tsx` | Target uses animated pulse dot instead |
+| CompactBlock | `Messages/Blocks/CompactBlock.tsx` | — | — | deferred (compact view out of scope) |
+| Inputbar | `Inputbar/Inputbar.tsx` | MessageInput | `components/chat/MessageInput.tsx` | Source: complex with tool system. Target: TipTap + send/stop |
+| InputbarCore | `Inputbar/components/InputbarCore.tsx` | MessageInput (inline) | `components/chat/MessageInput.tsx` | Source: configurable slots. Target: flat layout |
+| InputbarTools (18 tools) | `Inputbar/InputbarTools.tsx` | — | — | deferred (only Paperclip attach exists) |
+| SendMessageButton | `Inputbar/SendMessageButton.tsx` | MessageInput (inline) | `components/chat/MessageInput.tsx` | — |
+| TokenCount | `Inputbar/TokenCount.tsx` | — | — | deferred (token estimation) |
+| NarrowLayout | `Messages/NarrowLayout.tsx` | — | — | removed (no width constraint toggle) |
+| ChatFlowHistory | `Messages/ChatFlowHistory.tsx` | — | — | removed (ReactFlow graph view out of scope) |
+| AssistantsDrawer | `components/AssistantsDrawer.tsx` | — | — | removed (sidebar always available) |
+| ContentSearch | `components/ContentSearch.tsx` | — | — | deferred (find-in-chat) |
+| ChatNavigation | `Messages/ChatNavigation.tsx` | — | — | removed (prev/next message buttons) |
+| SelectModelPopup | `Popups/SelectModelPopup.tsx` | ModelSelector | `components/chat/ModelSelector.tsx` | Source: modal popup. Target: inline Popover |
+| AddAssistantPopup | `Popups/AddAssistantPopup.tsx` | AssistantEditor | `components/chat/AssistantEditor.tsx` | Source: AntD modal. Target: shadcn Dialog |
+| AgentSession branch | `pages/home/Chat.tsx` | — | — | deferred (agent sessions out of T1 scope) |
+| MultiSelectActionPopup | `Messages/SelectionBox.tsx` | — | — | deferred (bulk message selection) |

@@ -290,3 +290,127 @@
 - Message storage migration: source uses IndexedDB/Dexie → rebuild uses better-sqlite3; migration path needed for data import
 - Performance: streaming + rendering + state updates must not cause frame drops
 - Assistant system prompts must not contain Cherry-specific references in defaults
+
+### Component Tree
+
+#### Source App (Cherry Studio)
+
+```
+HomePage (pages/home/HomePage.tsx)
+├── Navbar (pages/home/Navbar.tsx) {isLeftNavbar &&}
+│   ├── NavbarLeft: PanelLeftClose [toggle sidebar], Menu [AssistantsDrawer]
+│   ├── NavbarCenter: (empty)
+│   └── NavbarRight: UpdateAppButton, Search, NarrowMode toggle, Topic sidebar toggle
+│
+├── HomeTabs (pages/home/Tabs/index.tsx) {showAssistants, animated width}
+│   ├── TabSwitcher: Assistants | Topics {topicPosition==='left' &&}
+│   ├── AssistantsTab (Tabs/AssistantsTab.tsx)
+│   │   ├── UnifiedAddButton
+│   │   ├── UnifiedTagGroups {sortType==='tags'} / UnifiedList {sortType==='list'}
+│   │   │   └── AssistantItem / AgentItem [drag-sortable, contextMenu]
+│   └── TopicsTab (Tabs/TopicsTab.tsx)
+│       ├── Topics {activeTopicOrSession==='topic'}
+│       └── SessionsTab → Sessions {activeTopicOrSession==='session'}
+│
+└── Chat (pages/home/Chat.tsx)
+    ├── ChatNavbar (components/ChatNavBar/)
+    │   ├── Sidebar toggle, AssistantsDrawer trigger
+    │   └── ChatNavbarContent [assistant name, model, tools]
+    │
+    ├── {activeTopicOrSession === 'topic'}
+    │   ├── Messages (Messages/Messages.tsx)
+    │   │   └── NarrowLayout (max-width constraint)
+    │   │       └── InfiniteScroll (reverse, column-reverse)
+    │   │           └── ContextMenu → ScrollContainer
+    │   │               └── MessageGroup[] → Message[]
+    │   │                   ├── MessageHeader (avatar, model, timestamp)
+    │   │                   ├── MessageEditor {isEditing &&}
+    │   │                   ├── MessageOutline {assistant && showOutline &&}
+    │   │                   ├── MessageContent → Blocks
+    │   │                   │   ├── MainTextBlock, ThinkingBlock
+    │   │                   │   ├── ToolBlock/ToolBlockGroup
+    │   │                   │   ├── ImageBlock, FileBlock, VideoBlock
+    │   │                   │   ├── ErrorBlock, TranslationBlock
+    │   │                   │   ├── CitationBlock, PlaceholderBlock
+    │   │                   │   └── CompactBlock
+    │   │                   └── MessageMenubar [copy,edit,resend,regenerate,branch,translate,TTS,bookmark,delete]
+    │   ├── ContentSearch (find-in-page)
+    │   ├── ChatNavigation (prev/next buttons)
+    │   └── Inputbar
+    │       └── InputbarToolsProvider → InputbarCore
+    │           ├── topContent: KnowledgeBaseInput, MentionModelsInput
+    │           ├── leftToolbar: InputbarTools (18 draggable tool buttons)
+    │           │   └── Attachment, NewTopic, ClearTopic, WebSearch, KB, MCP, ImageGen, Expand...
+    │           ├── Textarea (resizable)
+    │           ├── rightToolbar: TokenCount
+    │           └── SendButton / PauseButton
+    │
+    ├── {activeTopicOrSession === 'session'}
+    │   └── AgentSession branch (AgentSessionMessages, AgentSessionInputbar, PinnedTodoPanel)
+    │
+    ├── MultiSelectActionPopup {isMultiSelectMode &&}
+    │
+    └── Tabs (right position) {topicPosition==='right' && showTopics &&}
+        └── (same HomeTabs, position='right')
+
+Off-tree overlays: AssistantsDrawer, ChatFlowHistory, SelectModelPopup, SearchPopup
+```
+
+State: Redux (assistants, runtime, newMessage, messageBlock, settings, inputTools) + EventEmitter pub/sub
+Block types: 12 (MainText, Thinking, Tool, ToolGroup, Image, File, Video, Error, Translation, Citation, Placeholder, Compact)
+
+#### Target App (Angdu Studio)
+
+```
+HomePage (pages/home/HomePage.tsx)
+└── ChatErrorBoundary → HomePageContent
+    ├── HomeSidebar (pages/home/HomeSidebar.tsx)
+    │   └── {sidebarVisible, width 0↔260 transition}
+    │       ├── Tab Switcher: Assistants | Topics
+    │       ├── [Tab: assistants]
+    │       │   ├── Toolbar (Import, Export, New Assistant)
+    │       │   ├── Search Input
+    │       │   └── AssistantList [grouped by category]
+    │       │       └── AssistantItem [emoji, name, desc, hover: Edit/Delete]
+    │       │       └── AssistantEditor (Dialog) [name,emoji,desc,prompt,model,category,tags,params]
+    │       └── [Tab: topics]
+    │           ├── Toolbar (count, New Topic)
+    │           └── TopicList
+    │               └── TopicItem [pin icon, name (inline-editable), count, contextMenu: Rename/Delete]
+    │
+    └── ChatArea (pages/home/ChatArea.tsx)
+        ├── ChatHeader [sidebar toggle, assistant emoji/name, Separator, ModelSelector, topic name]
+        │   └── ModelSelector (Popover → Search + ScrollArea, grouped by provider)
+        ├── {no model warning banner}
+        ├── {error banner with dismiss}
+        ├── MessageList
+        │   ├── EmptyState {0 messages}
+        │   └── @tanstack/react-virtual virtualizer
+        │       ├── Load-more sentinel (IntersectionObserver at top)
+        │       └── MessageItem[]
+        │           ├── Avatar (User/Bot icon)
+        │           ├── Content bubble (bg-primary/bg-muted)
+        │           │   └── BlockRenderer[]
+        │           │       ├── TextBlock (react-markdown)
+        │           │       ├── CodeBlock (shiki, lazy)
+        │           │       ├── ThinkingBlock (collapsible)
+        │           │       ├── ToolBlock (placeholder for F007)
+        │           │       ├── ImageBlock, FileBlock
+        │           │       └── ErrorBlock (with retry)
+        │           ├── Metadata (tokens, duration)
+        │           └── MessageActions [hover: Copy, Edit, Regenerate, Delete]
+        │   └── ScrollToBottom
+        └── MessageInput
+            ├── Edit-mode banner {editMessageId &&}
+            ├── Paperclip [file attach]
+            ├── TipTap EditorContent
+            └── Send/Stop button + SendKey hint
+```
+
+State: Zustand (useChatStore, useAssistantStore, useTopicStore, useMessageStore, useBlockStore, useDraftStore)
+Block types: 7 (main_text, code, thinking, tool, image, file, error)
+
+#### UI Control Density Check
+- **AssistantEditor** (in HomeSidebar): 10+ interactive controls (name, emoji, description, system prompt, model selector, category, tags, temperature slider, topP slider, maxTokens slider, contextCount slider) → Exceeds 5-control threshold. Each slider/input should be independently verifiable.
+- **MessageInput**: 4 interactive controls (attach, editor, send/stop, cancel edit) → Below threshold.
+- **ChatHeader**: 3 interactive controls (sidebar toggle, model selector, active topic) → Below threshold.

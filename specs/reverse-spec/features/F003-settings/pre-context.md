@@ -211,3 +211,72 @@
 - F003↔F005: sendKey, fontSize, messageStyle, quickPhrases must be accessible by chat UI
 - F003 data export must include data from ALL features (conversations from F005, providers from F004)
 - Settings migration must handle schema changes across versions
+
+### Component Tree
+
+#### Source App (Cherry Studio)
+```
+SettingsPage (pages/settings/SettingsPage.tsx) — styled-components + AntD
+├── Sidebar (14+ items)
+│   ├── Provider, Model, General, Display, Data
+│   ├── MCP, WebSearch, Memory, QuickAssistant
+│   ├── SelectionAssistant, DocProcess, Shortcut
+│   ├── ApiServer, About
+│   └── Version display
+├── Routes (inline Switch)
+│   ├── GeneralSettings — 15+ controls
+│   │   ├── Language Select, Launch at login, Tray toggle
+│   │   ├── Tray-on-close, Hardware accel, Spell check
+│   │   ├── Notification, Data collection, Proxy mode
+│   │   ├── Proxy host/port, Send key, Quick phrases
+│   │   └── Provider-specific settings slots
+│   ├── DisplaySettings — 6+ controls
+│   │   ├── Theme RadioGroup, Font size, Message style
+│   │   ├── Avatar style, Code theme, Custom CSS
+│   │   └── Window opacity, TopicPosition
+│   ├── DataSettings/ — 4+ actions
+│   │   ├── Export, Import, Clear (with confirmation)
+│   │   └── WebDAV sync, Backup path
+│   ├── ShortcutSettings
+│   ├── MCPSettings/ (21 subdirs)
+│   ├── WebSearchSettings/ (10 subdirs)
+│   ├── MemorySettings/
+│   ├── QuickAssistantSettings/
+│   ├── SelectionAssistantSettings/
+│   ├── DocProcessSettings/ (12 subdirs)
+│   ├── AboutSettings
+│   └── AgentSettings/ (8 subdirs)
+```
+
+#### Target App (Angdu Studio)
+```
+SettingsPage (pages/settings/SettingsPage.tsx) — Tailwind + shadcn/ui
+├── SettingsSidebar (6 items)
+│   ├── Provider, Models, General, Display, Data, Shortcuts
+│   └── Active item highlighting
+├── <Outlet /> (react-router v7)
+│   ├── GeneralSettings — 8 controls
+│   │   ├── Language Select, Navbar position RadioGroup
+│   │   ├── Send key RadioGroup, Launch at login Switch
+│   │   ├── Start minimized Switch, Auto-update Switch
+│   │   ├── Proxy host/port Inputs
+│   │   └── QuickPhraseEditor (CRUD list)
+│   ├── DisplaySettings — 6 controls
+│   │   ├── Theme RadioGroup (light/dark/system)
+│   │   ├── Font size Slider (12-24)
+│   │   ├── Message style RadioGroup (bubble/plain)
+│   │   ├── Avatar style RadioGroup
+│   │   ├── Code theme Select
+│   │   └── Custom CSS Textarea
+│   ├── DataSettings — 4 actions
+│   │   ├── Export (dialog → Blob download)
+│   │   ├── Import (dialog → file:// fetch)
+│   │   ├── Clear data (inline confirm)
+│   │   └── Open storage folder, Backup retention
+│   └── ShortcutSettings
+│       └── Shortcut rows with ShortcutRecorder
+```
+
+#### UI Control Density Check
+- **GeneralSettings**: 8 interactive controls (below 5-control threshold when counting logical groups, but QuickPhraseEditor adds variable controls) → Manageable
+- **DisplaySettings**: 6 interactive controls → At threshold. Each control independently verified.

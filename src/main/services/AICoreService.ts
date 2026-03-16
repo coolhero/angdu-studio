@@ -1,7 +1,7 @@
 import { BrowserWindow } from 'electron'
 import type { Provider, Model, ProviderType } from '@shared/types/provider'
 import type { ChatMessage, ChatOptions, NormalizedChunk, SerializedError } from '@shared/types/ai-core'
-import { URL_TRANSFORM_RULES } from '@shared/types/provider'
+import { URL_TRANSFORM_RULES, isChatCapableModel } from '@shared/types/provider'
 
 export class AICoreService {
   private static instance: AICoreService
@@ -42,15 +42,18 @@ export class AICoreService {
       const data = await response.json()
       const rawModels = data.data ?? data.models ?? []
 
-      return rawModels.map((m: Record<string, unknown>) => ({
-        id: (m.id ?? m.name ?? '') as string,
-        provider: provider.id,
-        name: (m.id ?? m.name ?? '') as string,
-        group: ((m.owned_by as string) ?? provider.name),
-        capabilities: [],
-        endpoint_type: this.inferEndpointType(provider.type),
-        enabled: true
-      }))
+      return rawModels.map((m: Record<string, unknown>) => {
+        const id = (m.id ?? m.name ?? '') as string
+        return {
+          id,
+          provider: provider.id,
+          name: id,
+          group: ((m.owned_by as string) ?? provider.name),
+          capabilities: [],
+          endpoint_type: this.inferEndpointType(provider.type),
+          enabled: isChatCapableModel(id)
+        }
+      })
     } catch (err) {
       throw new Error(
         `Failed to fetch models from ${provider.name}: ${err instanceof Error ? err.message : 'Unknown error'}`

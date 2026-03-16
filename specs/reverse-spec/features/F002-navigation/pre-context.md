@@ -172,3 +172,87 @@
 - F002↔F005: Chat conversations should open as tabs; switching tabs must preserve chat scroll position
 - F002↔F004: Provider settings may open as sub-tabs within settings
 - Tab state persistence must survive app crash (write on change, not just on quit)
+
+### Component Tree
+
+#### Source App (Cherry Studio)
+
+```
+Router (Router.tsx)
+├── {navbarPosition === 'left'}
+│   ├── Sidebar (components/app/Sidebar.tsx)
+│   │   ├── Avatar/EmojiAvatar [onClick → UserPopup]
+│   │   ├── MainMenus [configurable via sidebarIcons.visible[]]
+│   │   │   └── {icons.map → StyledLink + LucideIcon} [onClick → navigate]
+│   │   ├── SidebarOpenedMinappTabs (PinnedMinapps.tsx)
+│   │   │   └── {openedKeepAliveMinapps.map → MinAppIcon} [onClick → toggle, contextMenu → Close/CloseAll]
+│   │   ├── SidebarPinnedApps (PinnedMinapps.tsx) {showPinnedApps &&}
+│   │   │   └── DraggableList [drag → reorder, contextMenu → Remove]
+│   │   ├── Theme toggle (Moon/Sun/Monitor) [onClick → toggleTheme]
+│   │   └── Settings StyledLink [onClick → navigate('/settings/provider')]
+│   └── Routes (ErrorBoundary wrapped)
+│
+├── {navbarPosition === 'top'}
+│   └── TabsContainer (components/Tab/TabContainer.tsx)
+│       ├── TabsBar [-webkit-app-region: drag]
+│       │   ├── HorizontalScrollContainer
+│       │   │   └── Sortable (DnD reorder)
+│       │   │       └── {visibleTabs.map → Tab}
+│       │   │           ├── TabIcon (getTabIcon → LucideIcon/MinAppIcon)
+│       │   │           ├── TabTitle (getTabTitle → i18n label)
+│       │   │           ├── [onClick → navigate(tab.path)]
+│       │   │           ├── [onAuxClick(button=1) → closeTab]
+│       │   │           └── {tab.id !== 'home' && CloseButton [onClick → closeTab]}
+│       │   └── AddTabButton [onClick → navigate('/launchpad')]
+│       ├── RightButtons
+│       │   ├── UpdateAppButton
+│       │   ├── ThemeButton [onClick → toggleTheme]
+│       │   ├── SettingsButton [onClick → navigate(lastSettingsPath)]
+│       │   └── WindowControls [min/max/close]
+│       ├── MinAppTabsPool (WebView keepalive)
+│       └── Routes
+│
+Navbar (components/app/Navbar.tsx) — left mode only, per-page content bar
+├── {isTopNavbar → return null}
+└── NavbarContainer [drag area]
+    ├── NavbarLeft / NavbarCenter / NavbarRight slots
+    └── WindowControls {!minappShow &&}
+```
+
+State: Redux (tabs, settings.navbarPosition, sidebarIcons.visible[]), ThemeProvider
+
+#### Target App (Angdu Studio)
+
+```
+AppLayout (components/layout/AppLayout.tsx)
+├── {navbarPosition === 'top'}
+│   ├── Navbar (components/navigation/Navbar.tsx)
+│   │   ├── {isMac && navbarPosition==='top' && <spacer w-20>}
+│   │   ├── TabBar (components/navigation/TabBar.tsx)
+│   │   │   ├── DndContext (@dnd-kit, PointerSensor distance=8)
+│   │   │   │   └── SortableContext
+│   │   │   │       └── {tabs.map → SortableTab → TabItem}
+│   │   │   │           ├── [onClick → setActiveTab + navigate]
+│   │   │   │           ├── [onAuxClick(button=1) → close]
+│   │   │   │           ├── [onContextMenu → TabContextMenu]
+│   │   │   │           └── {closable && CloseButton}
+│   │   │   └── TabContextMenu [Close / Close Others / Close All]
+│   │   ├── Settings gear [onClick → addTab('/settings') + navigate]
+│   │   └── {!isMac && WindowControls [min/max/close]}
+│   └── <Outlet />
+│
+├── {navbarPosition === 'left'}
+│   ├── Sidebar (components/navigation/Sidebar.tsx)
+│   │   ├── {isMac && <spacer h-8>}
+│   │   ├── {mainRoutes.map → SidebarItem}
+│   │   │   └── button [onClick → navigate, title tooltip]
+│   │   └── SidebarItem (settings, bottom)
+│   ├── Navbar (drag area only in left mode)
+│   └── <Outlet />
+```
+
+State: Zustand useTabsStore (tabs, activeTabId, navbarPosition), NavigationService singleton
+Routes: createHashRouter + RouterProvider (react-router v7 data router)
+
+#### UI Control Density Check
+No component exceeds the 5-control threshold requiring separate SBI decomposition within F002 scope.

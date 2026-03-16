@@ -243,3 +243,24 @@ const configStorage: StateStorage = {
 ## Complexity Tracking
 
 No constitution violations. All patterns follow established conventions from F001.
+
+## Source → Target Component Mapping
+
+| Source Component | Source File | Target Component | Target File | Notes |
+|---|---|---|---|---|
+| Router (conditional HashRouter) | `cherry-studio/.../Router.tsx` | AppRouter + AppLayout | `Router.tsx` + `layout/AppLayout.tsx` | Source: inline HashRouter with conditional wrapping. Target: createHashRouter + RouterProvider (v7 data router) |
+| Sidebar | `cherry-studio/.../components/app/Sidebar.tsx` | Sidebar | `navigation/Sidebar.tsx` | Source: styled-components, dynamic icon list from settings, avatar, theme toggle, minapp sections. Target: Tailwind, static route registry, no avatar/theme/minapp |
+| MainMenus (inner FC) | `cherry-studio/.../components/app/Sidebar.tsx` | SidebarItem | `navigation/SidebarItem.tsx` | Source: renders from sidebarIcons.visible[] with AntD Tooltip. Target: renders from ROUTES.filter(showInSidebar) with native title |
+| TabsContainer | `cherry-studio/.../Tab/TabContainer.tsx` | Navbar + TabBar | `navigation/Navbar.tsx` + `TabBar.tsx` | Source: monolithic. Target: split into chrome + tabs |
+| Tab (styled) | `cherry-studio/.../Tab/TabContainer.tsx` | TabItem | `navigation/TabItem.tsx` | Source: icon + title + close. Target: title + close only (no icon) |
+| Navbar (per-page content) | `cherry-studio/.../components/app/Navbar.tsx` | Navbar (in left mode) | `navigation/Navbar.tsx` | Source: multi-slot per-page navbar (Left/Center/Right). Target: unified bar for both modes |
+| PinnedMinapps | `cherry-studio/.../components/app/PinnedMinapps.tsx` | — | — | deferred (MinApp feature out of scope) |
+| NavigationHandler | `cherry-studio/.../NavigationHandler.tsx` | NavigationService | `services/NavigationService.ts` | Source: React component. Target: singleton class |
+| Redux tabs slice | `cherry-studio/.../store/tabs.ts` | useTabsStore (Zustand) | `stores/useTabsStore.ts` | Redux → Zustand. Target adds closeOthers, closeAll, restoreTabs |
+| WindowControls | `cherry-studio/.../WindowControls.tsx` | Inline buttons in Navbar | `navigation/Navbar.tsx` | Source: separate component. Target: inline buttons for Win/Linux |
+| HorizontalScrollContainer | `cherry-studio/.../HorizontalScrollContainer.tsx` | overflow-x-auto | `navigation/TabBar.tsx` | Source: custom scroll component. Target: CSS overflow |
+| useSettings().sidebarIcons | `cherry-studio/.../hooks/useSettings.ts` | ROUTES constant | `routes.tsx` | Source: user-configurable icon order. Target: static route list |
+| useNavbarPosition | `cherry-studio/.../hooks/useSettings.ts` | useNavbarPosition selector | `stores/useTabsStore.ts` | Redux → Zustand selector |
+| AddTabButton (+ PlusOutlined) | `cherry-studio/.../Tab/TabContainer.tsx` | — | — | removed (no Launchpad page needed, tabs auto-created on navigate) |
+| ThemeButton (tab bar) | `cherry-studio/.../Tab/TabContainer.tsx` | — | — | deferred (theme toggle in F003 Settings, not in nav chrome) |
+| UpdateAppButton | `cherry-studio/.../Tab/TabContainer.tsx` | — | — | deferred (update notification is F001 scope via tray/dialog) |

@@ -15,7 +15,8 @@
 **Scope**: core
 **Active Tiers**: T1
 **Created**: 2026-03-15T14:00:00
-**Last Updated**: 2026-03-15T14:00:00
+**Last Updated**: 2026-03-17T12:00:00
+**Re-verification**: completed (2026-03-17, Pipeline Integrity Guards)
 **Constitution Version**: 1.0.0
 **State Schema Version**: 2.0
 **Framework**: electron

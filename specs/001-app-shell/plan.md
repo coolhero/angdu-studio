@@ -208,3 +208,24 @@ No constitution violations. All patterns align with principles.
 - Integration tests for IPC bridge (invoke round-trip, event delivery)
 - E2E tests via Playwright _electron.launch() (window state, tray, single-instance)
 - Verify cold start < 2s, IPC < 10ms
+
+## Source → Target Component Mapping
+
+| Source Component | Source File | Target Component | Target File | Notes |
+|---|---|---|---|---|
+| Main entry (200+ lines) | `cherry-studio/src/main/index.ts` | Main entry (57 lines) | `src/main/index.ts` | Simplified: removed crashReporter, hw accel, devtools, platform switches |
+| bootstrap (imported) | `cherry-studio/src/main/bootstrap.ts` | bootstrap | `src/main/bootstrap.ts` | 5-phase sequential init. Note: Phase 4-5 init F004/F005 services (layer coupling) |
+| preload/index.ts (100+ methods) | `cherry-studio/src/preload/index.ts` | preload/index.ts (typed generic) | `src/preload/index.ts` | 36 invoke + 11 events via typed generic approach |
+| ConfigManager (electron-store) | `cherry-studio/.../ConfigManager.ts` | ConfigService (better-sqlite3) | `src/main/services/ConfigService.ts` | Storage engine change: electron-store → better-sqlite3 |
+| WindowService | source | WindowService | target | Same concept |
+| TrayService | source | TrayService | target | Same |
+| ShortcutService | source | ShortcutService | target | Same |
+| ProtocolClient (cherry://) | source | ProtocolService (angdu://) | target | Renamed + rebranded |
+| PowerMonitorService | source | PowerService | target | Renamed |
+| ipc.ts (monolithic, 200+ handlers) | source | ipc/ (modular, 14 files) | target | Split into domain-specific modules |
+| AppMenuService | source | — | — | removed (no native menu needed for frameless window) |
+| crashReporter | source | — | — | removed |
+| MCPService | source | — | — | deferred (F007) |
+| ApiServerService | source | — | — | deferred (F010) |
+| AnalyticsService | source | — | — | removed (not needed for rebuild) |
+| DevTools installer | source | — | — | removed |
