@@ -1734,3 +1734,144 @@ Cherry-studio의 HomePage는 동적 패널 시스템(topicPosition left/right �
    - "Demo 스크립트는 --ci 모드로 실제 실행하여 exit code 0 확인. 파일 존재 ≠ 실행 가능"
 5. `verify-phases.md`에 **이전 Feature 참조 규칙** 추가:
    - "현재 Feature verify 시작 시 sdd-state.md Feature Detail Log에서 직전 Feature의 verify Notes를 읽고, 사용된 검증 도구/방법/경로를 현재 Feature에 동일하게 적용"
+
+---
+
+## [SKF-038] Implement agent가 source reference를 읽지 않고 독자적 UI 구조를 생성 — cherry-studio와 완전히 다른 레이아웃
+
+- **Trigger**: B (사용자 지적) — "UI 구조는 cherry studio와 완전히 달라", "chat 화면 구조도 cherry studio와 다른 이유도 분석"
+- **Phase**: smart-sdd implement (F005-chat-conversation)
+- **Category**: MISSING_RULE
+- **Severity**: Critical (pipeline 중단)
+- **Timestamp**: 2026-03-16 23:45
+
+### Skill Trace
+- **File**: `.claude/skills/smart-sdd/reference/injection/implement.md` — § Source Reference Injection
+- **Rule**: "Read Source Path from sdd-state.md → Resolve each file → Before each task, identify relevant source files → inject as reference context" — 규칙은 존재하지만 **에이전트가 실행하지 않음**
+- **Line**: implement.md L63-80
+
+### Problem
+implement agent가 cherry-studio 소스 파일을 전혀 읽지 않고 독자적으로 UI를 구현했다:
+
+**핵심 차이점**:
+| 항목 | Cherry-studio | Angdu-studio (현재) |
+|------|---------------|---------------------|
+| 레이아웃 패러다임 | 동적 (settings-driven, 4개 boolean) | 고정 3-panel |
+| 좌측 사이드바 | Assistants↔Topics 탭 전환 (topicPosition에 따라) | Assistants만 고정 |
+| 모델 선택 | SelectModelPopup 전체 컴포넌트 | **없음** (텍스트만 표시) |
+| ChatNavbar | 풍부 (AssistantSettingsPopup, ModelSelector, Tools) | 최소 (이름+토글 버튼만) |
+| 애니메이션 | Framer Motion (motion.div + AnimatePresence) | CSS transition만 |
+| 네비게이션 통합 | Navbar가 HomePage에 position-aware로 렌더링 | Navbar 없음 |
+| 반응형 | NarrowLayout, 미디어 쿼리 | 없음 |
+
+**누락된 핵심 기능**:
+1. **FR-003 Model Selector**: ChatHeader에 모델 선택 드롭다운이 없어 채팅 자체가 불가능 (모델 미선택 → ai:chat에 model=undefined → 응답 없음)
+2. **FR-009 Assistant Editor**: 모델 필드가 폼에 없어 어시스턴트 생성/편집 시 모델 바인딩 불가
+3. **FR-036 Multi-model @mention**: 미구현
+4. **FR-029/034 File attachment**: 핸들러만 있고 실제 파일 전송 미구현
+
+**근본 원인**:
+- injection/implement.md § Source Reference Injection 규칙이 있지만, 실행 여부를 강제하는 게이트가 없음
+- implement agent가 spec/plan의 FR 목록만 보고 "이 기능이 필요하겠다"고 자의적 해석
+- Cherry-studio의 실제 코드(HomePage.tsx, Chat.tsx, Navbar.tsx, SelectModelPopup)를 한 번도 읽지 않음
+- 특히 SelectModelPopup은 cherry-studio에서 70+줄 팝업 컴포넌트인데, angdu-studio에는 아예 파일이 없음
+
+### Expected
+1. **implement 시작 전 Source Reference Gate** (BLOCKING):
+   - rebuild 모드 + Source Path ≠ N/A인 경우, implement의 첫 UI 태스크 전에:
+   - pre-context.md Source Reference의 모든 파일을 실제로 읽고
+   - 현재 Feature의 주요 컴포넌트에 대응하는 source 파일 목록을 생성
+   - "Source Reference: [N] files loaded" 표시
+   - 이 게이트를 건너뛰면 BLOCKING — AskUserQuestion으로 HARD STOP
+2. **implement agent에 source code injection 의무화**:
+   - UI 컴포넌트 태스크마다 대응하는 source 파일을 context에 포함
+   - 예: "ChatHeader 구현" 태스크 → cherry-studio ChatNavBar/index.tsx + TopicContent.tsx + SelectModelButton.tsx를 읽고 참조
+3. **post-implement 구조 비교 게이트**:
+   - implement 완료 후, source와 target의 컴포넌트 구조를 비교하는 체크리스트:
+   - "source에 있는 SelectModelPopup이 target에도 존재하는가?"
+   - "source에 있는 Tab 전환이 target에서 처리되는가?"
+
+### Workaround
+사용자가 직접 문제를 발견하여 피드백. Regression to implement 필요.
+
+### Suggested Fix
+1. `injection/implement.md` § Source Reference Injection에 **BLOCKING Gate** 추가:
+   ```
+   rebuild 모드 첫 UI 태스크 전:
+   1. pre-context.md Source Reference 파일 목록 읽기
+   2. 각 source 파일을 실제로 열고 컴포넌트 구조 파악
+   3. "Source Reference Gate: [N] files loaded, [M] components mapped"
+   4. 이 게이트 미통과 시 implement 불가
+   ```
+2. `injection/implement.md`에 **Per-Task Source Injection** 의무화:
+   ```
+   UI 컴포넌트 태스크 실행 시:
+   1. 태스크 대상 컴포넌트와 대응하는 source 파일 식별
+   2. source 파일 읽기 (최대 3개)
+   3. "📂 Source Reference: [file1, file2] loaded for this task"
+   4. source의 구조를 new-stack 패턴으로 재구현 (복사 아님)
+   ```
+3. `injection/implement.md`에 **Post-Implement Component Audit** 추가:
+   ```
+   모든 UI 태스크 완료 후:
+   1. pre-context Source Reference의 모든 컴포넌트를 나열
+   2. target에 대응 컴포넌트가 있는지 확인
+   3. 누락된 컴포넌트 목록 → BLOCKING (누락 이유가 정당하지 않으면 implement 재실행)
+   ```
+
+---
+
+## [SKF-039] Implement agent가 FR-003 (model selector)을 건너뜀 — 채팅의 핵심 기능인 모델 선택이 불가능
+
+- **Trigger**: B (사용자 지적) — "모델을 선정할수 없어서 채팅을 해도 답이 오지 않아"
+- **Phase**: smart-sdd implement (F005-chat-conversation)
+- **Category**: MISSING_RULE
+- **Severity**: Critical (pipeline 중단)
+- **Timestamp**: 2026-03-16 23:45
+
+### Skill Trace
+- **File**: `.claude/skills/smart-sdd/reference/injection/implement.md` — § Interaction Chains Injection
+- **Rule**: "When a task implements a handler, the agent MUST also implement the full chain: Store Mutation → DOM Effect → Visual Result" — Interaction Chains에 FR-003이 포함되지 않았고, tasks.md에도 ModelSelector 컴포넌트 태스크가 없음
+- **Line**: N/A
+
+### Problem
+spec.md FR-003은 "model selector dropdown"을 명시하지만:
+1. **plan.md**에 SelectModelPopup 컴포넌트가 파일 구조에 없음
+2. **tasks.md**에 ModelSelector 구현 태스크가 없음
+3. **Interaction Chains**에 "Click model selector → change model" 체인이 없음
+4. **결과**: ChatHeader에 모델 이름이 텍스트로만 표시되고, 클릭해도 아무 일도 안 생김
+
+이 문제는 plan → tasks → implement 파이프라인 전체에 걸친 FR 누락이다:
+- plan 단계에서 SelectModelPopup을 architecture에 포함하지 않음
+- tasks 단계에서 model selector 태스크를 생성하지 않음
+- implement 단계에서 당연히 구현되지 않음
+- analyze 단계에서 FR-003 → task mapping을 확인했지만 "ChatHeader includes model" 정도로 통과시킴
+
+**근본 원인**: analyze의 FR→Task coverage가 "태스크가 FR을 언급하는가"만 검사하고, "태스크가 FR의 모든 기능적 요소를 커버하는가"는 검사하지 않음. FR-003은 "model selector **dropdown**"이지만, ChatHeader 태스크는 "model **display**"만 커버.
+
+### Expected
+1. **analyze 단계의 FR→Task 매핑이 기능적 요소 단위로 분해**되어야 함:
+   - FR-003: "chat header" = ✅, "assistant name" = ✅, "model selector **dropdown**" = ❌, "topic info" = ✅
+   - 기능적 요소 중 하나라도 누락이면 HIGH gap (현재는 FR-003이 "covered"로 판정됨)
+2. **plan의 file structure에 필요한 모든 interactive 컴포넌트가 나열**되어야 함:
+   - SelectModelPopup이 Interaction Chains에 없으면 plan Review에서 블로킹
+
+### Workaround
+없음 — 사용자가 수동 개입하여 발견. Regression to implement 필요.
+
+### Suggested Fix
+1. `injection/analyze.md` § Coverage Severity Rules에 추가:
+   ```
+   FR의 기능적 요소 분해:
+   - FR 설명에서 "and" 또는 ","로 구분된 각 기능을 개별 요소로 분리
+   - 각 요소에 대해 tasks.md에 대응 태스크가 있는지 확인
+   - 하나라도 누락이면 HIGH gap (전체 FR이 아닌 요소 단위)
+   예: FR-003 "assistant name, model selector dropdown, topic info"
+       → 3개 요소 중 "model selector dropdown" 누락 = HIGH
+   ```
+2. `injection/plan.md` § Interaction Chain Verification에 추가:
+   ```
+   FR에 "selector", "dropdown", "picker", "chooser" 등 interactive 키워드가 있으면
+   해당 FR에 대응하는 Interaction Chain이 plan.md에 반드시 존재해야 함.
+   없으면 BLOCKING — plan 수정 후 진행.
+   ```
