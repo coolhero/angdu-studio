@@ -79,7 +79,7 @@ Foundation Verified: 2026-03-16 | PASS | Build ✅, Toolchain ✅, Platform N/A
 | F001 | app-shell | T1 | ✅ 03-15 | ✅ 03-15 | ✅ 03-15 | ✅ 03-15 | ✅ 03-15 | ✅ 03-15 | ✅ 03-15 | completed |
 | F002 | navigation | T1 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | completed |
 | F003 | settings | T1 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | completed |
-| F004 | model-provider | T1 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | | in_progress |
+| F004 | model-provider | T1 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | completed |
 | F005 | chat-conversation | T1 | | | | | | | | pending |
 | F006 | knowledge-memory | T2 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | deferred |
 | F007 | mcp-tools | T2 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | deferred |
@@ -134,6 +134,7 @@ Foundation Verified: 2026-03-16 | PASS | Build ✅, Toolchain ✅, Platform N/A
 | analyze | completed | 2026-03-16T15:15:00 | 2026-03-16T15:30:00 | 0 critical, 0 high, 2 medium, 3 low. 32/32 FR coverage |
 | implement | completed | 2026-03-16T15:30:00 | 2026-03-16T16:30:00 | 17 new files, 5 modified files, build ✅, smoke launch ✅. AI SDK deps installed, provider/model stores + services + IPC + UI complete |
 | verify | completed | 2026-03-16T16:30:00 | 2026-03-16T17:00:00 | Build ✅, TS ✅, Playwright UI ✅ (33 switches, provider list, edit panel), Cross-feature ✅, Demo CI ✅. Fixed: Tailwind @theme mapping (SKF-036) |
+| merge | completed | 2026-03-16T17:00:00 | 2026-03-16T17:15:00 | Fast-forward merge to main. 50 files, +3720 lines |
 
 ### F005-chat-conversation
 
@@ -149,7 +150,7 @@ Foundation Verified: 2026-03-16 | PASS | Build ✅, Toolchain ✅, Platform N/A
 | F001 | 001-app-shell | specs/001-app-shell/ | 001-app-shell | ✅ |
 | F002 | 002-navigation | specs/002-navigation/ | 002-navigation | ✅ |
 | F003 | 003-settings | specs/003-settings/ | 003-settings | ✅ |
-| F004 | 004-model-provider | specs/004-model-provider/ | 004-model-provider | |
+| F004 | 004-model-provider | specs/004-model-provider/ | 004-model-provider | ✅ |
 | F005 | | | | |
 | F006 | | | | |
 | F007 | | | | |
