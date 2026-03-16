@@ -1869,3 +1869,41 @@ Cherry-studio의 HomePage는 동적 패널 시스템(topicPosition left/right �
    - 앱 실행 → 데이터 생성 → 앱 종료 → 앱 재시작 → 데이터 존재 확인
    - streaming feature는 특히: stream → flush → reload → 동일 데이터 확인
    ```
+
+---
+
+## [SKF-041] F004 provider store에 hydrate()가 없어 API 키가 persist 안 되는 것처럼 보임
+
+- **Trigger**: B (사용자 지적) — "openAI API는 계속 저장이 안되어있어"
+- **Phase**: smart-sdd verify (F005-chat-conversation, F004-model-provider 교차)
+- **Category**: MISSING_RULE
+- **Severity**: Critical (pipeline 중단)
+- **Timestamp**: 2026-03-17 02:00
+
+### Skill Trace
+- **File**: `.claude/skills/smart-sdd/reference/injection/implement.md` — § Integration Contract 검증 규칙
+- **Rule**: Integration Contracts에 "Consumes ← F004 useProviderStore"가 정의되었으나, **provider store가 main process와 동기화되는지 검증하는 규칙이 없음**
+- **Line**: N/A
+
+### Problem
+F004 implement에서 `useProviderStore`에 `hydrate()` 메서드를 추가하지 않았다. API 키는 main process safeStorage에 정상 저장되지만, renderer store는 localStorage에서만 로드하고 main process에 물어보지 않았다. localStorage의 `partialize`가 `apiKey: ''`로 저장하므로 앱 재시작 시 API 키가 비어 보임.
+
+근본 원인: F004 implement/verify에서 "앱 재시작 후에도 API 키가 표시되는가" 라운드트립 검증이 없었음.
+
+### Expected
+`injection/implement.md`에 **Cross-Feature Store Hydration 검증** 규칙 추가:
+- "main process에 데이터를 저장하는 renderer store는 반드시 hydrate() 메서드가 있어야 하며, App 초기화 시 호출되어야 함"
+- "localStorage persist와 main process store가 공존하는 경우, 앱 재시작 후 main process 데이터가 renderer에 반영되는지 검증"
+
+### Workaround
+`useProviderStore.hydrate()` 추가 + App.tsx에서 호출. API 키 입력 필드에 `key` prop 추가로 re-render 강제.
+
+### Suggested Fix
+`injection/implement.md`에 추가:
+```
+IPC 기반 persist 패턴 검증:
+- renderer store가 main process IPC로 데이터를 저장하는 경우
+- 반드시 hydrate() 메서드가 있어야 함
+- App 초기화 시 hydrate() 호출 확인
+- "저장 → 앱 종료 → 재시작 → 데이터 표시" 라운드트립 테스트
+```
