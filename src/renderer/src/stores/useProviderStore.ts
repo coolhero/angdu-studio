@@ -9,6 +9,7 @@ interface ProviderState {
 }
 
 interface ProviderActions {
+  hydrate: () => Promise<void>
   setProviders: (providers: Provider[]) => void
   addProvider: (provider: Provider) => void
   updateProvider: (id: string, updates: Partial<Provider>) => void
@@ -24,6 +25,25 @@ export const useProviderStore = create<ProviderState & ProviderActions>()(
     (set, get) => ({
       providers: [],
       selectedProviderId: null,
+
+      hydrate: async () => {
+        try {
+          const providers = await window.api.invoke['provider:list']()
+          // Merge with localStorage state to preserve enabled/selectedProvider
+          const current = get()
+          const merged = providers.map((p: Provider) => {
+            const local = current.providers.find((lp) => lp.id === p.id)
+            return {
+              ...p,
+              // Keep local enabled state if it exists
+              enabled: local?.enabled ?? p.enabled
+            }
+          })
+          set({ providers: merged })
+        } catch (err) {
+          console.error('[ProviderStore] hydrate failed:', err)
+        }
+      },
 
       setProviders: (providers) => set({ providers }),
 

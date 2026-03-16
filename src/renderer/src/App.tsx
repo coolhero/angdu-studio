@@ -3,6 +3,7 @@ import { useUIStore, initUIStoreListeners } from './stores/useUIStore'
 import { useSettingsStore } from './stores/useSettingsStore'
 import { useShortcutsStore } from './stores/useShortcutsStore'
 import { useQuickPhrasesStore } from './stores/useQuickPhrasesStore'
+import { useProviderStore } from './stores/useProviderStore'
 import { useTheme } from './hooks/useTheme'
 import { AppRouter } from './Router'
 
@@ -56,6 +57,9 @@ function AppContent() {
     useSettingsStore.getState().hydrate()
     useShortcutsStore.getState().hydrate()
     useQuickPhrasesStore.getState().hydrate()
+
+    // Hydrate F004 provider store from main process (loads API keys as masked '***')
+    useProviderStore.getState().hydrate()
 
     return cleanup
   }, [])

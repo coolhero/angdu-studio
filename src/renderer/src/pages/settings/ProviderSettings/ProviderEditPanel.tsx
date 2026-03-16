@@ -111,11 +111,12 @@ export function ProviderEditPanel({ provider }: ProviderEditPanelProps) {
           <Label>{t('settings.provider.apiKey', 'API Key')}</Label>
           <div className="flex gap-2">
             <Input
+              key={`apikey-${provider.id}-${provider.apiKey}`}
               type={showKey ? 'text' : 'password'}
               defaultValue={provider.apiKey}
               onBlur={(e) => {
                 const val = e.target.value.trim()
-                if (val !== provider.apiKey) {
+                if (val && val !== provider.apiKey && val !== '***') {
                   handleFieldChange('apiKey', val)
                 }
               }}
