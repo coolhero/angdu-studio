@@ -68,7 +68,7 @@ function HomePageContent() {
   }, [])
 
   return (
-    <div className="flex h-full">
+    <div className="flex h-full overflow-hidden">
       {/* Left sidebar with tab switcher (Assistants / Topics) */}
       <HomeSidebar />
 

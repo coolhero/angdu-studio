@@ -1977,3 +1977,62 @@ F005 개발 중 발견하여 수동 수정. F004에 hydrate() 추가, upsertBloc
    - main process persist → renderer hydrate → UI 표시 전체 경로
    - "이 Feature만 설치된 상태에서 downstream Feature가 import할 수 있는가"
    ```
+
+---
+
+## [SKF-043] Playwright E2E 테스트가 사용자의 실제 앱 환경과 다른 격리 환경에서 실행되어 false positive 생성
+
+- **Trigger**: B (사용자 지적) — "너가 실행하는 데모랑 차이가 있는게 큰 문제 같아", "API키는 계속 내가 최근에 입력한게 아니고, 이상한 스크롤이 채팅화면에 생겨"
+- **Phase**: smart-sdd verify Phase 3 (F005-chat-conversation)
+- **Category**: WRONG_ASSUMPTION
+- **Severity**: Critical (pipeline 중단)
+- **Timestamp**: 2026-03-17 03:00
+
+### Skill Trace
+- **File**: `.claude/skills/smart-sdd/commands/verify-phases.md` — Phase 3 SC Verification
+- **Rule**: "Playwright CLI uses `_electron.launch()`" — 이 규칙은 Electron 앱을 Playwright로 실행하는 방법을 명시하지만, **Playwright가 생성하는 격리 환경과 사용자의 실제 환경이 다르다는 점을 경고하지 않음**
+- **Line**: SKILL.md Prerequisites
+
+### Problem
+Playwright `_electron.launch({ args: ['out/main/index.js'] })`는 다음 차이를 만든다:
+
+1. **빌드된 코드 vs dev 모드**: Playwright는 `pnpm run build` 결과물(`out/`)을 실행. 사용자는 `pnpm run dev`(electron-vite dev, HMR 포함)를 실행. dev 모드에서만 발생하는 문제(HMR race condition, 미빌드 의존성 등)를 Playwright가 잡지 못함
+2. **격리된 userData**: Playwright Electron 인스턴스는 새 userData 경로를 사용하므로 **사용자가 저장한 API 키, 모델 목록, 설정이 없음**. 에이전트의 테스트는 "빈 앱"에서 실행되어 항상 깨끗한 상태
+3. **persist된 state 무시**: 사용자 환경에는 이전 세션의 localStorage (Zustand persist), electron-store (provider configs), SQLite (messages) 데이터가 있음. Playwright는 빈 상태에서 시작하므로 persist 관련 버그를 놓침
+4. **CSS 렌더링 차이**: dev 모드의 Tailwind CSS는 JIT로 동적 생성, 빌드 모드는 정적 추출. 스크롤/레이아웃 차이 가능
+
+결과: Playwright 10/10 pass이지만 사용자 환경에서는 (1) API 키가 보이지 않고, (2) 이상한 스크롤이 생기고, (3) 채팅이 안 됨.
+
+### Expected
+verify-phases.md에 **실제 사용자 환경 검증** 규칙 추가:
+
+1. **Playwright 검증은 "격리 환경 검증"으로 명시**: 깨끗한 상태에서의 기본 기능 확인
+2. **추가로 "사용자 환경 검증"을 반드시 수행**:
+   - `pnpm run dev`로 실행한 앱에 Playwright MCP `browser_navigate(localhost:5173)`로 접속
+   - 또는 사용자에게 스크린샷을 요청
+   - persist된 데이터가 있는 환경에서의 렌더링 확인
+3. **dev 모드 vs build 모드 양쪽 검증**:
+   - `_electron.launch()` (빌드 모드) + dev server MCP 접속 (dev 모드) 둘 다 실행
+
+### Workaround
+없음 — 사용자가 직접 앱을 실행하여 문제를 계속 보고.
+
+### Suggested Fix
+1. `verify-phases.md` Phase 3에 **Dual-Mode Verification** 추가:
+   ```
+   Phase 3 SC Verification:
+   A. 격리 환경 (Playwright _electron.launch):
+      - 빈 상태에서 기본 렌더링 + 기능 확인
+      - 이것만으로는 verify pass 불가
+   B. 사용자 환경 (dev server + Playwright MCP 또는 수동):
+      - pnpm run dev 실행 → localhost:{port}에 접속
+      - persist된 데이터가 있는 환경에서 UI 확인
+      - 스크롤, 레이아웃, 데이터 표시 정상 확인
+   양쪽 모두 통과해야 verify pass
+   ```
+2. `SKILL.md` Prerequisites에 경고 추가:
+   ```
+   ⚠️ Playwright _electron.launch는 격리 환경에서 실행됨.
+   사용자의 실제 환경(persist data, dev mode)과 다를 수 있음.
+   verify 시 양쪽 환경 모두 검증 필수.
+   ```
