@@ -1907,3 +1907,73 @@ IPC 기반 persist 패턴 검증:
 - App 초기화 시 hydrate() 호출 확인
 - "저장 → 앱 종료 → 재시작 → 데이터 표시" 라운드트립 테스트
 ```
+
+---
+
+## [SKF-042] Feature가 downstream Feature에 제공하는 인터페이스를 verify 시 검증하지 않음 — F004→F005 의존성 체인 전체 실패
+
+- **Trigger**: B (사용자 지적) — "그 전의 feature가 다른 feature에 의존성을 주는 부분은 확실히 검증을 하고 넘어가게 해야하는 것도 있지?"
+- **Phase**: smart-sdd verify (F004-model-provider → F005-chat-conversation 교차)
+- **Category**: MISSING_RULE
+- **Severity**: Critical (pipeline 중단)
+- **Timestamp**: 2026-03-17 02:30
+
+### Skill Trace
+- **File 1**: `.claude/skills/smart-sdd/commands/verify-phases.md` — Phase 2 Cross-Feature Verification
+- **Rule**: Phase 2에 "Cross-feature integration check"이 있으나, **이전 Feature가 제공하는 인터페이스의 downstream 소비자 관점 검증 규칙이 없음**. 현재 규칙은 "현재 Feature가 이전 Feature를 올바르게 소비하는가"만 검증하고, "이전 Feature가 약속한 인터페이스를 실제로 제공하는가"는 검증하지 않음
+- **File 2**: `.claude/skills/smart-sdd/reference/injection/verify.md` — Integration Contract 검증
+- **Rule**: Integration Contracts의 "Provides →" 방향 검증 규칙 부재. plan.md에 "Provides → F005-chat" 로 기술되어 있지만, F004 verify 시 이 인터페이스가 실제로 동작하는지 테스트하지 않음
+- **Line**: verify-phases.md Phase 2, injection/verify.md Post-Step
+
+### Problem
+F004 verify가 통과했지만, F004가 F005에 제공해야 하는 3개 핵심 인터페이스가 실제로 동작하지 않았다:
+
+1. **Provider store hydrate()**: F004가 provider 데이터를 main process에 저장하지만, renderer에서 hydrate하는 경로가 없었음 → F005의 ModelSelector가 빈 목록 표시
+2. **Model list (provider.models[])**: F004 Settings에서 API 키 저장 후 모델을 fetch해야 하지만, 이 flow가 앱 재시작 후에도 유지되는지 미검증 → F005에서 선택할 모델 없음
+3. **ai:chat streaming**: F004의 AICoreService가 stream event를 발송하지만, 실제 provider API 키 + 모델 ID로 end-to-end 호출이 되는지 미검증 → F005에서 메시지 보내도 응답 없음
+
+F004 verify Notes: "Build ✅, TS ✅, Playwright UI ✅ (33 switches, provider list, edit panel)". Playwright로 **UI 요소 존재**만 확인했고, **기능적 flow** (API 키 저장 → 모델 fetch → 모델 선택 → 채팅 가능)는 검증하지 않았다.
+
+### Expected
+verify-phases.md에 **Provides → Interface Verification Gate** 추가:
+
+1. **Feature verify 시 plan.md Integration Contracts의 "Provides →" 항목을 모두 검증**:
+   - 각 "Provides →" 인터페이스에 대해 downstream Feature 관점의 소비 시나리오를 실행
+   - 예: F004 "Provides → F005-chat: ai:chat streaming" → verify에서 실제 ai:chat IPC 호출 + stream event 수신 검증
+   - 예: F004 "Provides → F005-chat: Model Registry" → verify에서 모델이 1개 이상 존재하는지 확인
+
+2. **앱 재시작 후 인터페이스 지속성 검증**:
+   - Provides 인터페이스 중 persist 의존이 있는 것 (API 키, 모델 목록 등)은 앱 재시작 후에도 동작하는지 확인
+   - "저장 → 종료 → 재시작 → downstream Feature 관점에서 데이터 접근 가능" 라운드트립
+
+3. **merge 전 downstream readiness 체크리스트**:
+   - Feature merge Checkpoint에 "이 Feature가 Provides하는 인터페이스가 downstream Feature에서 소비 가능한 상태인가?" 항목 추가
+   - BLOCKING: Provides 인터페이스 중 하나라도 동작하지 않으면 merge 불가
+
+### Workaround
+F005 개발 중 발견하여 수동 수정. F004에 hydrate() 추가, upsertBlocksBatch 추가, ProviderEditPanel Input key prop 수정.
+
+### Suggested Fix
+1. `verify-phases.md` Phase 2에 **Provides Interface Verification** 추가:
+   ```
+   Feature verify Phase 2 — Cross-Feature:
+   1. plan.md Integration Contracts에서 "Provides →" 항목 추출
+   2. 각 Provides 항목에 대해:
+      a. downstream Feature의 소비 관점에서 IPC/store/API 호출 테스트
+      b. persist 의존이 있는 인터페이스는 앱 재시작 후 지속성 확인
+      c. 결과를 verify Notes에 기록: "Provides → F005: ai:chat ✅, model registry ✅"
+   3. 하나라도 실패 → BLOCKING (merge 불가)
+   ```
+2. `reference/branch-management.md` § Post-Feature Merge에 추가:
+   ```
+   Merge Checkpoint에 Provides Interface Readiness 항목:
+   - "이 Feature의 Provides 인터페이스가 downstream에서 소비 가능한가?"
+   - Integration Contracts의 Provides 항목별 검증 결과 표시
+   ```
+3. `injection/verify.md`에 추가:
+   ```
+   downstream Feature 관점 검증:
+   - Provides 인터페이스의 consumer가 해당 데이터를 올바르게 받는지 시뮬레이션
+   - main process persist → renderer hydrate → UI 표시 전체 경로
+   - "이 Feature만 설치된 상태에서 downstream Feature가 import할 수 있는가"
+   ```
