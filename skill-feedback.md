@@ -1647,7 +1647,285 @@ F004 implement에서 shadcn/ui 컴포넌트(Switch, Button, Input, Dialog 등)�
 
 ---
 
-## [SKF-037] F005 verify + implement 통과했으나 실제 Playwright 검증 미수행, 데모 미검증, MCP 활용 포기 — 종합적 verify 품질 실패
+## F005 파이프라인 교훈 — 종합 정리 (SKF-037~044 통합)
+
+> F005 chat-conversation 구현 과정에서 발견된 모든 문제를 근본 원인별로 분류하고,
+> spec-kit-skills의 어느 파일을 어떻게 보강해야 재발을 방지하는지 정리한다.
+> 개별 증상이 아닌 **파이프라인 구조의 gap** 중심으로 기술한다.
+
+### F005에서 발생한 문제 목록
+
+| # | 증상 | 근본 원인 | 발견 시점 |
+|---|------|----------|----------|
+| 1 | UI 구조가 cherry-studio와 완전히 다름 (고정 3-panel vs 동적 탭 전환) | reverse-spec에서 컴포넌트 트리를 추출하지 않음, implement에서 source 코드를 읽지 않음 | verify 후 사용자 지적 |
+| 2 | 모델 선택 UI가 없어 채팅 불가 (ModelSelector 컴포넌트 자체 부재) | analyze가 FR을 요소 단위로 분해하지 않아 "model selector dropdown" 누락을 감지 못함 | verify 후 사용자 지적 |
+| 3 | AI SDK가 /responses 엔드포인트로 요청 (404) | AI SDK v6에서 기본 API가 Responses API로 변경됨. `.chat()` 명시 필요. source app 참조했으면 발견 가능 | 사용자 채팅 시도 |
+| 4 | baseURL에 /v1 누락 (404) | provider.apiHost가 'https://api.openai.com'이고 SDK가 /v1을 자동 추가 안 함 | 사용자 채팅 시도 |
+| 5 | API 키가 저장 안 된 것처럼 보임 | useProviderStore에 hydrate() 없음 — localStorage만 읽고 main process에 안 물어봄 | verify 후 사용자 지적 |
+| 6 | streaming block이 앱 재시작 시 사라짐 | flushStreamingBlocks가 UPDATE-only (INSERT 안 함) | 코드 리뷰 |
+| 7 | fontSize: 22에서 화면 짤림/이중 스크롤 | flex 컨테이너에 min-h-0 누락 | 사용자 환경 Playwright |
+| 8 | TipTap editor.view.dom crash | useEffect에서 editor view 접근 시 미초기화 | Playwright 스크린샷 |
+| 9 | Playwright 격리 환경과 사용자 환경의 결과가 다름 | _electron.launch는 빈 userData 사용, 사용자 persist data 미반영 | 사용자 지적 |
+| 10 | F004 verify 통과했으나 F005에 제공할 인터페이스가 동작 안 함 | verify에서 Provides 인터페이스를 downstream 관점으로 검증하지 않음 | F005 개발 중 발견 |
+
+---
+
+## [SKF-037] reverse-spec에서 source app의 컴포넌트 계층 구조(Component Tree)를 추출하지 않음
+
+- **Trigger**: B (사용자 지적)
+- **Phase**: reverse-spec → implement (파이프라인 전체에 영향)
+- **Category**: MISSING_RULE
+- **Severity**: Critical
+- **Timestamp**: 2026-03-17
+
+### Skill Trace
+- **File**: `reverse-spec/commands/analyze.md` — Phase 2 (Feature별 pre-context 생성)
+- **Rule**: pre-context에 Source Reference(파일 목록), SBI(함수 단위 행동), UI Component Features(라이브러리 매핑)를 기록하는 규칙은 있으나, **컴포넌트 간 부모-자식 관계, 조건부 렌더링 분기, 패널 시스템 구조를 기록하는 규칙이 없음**
+
+### Problem
+pre-context.md가 "파일 목록 + 함수 단위 SBI"만 기록하고, 컴포넌트가 어떻게 **조립**되는지(계층, 조건 분기, 공유 상태)를 기록하지 않는다. 결과: plan이 source 구조를 모르고 독자적 아키텍처를 설계하고, implement가 source 코드를 읽지 않고 FR 텍스트만으로 구현한다.
+
+F005 사례: cherry-studio HomePage는 `Navbar(조건부) → HomeTabs(Assistants/Topics 탭 전환) → Chat(ChatNavBar+Messages+Inputbar) → TopicSidebar(조건부)`라는 계층 구조인데, pre-context에는 이 구조가 없어 angdu-studio가 "고정 3-panel"로 구현됨.
+
+### Suggested Fix
+`reverse-spec/commands/analyze.md` Phase 2에 **Component Tree Extraction** 추가:
+
+```markdown
+## Component Tree (pre-context.md에 추가할 섹션)
+
+reverse-spec Phase 2에서 GUI Feature의 pre-context 생성 시:
+1. source app의 주요 페이지(route)별 컴포넌트 계층 구조를 추출
+2. 조건부 렌더링 분기(설정에 따라 달라지는 구조)를 명시
+3. 공유 state/context 의존성을 기록
+4. pre-context.md "## Component Tree" 섹션에 들여쓰기 트리 형태로 기록
+
+예시:
+HomePage
+├── Navbar (conditional: navbarPosition='left')
+├── HomeTabs (left sidebar)
+│   ├── Tab: Assistants → AssistantsTab
+│   └── Tab: Topics → TopicsTab (conditional: topicPosition='left')
+└── Chat
+    ├── ChatNavBar
+    │   ├── AssistantName (click → settings popup)
+    │   ├── SelectModelButton (model selector dropdown)
+    │   └── Tools (settings, search)
+    ├── Messages (virtual scroll)
+    │   └── MessageItem → BlockRenderer → [Text, Code, Thinking, ...]
+    ├── Inputbar (TipTap + 14 toolbar buttons)
+    └── TopicSidebar (conditional: topicPosition='right')
+
+이 트리가 plan/implement의 구조적 기준선(baseline)이 된다.
+```
+
+이 섹션이 있으면 plan 단계에서 "source에 SelectModelButton이 있는데 target plan에 없다"를 즉시 감지할 수 있다.
+
+---
+
+## [SKF-038] plan에서 source→target 컴포넌트 매핑을 강제하지 않아 핵심 컴포넌트가 누락됨
+
+- **Trigger**: B (사용자 지적)
+- **Phase**: plan → tasks → implement
+- **Category**: MISSING_RULE
+- **Severity**: Critical
+- **Timestamp**: 2026-03-17
+
+### Skill Trace
+- **File 1**: `injection/plan.md` — plan.md 생성 시 file structure 섹션
+- **Rule**: plan이 "Project Structure" 파일 트리를 생성하지만, **source app의 어떤 컴포넌트가 target의 어떤 컴포넌트에 대응하는지 매핑하는 규칙이 없음**
+- **File 2**: `injection/analyze.md` — FR→Task coverage 검증
+- **Rule**: FR 단위로만 매핑하고 **FR 내부의 기능적 요소(model selector dropdown 등)를 분해하지 않음**
+
+### Problem
+plan이 source 구조를 참조하지 않고 독자적 파일 트리를 설계할 수 있다. 또한 analyze가 "ChatHeader 태스크가 FR-003을 언급함 = covered"로 판정하여, FR-003의 3개 요소 중 "model selector dropdown"이 누락된 것을 감지하지 못했다.
+
+### Suggested Fix
+
+**1. `injection/plan.md`에 Source Component Mapping Table 추가 (rebuild 모드, BLOCKING)**:
+
+```markdown
+## Source → Target Component Mapping (plan.md 필수 섹션)
+
+rebuild 모드에서 plan.md 생성 시:
+1. pre-context.md의 Component Tree에서 source 컴포넌트 목록 추출
+2. 각 source 컴포넌트에 대응하는 target 컴포넌트를 plan의 file structure에서 매핑
+3. 1:1 매핑이 안 되는 경우 "merged into X" 또는 "deferred to F00N" 사유 기록
+
+| Source Component | Source File | Target Component | Target File | Notes |
+|---|---|---|---|---|
+| HomeTabs | Tabs/index.tsx | HomeSidebar | HomeSidebar.tsx | Tab switcher 유지 |
+| SelectModelButton | SelectModelButton.tsx | ModelSelector | ModelSelector.tsx | Popover 구현 |
+| Inputbar | Inputbar.tsx | MessageInput | MessageInput.tsx | TipTap + toolbar |
+
+plan Review에서 source 컴포넌트 중 target 매핑이 없고 사유도 없는 항목이 있으면 BLOCKING.
+```
+
+**2. `injection/analyze.md`에 FR Element Decomposition 추가**:
+
+```markdown
+FR→Task 매핑 시 FR을 기능적 요소로 분해:
+- FR 설명에서 "," 또는 "and"로 구분된 각 기능을 개별 요소로 분리
+- "selector", "dropdown", "picker" 등 interactive 키워드가 있으면
+  대응하는 Interaction Chain + tasks.md 태스크가 반드시 존재해야 함
+- 요소 하나라도 누락이면 HIGH gap (전체 FR이 아닌 요소 단위)
+```
+
+---
+
+## [SKF-039] implement에서 source 코드를 읽지 않고 구현 + SDK API 버전 차이를 감지 못함
+
+- **Trigger**: B (사용자 지적)
+- **Phase**: implement
+- **Category**: MISSING_RULE
+- **Severity**: Critical
+- **Timestamp**: 2026-03-17
+
+### Skill Trace
+- **File**: `injection/implement.md` — § Source Reference Injection
+- **Rule**: "Read Source Path → Before each task, identify relevant source files → inject as reference context" — 규칙은 존재하지만 **BLOCKING gate가 아니라 가이드라인**. 에이전트가 건너뛸 수 있음
+
+### Problem
+3가지 연쇄 실패:
+
+1. **Source 코드 미참조**: implement agent가 cherry-studio의 HomePage.tsx, Chat.tsx, SelectModelButton.tsx 등을 한 번도 읽지 않고 FR 텍스트만으로 독자적 UI를 구현. Source Reference Injection이 가이드라인이라 건너뜀
+2. **AI SDK v6 API 변경 미감지**: `@ai-sdk/openai` v3에서 `createOpenAI()(modelId)`가 Responses API(`/responses`)를 기본 사용하도록 변경됨. source app (cherry-studio)의 코드를 읽었으면 `.chat()` 사용 패턴을 발견했을 것
+3. **데이터 왕복 미검증**: streaming block을 in-memory에서 DB로 flush할 때 UPDATE-only 사용 (INSERT 없음). source app의 persist 패턴을 참조했으면 UPSERT 패턴을 사용했을 것
+
+### Suggested Fix
+
+**1. Source Reference Injection을 BLOCKING Gate로 승격**:
+
+```markdown
+injection/implement.md 수정:
+
+rebuild 모드 UI 태스크 실행 시 (BLOCKING):
+1. BEFORE writing code: plan.md의 Source→Target Mapping에서 이 태스크에 대응하는 source 파일을 읽음
+2. "📂 Source Reference: [file1, file2] loaded" 메시지 없는 UI 태스크는 BLOCKING 위반
+3. source의 구조, props, state, 외부 SDK 사용법을 파악 후 new-stack 패턴으로 재구현
+4. AFTER writing: source에 있는 기능이 target에서 누락되면 → 사유 필수 기록
+```
+
+**2. SDK Migration Awareness를 implement에서도 실행**:
+
+```markdown
+injection/implement.md 수정:
+
+plan.md에 SDK 버전이 명시된 경우, implement 첫 태스크 전에:
+1. package.json의 실제 설치 버전 확인
+2. plan에 명시된 버전과 다르면 → HARD STOP (breaking change 확인)
+3. source app의 SDK 사용 패턴을 확인하여 migration 필요 여부 판단
+특히 AI SDK, UI 라이브러리 등 API가 자주 변경되는 의존성에 주의
+```
+
+**3. 데이터 왕복 검증 규칙 추가**:
+
+```markdown
+injection/implement.md § Pattern Constraints에 추가:
+
+"In-memory → DB flush" 패턴 사용 시:
+- flush가 INSERT인지 UPDATE인지 명시적으로 구분
+- 새로 생성된 엔티티의 flush는 반드시 UPSERT
+- "생성 → persist → reload → 동일 데이터 확인" 라운드트립 검증 필수
+```
+
+---
+
+## [SKF-040] verify가 Playwright 격리 환경에서만 테스트하고 사용자 실제 환경을 검증하지 않음
+
+- **Trigger**: B (사용자 지적)
+- **Phase**: verify
+- **Category**: MISSING_RULE + WRONG_ASSUMPTION
+- **Severity**: Critical
+- **Timestamp**: 2026-03-17
+
+### Skill Trace
+- **File**: `verify-phases.md` — Phase 3 SC Verification
+- **Rule**: Playwright `_electron.launch()`로 검증하되, **이 환경이 사용자 환경과 다르다는 경고가 없음**. 또한 Playwright 설정이 없을 때 skip 가능한 경로가 열려 있음
+
+### Problem
+4가지 환경 차이로 인한 false positive:
+
+1. **격리된 userData**: Playwright는 빈 상태에서 시작 → persist된 API 키, 모델, 설정이 없음
+2. **기본 설정만 테스트**: fontSize:14(기본)에서만 검증 → fontSize:22(사용자 설정)에서 레이아웃 깨짐 미감지
+3. **빌드 캐시**: `pnpm run build`가 이전 결과를 재사용 → 코드 변경이 반영 안 됨 (`rm -rf out/` 필요)
+4. **Playwright 설정 부재 시 skip**: playwright.config.ts가 없으면 에이전트가 "설정 없으니 skip" 선택 가능
+
+### Suggested Fix
+
+```markdown
+verify-phases.md Phase 3 수정:
+
+## Playwright 검증 프로토콜 (BLOCKING)
+
+### Setup Gate (Phase 3 시작 전)
+1. playwright.config.ts 없으면 → 자동 생성 (Electron: _electron.launch 패턴)
+2. 이전 Feature verify Notes 읽기 → 동일 Playwright 접근 방식 적용
+3. "Playwright 없으니 skip"은 BLOCKING 위반
+
+### Dual-Mode Verification (양쪽 모두 통과 필요)
+
+A. 격리 환경 (_electron.launch):
+   - `rm -rf out/ && pnpm run build` (캐시 방지)
+   - 빈 상태에서 기본 렌더링 + 기능 확인
+
+B. 사용자 환경 시뮬레이션 (_electron.launch + --user-data-dir):
+   - 사용자의 실제 userData 경로로 실행
+   - persist된 데이터(API 키, 모델, 설정)가 있는 상태에서 검증
+   - fontSize를 극단값(12, 24)으로 변경 후 레이아웃 확인
+   - Provider에 저장된 API 키로 모델 선택 → 채팅 전송 → 응답 확인
+
+C. Demo 실행:
+   - 데모 스크립트를 --ci 모드로 실제 실행 (파일 존재 ≠ 실행 가능)
+```
+
+---
+
+## [SKF-041] Feature verify에서 Provides 인터페이스를 downstream 관점으로 검증하지 않음
+
+- **Trigger**: B (사용자 지적)
+- **Phase**: verify (Feature 경계)
+- **Category**: MISSING_RULE
+- **Severity**: Critical
+- **Timestamp**: 2026-03-17
+
+### Skill Trace
+- **File**: `verify-phases.md` — Phase 2 Cross-Feature Verification
+- **Rule**: "현재 Feature가 이전 Feature를 올바르게 소비하는가"만 검증하고, **"이전 Feature가 약속한 인터페이스를 실제로 제공하는가"는 검증하지 않음**
+
+### Problem
+F004 verify가 "Build ✅, Playwright UI ✅ (33 switches)"로 통과했지만, F005에 제공해야 하는 3개 인터페이스가 모두 동작하지 않았다:
+- provider store hydrate() 부재 → F005에서 모델 목록 빈 배열
+- ai:chat SDK API 변경 → /responses 404
+- baseURL /v1 누락 → 404
+
+또한 renderer store가 main process IPC로 데이터를 저장하는 경우 hydrate() 메서드가 필수인데, 이를 강제하는 규칙이 없었다.
+
+### Suggested Fix
+
+```markdown
+verify-phases.md Phase 2에 추가:
+
+## Provides Interface Verification (BLOCKING)
+
+Feature verify 시 plan.md Integration Contracts의 "Provides →" 항목을 모두 검증:
+
+1. 각 Provides 인터페이스에 대해 downstream Feature 관점의 소비 시나리오 실행
+   - IPC 호출 → 올바른 데이터 반환 확인
+   - Store hydrate → renderer에 데이터 표시 확인
+   - API 호출 → 200 응답 확인
+
+2. persist 의존 인터페이스는 앱 재시작 후 지속성 확인
+   - "저장 → 종료 → 재시작 → downstream에서 데이터 접근 가능" 라운드트립
+
+3. renderer store + main process 이중 저장 패턴:
+   - renderer store에 hydrate() 있는지 확인
+   - App 초기화에서 hydrate() 호출 확인
+
+4. 하나라도 실패 → merge BLOCKING
+
+Merge Checkpoint에 Provides Interface Readiness 항목 추가:
+"이 Feature의 Provides 인터페이스가 downstream에서 소비 가능한 상태인가?"
+```
 
 - **Trigger**: B (사용자 지적) — "playwright 검증을 한건가?", "지금 제대로 데모가 동작도 안", "Playwright MCP로 electron도 검증이 가능함에도 안된다고 가정한 이유도 분석"
 - **Phase**: smart-sdd verify Phase 3 (F005-chat-conversation)
