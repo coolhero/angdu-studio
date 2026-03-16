@@ -1828,3 +1828,44 @@ Cherry-studio의 HomePage는 동적 패널 시스템(topicPosition left/right �
    해당 FR에 대응하는 Interaction Chain이 plan.md에 반드시 존재해야 함.
    없으면 BLOCKING — plan 수정 후 진행.
    ```
+
+---
+
+## [SKF-040] Implement agent가 streaming block을 DB에 INSERT하지 않고 UPDATE만 시도 — 채팅 응답이 사라짐
+
+- **Trigger**: B (사용자 지적) — "채팅도 실패하고"
+- **Phase**: smart-sdd implement (F005-chat-conversation)
+- **Category**: MISSING_RULE
+- **Severity**: Critical (pipeline 중단)
+- **Timestamp**: 2026-03-17 01:00
+
+### Skill Trace
+- **File**: `.claude/skills/smart-sdd/reference/injection/implement.md` — § Post-Implement Verification
+- **Rule**: "Build 통과 외에 최소 1회 앱 실행 + 해당 Feature UI가 DOM에 렌더링되는지 확인" — 이 규칙이 있었으면 streaming 후 reload 시 block 소실을 발견했을 것. 현재는 규칙 부재.
+- **Line**: N/A (규칙 자체가 없음)
+
+### Problem
+`injection/implement.md`에 **데이터 왕복(round-trip) 검증 규칙이 없음**. implement agent가 `useBlockStore.flushStreamingBlocks()`를 `chat:updateBlocksBatch` (SQL UPDATE)로 구현했지만, streaming block은 `setStreamingBlock()`으로 in-memory에만 생성되고 DB에는 INSERT되지 않았음. UPDATE는 존재하지 않는 row에 대해 no-op. 결과: AI 응답이 streaming 중에는 보이지만 앱 재시작 시 사라짐.
+
+### Expected
+`injection/implement.md`에 **데이터 persist 왕복 검증** 규칙 추가:
+- "DB에 write하는 모든 코드 경로에 대해, write → read → 동일성 확인 패턴이 태스크에 포함되어야 함"
+- "특히 in-memory cache → DB flush 패턴은 INSERT vs UPDATE 구분이 필수. UPDATE-only flush는 새로 생성된 데이터를 잃음"
+
+### Workaround
+`upsertBlocksBatch` 메서드 추가: 각 block의 DB 존재 여부를 확인 후 INSERT/UPDATE 분기.
+
+### Suggested Fix
+1. `injection/implement.md` § Pattern Constraints Injection에 추가:
+   ```
+   "In-memory → DB flush" 패턴 사용 시:
+   - flush가 INSERT인지 UPDATE인지 명시적으로 구분
+   - 새로 생성된 엔티티의 flush는 반드시 INSERT (또는 UPSERT)
+   - UPDATE-only flush는 기존 row가 반드시 존재하는 경우에만
+   ```
+2. `verify-phases.md` Phase 1에 추가:
+   ```
+   데이터 persist 왕복 검증:
+   - 앱 실행 → 데이터 생성 → 앱 종료 → 앱 재시작 → 데이터 존재 확인
+   - streaming feature는 특히: stream → flush → reload → 동일 데이터 확인
+   ```
