@@ -6,6 +6,9 @@ import { registerShellHandlers } from './shell'
 import { registerDialogHandlers } from './dialog'
 import { registerClipboardHandlers } from './clipboard'
 import { registerAppHandlers } from './app'
+import { registerDataHandlers } from './data'
+import { registerShortcutHandlers } from './shortcuts'
+import { registerStartupHandlers } from './startup'
 
 export function registerAllHandlers(): void {
   registerConfigHandlers()
@@ -16,4 +19,7 @@ export function registerAllHandlers(): void {
   registerDialogHandlers()
   registerClipboardHandlers()
   registerAppHandlers()
+  registerDataHandlers()
+  registerShortcutHandlers()
+  registerStartupHandlers()
 }

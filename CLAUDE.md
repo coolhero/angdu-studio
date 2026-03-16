@@ -86,6 +86,22 @@ Pipeline 실행 중 spec-kit-skills 개선이 필요한 사항을 `skill-feedbac
 
 3. **Feature 의존성 = 구현 순서**: "A의 코드가 B를 import한다"는 런타임 결합이지 Feature 의존성이 아닙니다. Feature 의존성은 "B의 코드가 없으면 A를 처음부터 작성할 수 없는가?"로 판단합니다. F001 (app-shell)은 항상 첫 번째입니다.
 
+### Skill Feedback 작성 원칙
+
+SKF 항목은 **spec-kit-skills의 구조적 문제**에 초점을 맞춘다:
+- Problem: "에이전트가 뭘 잘못했는가"가 아니라 "skill 파일의 어떤 규칙 부재/결함이 이 결과를 유발했는가"
+- Suggested Fix: "구체적으로 어느 skill 파일의 어느 규칙을 어떻게 수정하면 같은 문제가 재발하지 않는가"
+- 단순한 구현 버그, 에이전트의 실수는 SKF가 아님. Skill의 규칙이 해당 상황을 커버하지 못한 구조적 gap만 기록
+
+### F003 파이프라인 교훈 (구조적 결함)
+
+1. **SBI 해상도 부족 (SKF-028)**: 설정 페이지처럼 UI 컨트롤이 밀집된 파일은 파일 단위 SBI로는 개별 기능을 놓침. reverse-spec의 SBI 추출에 "UI 밀집 파일 감지 → 컨트롤 단위 분리" 규칙 필요
+2. **Verify Method 단절 (SKF-029)**: plan.md Interaction Chains의 Verify Method 열이 verify Phase 3에서 실행되지 않음. plan에서 정의한 검증 사양이 verify까지 흐르는 연결 규칙 필요
+3. **Feature Reachability 미검증 (SKF-030)**: UI Feature가 코드로 존재해도 앱에서 접근할 수 없으면 무의미. verify Phase 0에 "홈에서 UI만으로 대상 Feature에 도달 가능한가" 게이트 필요
+4. **Demo TEST PLAN 작성만 하고 검증 안 함 (SKF-031/032)**: Demo 스크립트의 TEST PLAN에 "조작→기대→확인" 형식으로 시나리오를 작성해도, verify에서 이를 실행하는 규칙이 없으면 dead document. verify Phase 3에서 자동화 가능한 항목은 Playwright로 실행하고, 수동 전용은 skip 사유 기록 필요
+5. **Verify 자동 테스트가 persist 상태를 고려 안 함 (SKF-033)**: 이전 테스트 세션의 persist된 상태(dark theme, 변경된 언어 등)로 앱이 시작되면 테스트 로직이 오판. "상태 가정 금지 → 현재 값 감지 후 반대로 전환" 패턴 필수
+6. **비동기 hydration과 외부 시스템 동기화 누락 (SKF-034)**: i18next 정적 초기화(`lng:'ko'`)와 config persist된 language가 불일치하는 race condition. hydrate 완료 시 `i18n.changeLanguage(config.language)` 무조건 호출 필요
+
 ### Execution Log
 
 | Date | Phase | Issue | Resolution |
@@ -94,6 +110,8 @@ Pipeline 실행 중 spec-kit-skills 개선이 필요한 사항을 `skill-feedbac
 | 2026-03-15 | reverse-spec | Demo Group SBI Coverage "TBD"로 남음 | roadmap.md에 직접 계산하여 기입, analyze.md 구조 분리 |
 | 2026-03-15 | smart-sdd constitution | Review 없이 F001로 바로 진행 | MANDATORY RULE 3 추가 (SKILL.md) |
 | 2026-03-15 | smart-sdd specify F001 | "Ready for /speckit.clarify" raw output 표시 후 멈춤 | MANDATORY RULE 3 반영 전 발생, 최신 버전에서 확인 예정 |
+| 2026-03-16 | smart-sdd F003 verify | Top 모드에서 Settings 접근 불가 | Navbar에 gear 아이콘 추가 (SKF-030) |
+| 2026-03-16 | smart-sdd F003 verify | Cherry Studio 대비 설정 기능 누락 | SBI 해상도 문제 (SKF-028), scope 결정 필요 |
 
 ## Active Technologies
 (clean restart — no implementation yet)
@@ -101,6 +119,8 @@ Pipeline 실행 중 spec-kit-skills 개선이 필요한 사항을 `skill-feedbac
 - better-sqlite3 for config persistence (main process) (001-app-shell)
 - TypeScript 5.8+ (strict mode) + react-router-dom v7 (HashRouter), Zustand, @dnd-kit/core + @dnd-kit/sortable, shadcn/ui (ContextMenu, Tooltip, DropdownMenu), lucide-reac (002-navigation)
 - F001's AppConfig via IPC (config:get/set) for tab and navbar persistence (002-navigation)
+- TypeScript 5.8+ (strict mode) + React 19, Zustand, shadcn/ui, Tailwind CSS 4, i18next, react-i18next, JSZip, react-router-dom v7 (003-settings)
+- electron-store via F001 Config API (IPC) (003-settings)
 
 ## Recent Changes
 (clean restart — no implementation yet)

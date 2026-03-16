@@ -78,7 +78,7 @@ Foundation Verified: 2026-03-16 | PASS | Build ✅, Toolchain ✅, Platform N/A
 |------------|-------------|------|---------|------|-------|---------|-----------|--------|-------|--------|
 | F001 | app-shell | T1 | ✅ 03-15 | ✅ 03-15 | ✅ 03-15 | ✅ 03-15 | ✅ 03-15 | ✅ 03-15 | ✅ 03-15 | completed |
 | F002 | navigation | T1 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | completed |
-| F003 | settings | T1 | | | | | | | | pending |
+| F003 | settings | T1 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | | in_progress |
 | F004 | model-provider | T1 | | | | | | | | pending |
 | F005 | chat-conversation | T1 | | | | | | | | pending |
 | F006 | knowledge-memory | T2 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | deferred |
@@ -117,6 +117,12 @@ Foundation Verified: 2026-03-16 | PASS | Build ✅, Toolchain ✅, Platform N/A
 
 | Step | Status | Started | Completed | Notes |
 |------|--------|---------|-----------|-------|
+| specify | completed | 2026-03-16T10:00:00 | 2026-03-16T10:15:00 | 28 FRs, 10 SCs, 7 user stories, 25 SBI mapped (B056-B080) |
+| plan | completed | 2026-03-16T10:15:00 | 2026-03-16T10:45:00 | 3 entities, 8 IPC channels, 6 phases, 16 interaction chains, 7 pattern constraints |
+| tasks | completed | 2026-03-16T10:45:00 | 2026-03-16T11:00:00 | 65 tasks, 10 phases, 7 user stories |
+| analyze | completed | 2026-03-16T11:00:00 | 2026-03-16T11:15:00 | 0 critical, 3 high (resolved), 28/28 FR coverage |
+| implement | completed | 2026-03-16T11:15:00 | 2026-03-16T12:30:00 | 30+ files, TS clean, build OK. Fixed: Tailwind dark variant, useTheme wiring, startup IPC |
+| verify | completed | 2026-03-16T12:30:00 | 2026-03-16T13:00:00 | Build ✅, TS ✅, Cross-feature ✅, Runtime ✅ (4 sub-pages, 0 errors), Demo ✅ |
 
 ### F004-model-provider
 
@@ -136,7 +142,7 @@ Foundation Verified: 2026-03-16 | PASS | Build ✅, Toolchain ✅, Platform N/A
 |------------|---------------|---------------|--------|--------|
 | F001 | 001-app-shell | specs/001-app-shell/ | 001-app-shell | ✅ |
 | F002 | 002-navigation | specs/002-navigation/ | 002-navigation | ✅ |
-| F003 | | | | |
+| F003 | 003-settings | specs/003-settings/ | 003-settings | |
 | F004 | | | | |
 | F005 | | | | |
 | F006 | | | | |

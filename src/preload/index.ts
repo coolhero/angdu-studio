@@ -15,7 +15,10 @@ const INVOKE_CHANNELS: InvokeChannel[] = [
   'dialog:openFile', 'dialog:saveFile',
   'clipboard:read', 'clipboard:write', 'clipboard:readImage',
   'theme:get', 'theme:set',
-  'app:getVersion', 'app:getPlatform', 'app:getPath', 'app:relaunch', 'app:quit'
+  'app:getVersion', 'app:getPlatform', 'app:getPath', 'app:relaunch', 'app:quit',
+  'data:export', 'data:import', 'data:clear', 'data:getStoragePath',
+  'shortcuts:register', 'shortcuts:unregister', 'shortcuts:unregisterAll',
+  'startup:setLoginItem'
 ]
 
 const EVENT_CHANNELS: EventChannel[] = [

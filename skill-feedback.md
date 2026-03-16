@@ -1132,6 +1132,7 @@ renderer: { plugins: [tailwindcss(), react()] }
 - **Category**: WRONG_ASSUMPTION
 - **Severity**: Major (결과물 품질 저하)
 - **Timestamp**: 2026-03-16 09:10
+- **Status**: ✅ Reflected — `injection/implement.md` (Rebuild Visual Reference Checkpoint HARD STOP), `pipeline.md` (Post-Implement Completeness Gate with rebuild parity check), `verify-phases.md` (Phase 3e strengthened skip conditions with visual ref fallback)
 
 ### Skill Trace
 - **File**: `.claude/skills/smart-sdd/reference/injection/implement.md`
@@ -1180,6 +1181,7 @@ AppLayout.tsx에서 navbarPosition에 따라 Sidebar를 조건부 렌더링하�
 - **Category**: MISSING_RULE
 - **Severity**: Major (결과물 품질 저하)
 - **Timestamp**: 2026-03-16 09:15
+- **Status**: ✅ Reflected — Source Modification Gate already exists in `verify-phases.md` (lines 87-200). The issue was agent non-compliance, not missing rule. Reinforced via Post-Implement Completeness Gate and Phase 2 task completion blocking elevation to prevent incomplete features from reaching verify.
 
 ### Skill Trace
 - **File**: `.claude/skills/smart-sdd/commands/verify-phases.md`
@@ -1212,3 +1214,359 @@ Verify에서 코드 변경이 필요할 때:
 - "verify 중 코드 변경이 필요한 상황이 발생하면, **반드시 먼저** Type 1/2/3 분류를 수행하고 사용자에게 표시해야 한다"
 - "Type 2 이상의 변경을 verify 내에서 직접 수행하는 것은 **HARD STOP 위반**이다"
 - "분류 결과를 AskUserQuestion으로 제시: 'Type 2 설계 변경 필요 — implement로 돌아갈까요?'"
+
+---
+
+## [SKF-026] speckit-specify의 create-new-feature.sh가 smart-sdd의 사전 생성 브랜치와 충돌
+
+- **Trigger**: A (자각)
+- **Phase**: smart-sdd pipeline specify (F003-settings)
+- **Category**: WRONG_ASSUMPTION
+- **Severity**: Minor (마찰)
+- **Timestamp**: 2026-03-16 10:05
+- **Status**: ✅ Reflected — `pipeline.md` Feature Number & Branch Conflict Prevention (expanded with branch-already-exists error recovery)
+
+### Skill Trace
+- **File**: `.claude/skills/smart-sdd/commands/pipeline.md`
+- **Rule**: "smart-sdd creates and switches to the Feature branch... Because spec-kit is initialized with --no-git, speckit-specify does NOT create Feature branches."
+- **Line**: Pre-Flight § Create Feature branch
+
+### Problem
+smart-sdd가 `git checkout -b 003-settings`로 브랜치를 미리 생성한 후, speckit-specify 내부의 `create-new-feature.sh`를 실행하면 "Branch '003-settings' already exists" 에러 발생. 스크립트가 브랜치 생성을 시도하기 때문.
+
+### Expected
+smart-sdd가 브랜치를 미리 만드는 경우 speckit-specify의 브랜치 생성 단계를 건너뛰거나, 이미 존재하는 브랜치를 감지하고 계속 진행해야 함.
+
+### Workaround
+speckit-specify의 create-new-feature.sh 호출을 건너뛰고, specs 디렉토리와 spec.md를 수동으로 생성.
+
+### Suggested Fix
+`commands/pipeline.md`의 specify 실행 섹션에 명시: "smart-sdd가 이미 Feature branch를 생성했으므로, speckit-specify 호출 시 `create-new-feature.sh`가 에러를 반환하면 무시하고 spec 디렉토리/파일만 수동 생성한다." 또는 `create-new-feature.sh`에 `--skip-branch` 플래그 추가 제안.
+
+---
+
+## [SKF-027] Analyze의 FR coverage gap 기준이 partial coverage에 대해 과도하게 엄격
+
+- **Trigger**: A (자각)
+- **Phase**: smart-sdd pipeline analyze (F003-settings)
+- **Category**: OVER_ENGINEERED
+- **Severity**: Minor (마찰)
+- **Timestamp**: 2026-03-16 11:10
+- **Status**: ✅ Reflected — `injection/analyze.md` Coverage Severity Rules (MEDIUM tier added: task covers core behavior but lacks implementation detail → MEDIUM, not HIGH)
+
+### Skill Trace
+- **File**: `.claude/skills/smart-sdd/reference/injection/analyze.md`
+- **Rule**: "FR has task(s) but partial coverage (sub-aspect not explicit) → HIGH severity"
+- **Line**: Coverage Severity Rules table
+
+### Problem
+FR-011 (avatar style with visual previews), FR-013 (code block theme selection), FR-018 (backup config management) 모두 해당 task가 있지만 task 설명에 세부 구현 방식(preview 이미지, theme 목록 소스, retention 외 다른 config)이 명시되지 않아 HIGH로 분류됨. 실제로는 task 설명을 약간 보강하면 해결되는 수준으로, HIGH보다는 MEDIUM이 적절.
+
+### Expected
+Task가 존재하고 FR의 핵심 행동을 커버하지만 세부 구현 방식이 task 설명에 없는 경우 → MEDIUM으로 분류. HIGH는 task가 FR의 핵심 행동 자체를 누락한 경우에 사용.
+
+### Workaround
+Task 설명을 보강하여 해결 (T030에 "visual preview icons" + "static theme list constant", T055에 scope 명시).
+
+### Suggested Fix
+`reference/injection/analyze.md`의 Coverage Severity Rules에 MEDIUM 등급 추가:
+- "FR has task(s) covering core behavior but implementation detail not explicit in task description → MEDIUM"
+- HIGH는 "FR has task(s) but a functionally distinct sub-behavior is entirely missing" 으로 변경
+
+---
+
+## [SKF-028] SBI 추출 해상도가 "파일 단위"에 머물러 UI 컨트롤 수준의 기능을 누락시킴
+
+- **Trigger**: C (비교 검증) — Cherry Studio와 Angdu Studio F003 기능 비교
+- **Phase**: smart-sdd verify (F003-settings)
+- **Category**: MISSING_RULE
+- **Severity**: Major (결과물 품질 저하)
+- **Timestamp**: 2026-03-16 13:30
+
+### Skill Trace
+
+- **File**: `.claude/skills/reverse-spec/commands/analyze.md`
+- **Rule**: N/A — reverse-spec Phase 2의 SBI 추출 규칙이 파일/함수 단위까지만 요구하고, UI 페이지 내 개별 컨트롤 단위 포착 규칙이 없음
+- **Line**: N/A
+
+### Problem
+
+SBI 추출의 구조적 해상도 문제. reverse-spec Phase 2는 소스 파일을 읽고 "이 파일이 하는 일"을 SBI로 추출한다. 설정 페이지처럼 하나의 파일에 10+ 개 UI 컨트롤이 밀집된 경우, "General settings 페이지 렌더링(B056)"처럼 파일 수준 SBI만 추출되고 내부 컨트롤(Spell check toggle, Hardware acceleration, Zoom controls 등)은 개별 SBI로 포착되지 않았다. SBI에 없는 기능은 specify에서 FR로 변환되지 않고, plan/tasks/implement로 이어져 최종 구현에서 누락됨.
+
+### Expected
+
+UI 밀집 페이지(설정, 폼, 대시보드)에서는 파일 수준이 아닌 **개별 UI 컨트롤 단위**로 SBI를 추출해야 함. 각 Switch, Select, Button, Slider가 하나의 SBI가 되어야 한다.
+
+### Workaround
+
+Verify 후 Cherry Studio 소스와 수동 비교하여 누락 기능 식별.
+
+### Suggested Fix
+
+`reverse-spec/commands/analyze.md` Phase 2 SBI 추출 지침에 해상도 규칙 추가:
+- "**UI 밀집 파일 감지**: 파일 내 form control 요소(Switch, Select, Input, Button, Slider 등)가 5개 이상이면 → 각 컨트롤을 개별 SBI로 분리"
+- "**소스 파일 읽기 시**: UI 렌더 함수 내 모든 사용자 상호작용 요소를 나열하고, 각각에 고유 B### ID를 부여"
+- "**Phase 1.5 런타임 탐색 연계**: 소스 코드 SBI 추출 후 런타임 탐색에서 실제 UI 요소 수와 교차 검증하여 누락 포착"
+
+---
+
+## [SKF-029] Verify Phase 3가 렌더링 확인에 그치고, plan.md Interaction Chains의 Verify Method를 실행하지 않음
+
+- **Trigger**: A (자각)
+- **Phase**: smart-sdd verify Phase 3 (F003-settings)
+- **Category**: MISSING_RULE
+- **Severity**: Major (결과물 품질 저하)
+- **Timestamp**: 2026-03-16 13:30
+
+### Skill Trace
+
+- **File**: `.claude/skills/smart-sdd/commands/verify-phases.md`
+- **Rule**: Phase 3 — "Navigate to each SC-related screen → Snapshot → confirm normal rendering"
+- **Line**: Phase 3 section
+
+### Problem
+
+파이프라인의 구조적 단절 문제. plan.md에 Interaction Chains 테이블의 Verify Method 열(`verify-state`, `verify-effect`)이 정의되어 있고, 이 열의 목적은 "verify Phase 3에서 자동화된 검증에 사용"이라고 injection/plan.md에 명시되어 있다. 그러나 verify-phases.md의 Phase 3 실행 규칙은 "스크린샷 캡처 + 정상 렌더링 확인"만 요구하고, Verify Method 열을 Playwright에서 실행하라는 규칙이 없다. 결과적으로 plan에서 정의한 검증 방법이 verify에서 사용되지 않는 dead column이 됨.
+
+### Expected
+
+plan.md → tasks.md → implement → verify의 데이터 흐름에서, Verify Method 열이 verify Phase 3에 자동 주입되어 Playwright에서 실행되어야 함. 예: `verify-effect html class "dark"` → `await expect(page.locator('html')).toHaveClass(/dark/)`.
+
+### Workaround
+
+별도 수동 테스트 스크립트에서 확인.
+
+### Suggested Fix
+
+`commands/verify-phases.md` Phase 3에 **Interaction Chain 검증 연결** 규칙 추가:
+- "plan.md에 `## Interaction Chains` 섹션이 있으면 → 각 행의 Verify Method 열을 읽어 Playwright 검증으로 변환하여 실행"
+- "`verify-state selector attribute \"expected\"` → `expect(page.locator(selector)).toHaveAttribute(attribute, expected)`"
+- "`verify-effect target property \"expected\"` → `page.evaluate(...)` + assert"
+- "모든 chain의 Verify Method가 PASS해야 Phase 3 통과. FAIL 시 해당 FR과 함께 보고"
+
+이렇게 하면 plan에서 정의한 검증 사양이 verify까지 끊기지 않고 자동화된 검증으로 이어진다.
+
+---
+
+## [SKF-030] 파이프라인에 "Feature 진입점 존재 확인" 게이트가 없어 접근 불가능한 Feature가 verify를 통과함
+
+- **Trigger**: B (사용자 지적) — "demo를 띄웠을때 정작 확인해야할 setting 화면으로 갈 방법이 없어"
+- **Phase**: smart-sdd verify (F003-settings)
+- **Category**: MISSING_RULE
+- **Severity**: Critical (pipeline 중단 — 기능 접근 불가)
+- **Timestamp**: 2026-03-16 14:00
+
+### Skill Trace
+
+- **File**: `.claude/skills/smart-sdd/reference/injection/implement.md`, `.claude/skills/smart-sdd/reference/injection/specify.md`, `.claude/skills/smart-sdd/commands/verify-phases.md`
+- **Rule**: N/A — 3개 파일 모두 "현재 Feature의 진입점이 기존 UI에 존재하는지 확인" 규칙 없음
+- **Line**: N/A
+
+### Problem
+
+파이프라인 전체에 "Feature Reachability" 검증이 없다는 구조적 결함. F003 Settings 구현이 specify → plan → tasks → implement → verify 전 과정을 통과했지만, 기본 Top 모드에서 Settings 페이지로 이동할 UI 진입점(아이콘, 버튼)이 존재하지 않았다. Cherry Studio의 runtime-exploration.md에 "Navbar 우측: settings gear icon"이 기록되어 있었으나, 이 정보가 F002 또는 F003의 어느 파이프라인 단계에서도 "진입점을 구현해야 한다"는 요구사항으로 변환되지 않았다.
+
+근본 원인은 3단계에 분산:
+1. **specify**: spec.md에 "사용자가 이 Feature에 어떻게 접근하는가"를 기술하는 FR이 없음
+2. **implement**: 이전 Feature UI에 현재 Feature 진입점이 있는지 확인하는 규칙 없음
+3. **verify**: "사용자가 앱 시작 → 대상 Feature로 이동 가능한가"를 검증하는 게이트 없음
+
+### Expected
+
+UI Feature는 그 존재만으로는 불충분하고, 사용자가 실제로 도달할 수 있어야 한다. 파이프라인의 최소 1개 단계에서 "Feature Reachability"를 검증해야 함.
+
+### Workaround
+
+Navbar.tsx에 Settings gear 아이콘 수동 추가.
+
+### Suggested Fix
+
+**단일 게이트로 3단계 중 가장 효과적인 위치에 삽입** — verify Phase 0 (앱 시작 직후)이 최적:
+
+`commands/verify-phases.md` Phase 0에 **Feature Reachability Gate** 추가:
+- "UI Feature의 verify 시작 시, 앱을 홈 화면에서 시작 → **UI 조작만으로** 대상 Feature 화면에 도달할 수 있는지 확인"
+- "도달 방법: 네비게이션 바 아이콘 클릭, 메뉴 항목 선택, 버튼 클릭 등 — URL 직접 입력은 불가"
+- "도달 불가 → **CRITICAL BLOCK** — implement로 regression하여 진입점 추가"
+
+부수적으로 specify에도 보강:
+- `reference/injection/specify.md`에: "UI Feature spec에는 사용자가 이 Feature에 접근하는 경로를 기술하는 FR 또는 AS(Acceptance Scenario)가 최소 1개 포함되어야 함. 다른 Feature UI 수정이 필요하면 Integration Contract에 명시"
+
+---
+
+## [SKF-031] Demo 스크립트가 "무엇을 시도하라"만 나열하고, 기대 결과와 확인 방법이 없어 테스트 가이드로 기능하지 못함
+
+- **Trigger**: B (사용자 지적) — "demo 파일 안에 주석으로 정확히 사용자가 어떤 테스트를 어떻게 진행해서 어떻게 확인한다는게 명확히 표현되면 좋겠는데"
+- **Phase**: smart-sdd implement → demo script generation (F003-settings)
+- **Category**: TEMPLATE_GAP
+- **Severity**: Major (결과물 품질 저하)
+- **Timestamp**: 2026-03-16 14:30
+
+### Skill Trace
+
+- **File**: `.claude/skills/smart-sdd/reference/demo-standard.md`
+- **Rule**: Demo script 구조 규정에 "사용자 지침" 출력 요구가 있으나, 각 테스트 항목의 형식이 "조작 → 기대 결과 → 확인 방법"이 아닌 "기능 나열" 수준
+- **Line**: Interactive mode section
+
+### Problem
+
+demo-standard.md의 데모 스크립트 템플릿이 interactive 모드에서 사용자에게 출력하는 지침을 "기능 목록 나열" 형태로만 규정한다. 결과적으로 생성된 데모 스크립트(F003-settings.sh)는 "Switch theme: Light / Dark / System"처럼 무엇을 시도하라는 것만 나열하고, **어떻게 조작하고**, **무엇이 기대되고**, **어떻게 확인하는지**가 없다. 사용자가 테마를 Dark로 변경했을 때 "전체 UI가 200ms 이내에 어두운 색상으로 변경되어야 한다"는 기대 결과를 모르면, 정상인지 비정상인지 판단할 수 없다.
+
+### Expected
+
+데모 스크립트의 각 테스트 항목이 다음 3단계 형식을 따라야 함:
+```
+조작: [사용자가 정확히 무엇을 어떻게 하는지]
+기대: [조작 후 어떤 결과가 나타나야 하는지]
+확인: [사용자가 무엇을 보고 성공/실패를 판단하는지]
+```
+
+### Workaround
+
+F003-settings.sh의 파일 상단 주석에 각 테스트 항목을 "조작 → 기대 → 확인" 3단계로 상세 작성.
+
+### Suggested Fix
+
+`reference/demo-standard.md`의 Interactive Mode 섹션에 **Test Plan Comment Block** 형식 규정 추가:
+
+```
+Demo 스크립트 파일 상단에 TEST PLAN 주석 블록을 포함해야 한다.
+각 테스트 항목은 다음 형식:
+
+# ── Test N: [테스트 제목] ──
+#   사전 조건: [필요한 상태 — 예: "화면 설정 페이지에 있어야 함"]
+#   조작: [사용자의 구체적 행동 — 예: "테마에서 '다크' 라디오 버튼 클릭"]
+#   기대: [조작 직후 발생해야 하는 결과 — 예: "전체 UI가 200ms 이내에 어두운 색상으로 변경"]
+#   확인: [사용자가 시각적으로 확인할 수 있는 것 — 예: "배경 검은색, 텍스트 흰색, 사이드바/탭바 모두 다크 적용"]
+```
+
+이 형식은 spec.md의 Acceptance Scenario(Given-When-Then)와 plan.md의 Interaction Chain(Verify Method)에서 자동으로 도출할 수 있으므로, demo 생성 시 이 두 소스를 참조하도록 injection 규칙도 추가한다.
+
+---
+
+## [SKF-032] Demo TEST PLAN의 테스트 항목이 verify에서 실제 실행·검증되지 않음 — 작성만 하고 검증을 건너뜀
+
+- **Trigger**: B (사용자 지적) — "최소한 verify 단계에서 각 테스트 항목을 테스트는 해보고 검증 해야하는것도 반영"
+- **Phase**: smart-sdd verify (F003-settings)
+- **Category**: MISSING_RULE
+- **Severity**: Critical (pipeline 중단 — 검증 없이 통과)
+- **Timestamp**: 2026-03-16 14:45
+
+### Skill Trace
+
+- **File**: `.claude/skills/smart-sdd/commands/verify-phases.md`
+- **Rule**: N/A — verify에서 demo 스크립트의 TEST PLAN 항목을 실행하라는 규칙 없음. Demo 스크립트는 implement에서 생성되지만 verify에서 그 내용을 검증 자산으로 활용하는 연결이 부재
+- **Line**: N/A
+
+### Problem
+
+파이프라인의 구조적 단절. Demo 스크립트의 TEST PLAN에 "조작 → 기대 → 확인" 형식으로 9개 테스트 시나리오를 상세 작성했지만, verify 단계에서 이 항목들을 **실제로 실행하지 않았다**. Verify Phase 3는 스크린샷 캡처 + 콘솔 에러 체크만 수행하고, demo TEST PLAN의 개별 시나리오를 Playwright로 재현하여 기대 결과를 검증하는 과정이 없다.
+
+결과적으로 TEST PLAN은 사용자를 위한 안내문에 그치고, 파이프라인 내부의 품질 게이트로 기능하지 못한다. "테마 전환 시 html.dark 클래스 토글", "앱 재시작 후 설정 persist", "단축키 충돌 경고 표시" 같은 시나리오는 작성되었지만 자동 검증되지 않았다.
+
+### Expected
+
+Demo TEST PLAN 항목은 verify Phase 3에서 **자동화 가능한 것은 Playwright로 실행**하고, **자동화 불가능한 것(파일 다이얼로그, OS 재시작 등)은 사유와 함께 skip 기록**해야 한다. TEST PLAN이 "작성 후 방치"되는 dead document가 아니라, verify의 검증 체크리스트로 기능해야 한다.
+
+### Workaround
+
+없음 — 사용자가 직접 데모를 실행하여 수동 확인.
+
+### Suggested Fix
+
+`commands/verify-phases.md` Phase 3에 **Demo TEST PLAN Execution Gate** 추가:
+
+1. "implement에서 생성된 demo 스크립트 내 TEST PLAN 주석 블록을 파싱"
+2. "각 테스트 항목을 분류:
+   - **자동화 가능** (UI 조작 + DOM 상태 확인): Playwright로 실행 → PASS/FAIL 기록
+   - **반자동** (UI 조작 가능하나 기대 결과가 시각적 판단): Playwright 스크린샷 캡처 + 에이전트가 기대 결과와 대조
+   - **수동 전용** (파일 다이얼로그, OS 레벨 동작, 앱 재시작): skip 사유 기록 + 사용자에게 수동 테스트 요청"
+3. "자동화 가능 항목 중 FAIL이 있으면 → 기존 Bug Fix Severity Rule에 따라 분류 및 처리"
+4. "결과를 verify Review에 표시:
+   ```
+   ── Demo TEST PLAN Execution ─────────────────
+   Total: 9 tests | Auto: 5 PASS | Semi-auto: 2 PASS | Manual: 2 SKIPPED
+   ────────────────────────────────────────────────
+   ```"
+
+**연결 포인트**: SKF-031에서 TEST PLAN 작성 형식을 표준화하면, 이 게이트가 파싱하기 쉬워진다. SKF-029의 Interaction Chain Verify Method 실행과 통합하면, TEST PLAN + Interaction Chain + SC가 하나의 검증 체계로 수렴한다.
+
+---
+
+## [SKF-033] Verify 자동 테스트가 앱의 persist된 상태를 고려하지 않아 false positive/negative 발생
+
+- **Trigger**: A (자각) — TEST PLAN 실행 시 이전 세션의 persist된 dark theme로 인해 테스트 로직이 오판
+- **Phase**: smart-sdd verify Phase 3 (F003-settings)
+- **Category**: MISSING_RULE
+- **Severity**: Major (결과물 품질 저하)
+- **Timestamp**: 2026-03-16 15:00
+
+### Skill Trace
+
+- **File**: `.claude/skills/smart-sdd/commands/verify-phases.md`
+- **Rule**: N/A — verify에서 앱 상태를 초기화한 후 테스트를 시작하라는 규칙 없음
+- **Line**: N/A
+
+### Problem
+
+Verify 자동 테스트 실행 시, 앱이 이전 테스트 세션의 persist된 상태(dark theme, English 언어 등)로 시작했다. 테스트 로직이 "현재 상태 → 변경 → 검증"을 가정하지만, 시작 상태가 예측 불가능하면 결과가 틀린다:
+- T2a: dark→dark 전환 시도 → before=true, after=true → FAIL (실제로는 기능 정상)
+- T4: 이전에 English로 전환된 상태에서 한국어 UI로 검색 → 매칭 실패 → FAIL
+- T9b: 이전 언어 전환으로 버튼 텍스트가 "삭제"가 아닌 "Clear All Data" → 매칭 실패 → FAIL
+
+3개 FAIL 중 0개가 실제 코드 버그. 전부 **테스트 환경 상태** 문제.
+
+### Expected
+
+Verify 시작 전 앱 상태를 **알려진 초기 상태로 리셋**하거나, 테스트 로직이 **현재 상태를 먼저 감지한 후** 그에 맞게 조작해야 함.
+
+### Workaround
+
+각 테스트에서 "원하는 상태로 먼저 강제 설정 → 반대 상태로 전환 → 검증" 패턴 적용.
+
+### Suggested Fix
+
+`commands/verify-phases.md` Phase 0에 **Test State Isolation** 규칙 추가:
+- "Verify 시작 전 `config:reset` IPC를 호출하여 앱 상태를 기본값으로 초기화하거나, 별도 user data 경로(`--user-data-dir`)로 앱을 시작하여 clean state 보장"
+- "테스트 자동화 스크립트에서 **상태를 가정하지 말 것**: 토글 테스트 시 `현재 값 읽기 → 반대 값으로 변경 → 변경 확인` 패턴 사용"
+- "Playwright 런타임 테스트의 각 시나리오는 이전 시나리오의 상태 변경에 영향 받지 않도록 **순서 독립적**으로 작성"
+
+---
+
+## [SKF-034] i18n hydration 시 config language 값과 i18next 실제 언어가 불일치 — Select UI에 잘못된 언어 표시
+
+- **Trigger**: B (사용자 지적) — "당장 언어가 english로 되있지만 한국어로 되어있잖아"
+- **Phase**: smart-sdd verify (F003-settings)
+- **Category**: MISSING_RULE
+- **Severity**: Major (결과물 품질 저하)
+- **Timestamp**: 2026-03-16 15:00
+
+### Skill Trace
+
+- **File**: `.claude/skills/smart-sdd/reference/injection/implement.md`
+- **Rule**: N/A — implement 시 "i18n 초기화와 config hydration의 순서/동기화"를 검증하는 규칙 없음
+- **Line**: N/A
+
+### Problem
+
+i18next의 초기 언어(`lng: 'ko'`)와 electron-store에 persist된 language config 값이 동기화되지 않는 구조적 문제:
+1. `i18n/index.ts`에서 `lng: 'ko'`로 초기화 (정적)
+2. `useSettingsStore.hydrate()`에서 `config:getAll` → language 값 로드 (비동기)
+3. hydrate 완료 전에 이미 i18next는 'ko'로 렌더링 시작
+4. hydrate 후 `setLanguage`가 호출되어야 하지만, config에 저장된 값이 'ko'면 "이미 같으므로" 변경 이벤트가 발생하지 않음
+5. 이전 세션에서 'en'으로 변경된 경우, config에는 'en'이 저장되어 있지만 i18next는 'ko'로 시작 → Select에는 'en' 표시, UI는 'ko' — **불일치**
+
+이 문제는 "비동기 config hydration + 정적 i18n 초기화" 패턴에서 구조적으로 발생하며, implement 단계에서 이 race condition을 감지하는 규칙이 없다.
+
+### Expected
+
+i18n 초기 언어가 persist된 config 값과 일치해야 함. hydrate 완료 시 `i18n.changeLanguage(config.language)` 를 반드시 호출하되, 현재 언어와 같더라도 Select UI의 value가 config 값을 반영해야 함.
+
+### Workaround
+
+`useSettingsStore.hydrate()`에서 language 로드 후 무조건 `i18n.changeLanguage(language)` 호출.
+
+### Suggested Fix
+
+`reference/injection/implement.md`에 **Async Hydration Sync** 규칙 추가:
+- "비동기로 hydrate되는 store가 외부 시스템(i18n, theme, OS 설정 등)의 상태를 동기화하는 경우, hydrate 완료 시 해당 외부 시스템의 API를 **무조건** 호출하여 동기화. '이미 같은 값'이어도 호출해야 — 외부 시스템이 다른 경로로 다른 값을 가질 수 있음"
+- "i18n 특수 사례: i18next의 `lng` 초기값과 persist된 config.language는 다를 수 있다. hydrate에서 `i18n.changeLanguage(config.language)` 를 반드시 호출"

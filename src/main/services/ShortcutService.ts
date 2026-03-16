@@ -6,6 +6,7 @@ import { logger } from './LoggerService'
 class ShortcutService {
   private static instance: ShortcutService | null = null
   private registeredShortcut: string | null = null
+  private keyedShortcuts: Map<string, string> = new Map()
 
   static getInstance(): ShortcutService {
     if (!ShortcutService.instance) {
@@ -51,8 +52,70 @@ class ShortcutService {
     }
   }
 
+  /**
+   * Register a keyed shortcut (F003).
+   * Returns true if the shortcut was successfully registered.
+   */
+  registerKeyed(key: string, accelerator: string): boolean {
+    // Unregister previous binding for this key if exists
+    this.unregisterKeyed(key)
+
+    try {
+      const success = globalShortcut.register(accelerator, () => {
+        const mainWindow = windowService.getMainWindow?.()
+        if (mainWindow) {
+          mainWindow.webContents.send('shortcut:triggered', key)
+        }
+      })
+
+      if (success) {
+        this.keyedShortcuts.set(key, accelerator)
+        logger.info(`[ShortcutService] Registered keyed: ${key} → ${accelerator}`)
+      } else {
+        logger.warn(`[ShortcutService] Failed to register keyed: ${key} → ${accelerator}`)
+      }
+
+      return success
+    } catch (err) {
+      logger.warn(`[ShortcutService] Error registering keyed shortcut: ${key}`, err)
+      return false
+    }
+  }
+
+  /**
+   * Unregister a keyed shortcut by its key name.
+   */
+  unregisterKeyed(key: string): void {
+    const accelerator = this.keyedShortcuts.get(key)
+    if (accelerator) {
+      try {
+        globalShortcut.unregister(accelerator)
+      } catch {
+        // already unregistered
+      }
+      this.keyedShortcuts.delete(key)
+      logger.info(`[ShortcutService] Unregistered keyed: ${key}`)
+    }
+  }
+
+  /**
+   * Unregister all keyed shortcuts (F003).
+   */
+  unregisterAllKeyed(): void {
+    for (const [key, accelerator] of this.keyedShortcuts) {
+      try {
+        globalShortcut.unregister(accelerator)
+      } catch {
+        // already unregistered
+      }
+      logger.info(`[ShortcutService] Unregistered keyed: ${key}`)
+    }
+    this.keyedShortcuts.clear()
+  }
+
   cleanup(): void {
     globalShortcut.unregisterAll()
+    this.keyedShortcuts.clear()
   }
 }
 

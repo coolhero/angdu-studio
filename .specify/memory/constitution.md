@@ -206,6 +206,18 @@ reads without IPC round-trips.
 
 No Cherry references in any generated code, comments, or documentation.
 
+### Internationalization (i18n)
+
+| Setting | Value | Notes |
+|---------|-------|-------|
+| Default language | `ko` (한국어) | App starts in Korean |
+| Supported languages | `ko`, `en`, `zh-CN` | Korean, English, Chinese (Simplified) |
+| Fallback language | `en` (English) | Used when translation key missing |
+| Framework | i18next + react-i18next | Industry standard |
+
+All user-facing text MUST use translation keys via `useTranslation()` hook.
+Locale files live in `src/renderer/src/i18n/locales/{lang}.json`.
+
 ## Domain-Specific Principles
 
 ### PSP-01: Conversation as First-Class Entity

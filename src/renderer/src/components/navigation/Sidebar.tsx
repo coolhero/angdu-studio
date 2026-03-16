@@ -34,7 +34,7 @@ export function Sidebar() {
         <div className="flex flex-col items-center pb-2">
           <SidebarItem
             route={settingsRoute}
-            isActive={location.pathname === settingsRoute.path}
+            isActive={location.pathname.startsWith(settingsRoute.path)}
           />
         </div>
       )}

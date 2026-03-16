@@ -1,5 +1,9 @@
 import { Component, useEffect, type ReactNode } from 'react'
 import { useUIStore, initUIStoreListeners } from './stores/useUIStore'
+import { useSettingsStore } from './stores/useSettingsStore'
+import { useShortcutsStore } from './stores/useShortcutsStore'
+import { useQuickPhrasesStore } from './stores/useQuickPhrasesStore'
+import { useTheme } from './hooks/useTheme'
 import { AppRouter } from './Router'
 
 // Error Boundary — catches render errors, shows fallback UI (F7-01, Pattern Constraint)
@@ -36,8 +40,8 @@ class ErrorBoundary extends Component<
 }
 
 function AppContent() {
-  // Scalar selectors only — Pattern Constraint: referential stability
-  const theme = useUIStore((s) => s.theme)
+  // Apply theme class to <html> and <body>, sync font size (F003)
+  useTheme()
 
   // Initialize IPC event listeners (in useEffect, NOT render — Pattern Constraint)
   useEffect(() => {
@@ -48,14 +52,13 @@ function AppContent() {
       useUIStore.getState().setTheme(resolved)
     })
 
+    // Hydrate F003 stores
+    useSettingsStore.getState().hydrate()
+    useShortcutsStore.getState().hydrate()
+    useQuickPhrasesStore.getState().hydrate()
+
     return cleanup
   }, [])
-
-  // Apply theme class to document body
-  useEffect(() => {
-    document.body.classList.remove('light', 'dark')
-    document.body.classList.add(theme)
-  }, [theme])
 
   return <AppRouter />
 }

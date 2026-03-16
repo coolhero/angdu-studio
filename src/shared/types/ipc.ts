@@ -54,6 +54,20 @@ export interface InvokeChannelMap {
   }
   'app:relaunch': { args: []; return: void }
   'app:quit': { args: []; return: void }
+
+  // Data (F003)
+  'data:export': { args: [includeDocs?: boolean]; return: Buffer }
+  'data:import': { args: [zipBuffer: ArrayBuffer]; return: void }
+  'data:clear': { args: []; return: void }
+  'data:getStoragePath': { args: []; return: string }
+
+  // Shortcuts (F003)
+  'shortcuts:register': { args: [key: string, accelerator: string]; return: boolean }
+  'shortcuts:unregister': { args: [key: string]; return: void }
+  'shortcuts:unregisterAll': { args: []; return: void }
+
+  // Startup (F003)
+  'startup:setLoginItem': { args: [enabled: boolean]; return: void }
 }
 
 // --- Event Channels (main → renderer) ---
