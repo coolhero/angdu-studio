@@ -1580,6 +1580,7 @@ i18n 초기 언어가 persist된 config 값과 일치해야 함. hydrate 완료 
 - **Category**: MISSING_RULE
 - **Severity**: Major (결과물 품질 저하)
 - **Timestamp**: 2026-03-16 16:30
+- **Status**: ✅ Reflected — `verify-phases.md` GUI MANDATORY PLAYWRIGHT GATE rule 5 (Demo --ci ≠ UI Verification)
 
 ### Skill Trace
 - **File**: spec-kit-skills 내 `smart-sdd/commands/verify-phases.md`
@@ -1614,6 +1615,7 @@ Verify Phase 3에서 반드시 Playwright `_electron.launch()`로 앱을 실행�
 - **Category**: MISSING_RULE
 - **Severity**: Critical (pipeline 중단 — UI가 사실상 작동하지 않음)
 - **Timestamp**: 2026-03-16 17:00
+- **Status**: ✅ Reflected — `injection/implement.md` Build Toolchain Integration step 4 (CSS Theme Token mapping check), `verify-phases.md` Step 3 CSS Theme Token Rendering Check (getComputedStyle), `gui.md` S7 cross-reference
 
 ### Skill Trace
 - **File**: spec-kit-skills 내 `smart-sdd/commands/pipeline.md` § Pattern Constraints 및 `smart-sdd/reference/injection/implement.md`
