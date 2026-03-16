@@ -1667,29 +1667,13 @@ F004 implement에서 shadcn/ui 컴포넌트(Switch, Button, Input, Dialog 등)�
   5. implement agent의 "build passes" ≠ "feature works" 구분 규칙
 
 ### Problem
-에이전트의 3개 연쇄 실패:
+5개 skill 파일의 구조적 gap이 연쇄하여 "build ✅ + TS ✅"만으로 implement/verify 모두 통과되었으나, 실제 앱은 에러 바운더리에 걸려 동작하지 않았다.
 
-**1. Implement agent가 "build passes"만으로 성공 판정**
-- implement agent가 `pnpm run build` 통과만 확인하고 "✅ built in 2.5s" 보고
-- 실제 앱을 실행하여 렌더링 상태를 확인하지 않음
-- 40+ 파일을 생성했지만 그 중 어떤 컴포넌트도 런타임에서 렌더링되는지 검증하지 않음
-- "Build passes after each phase" 규칙은 있지만 "실제 앱에서 해당 UI가 렌더링되는가"에 대한 규칙이 없음
-
-**2. Verify에서 Playwright 검증 완전 생략**
-- playwright.config.ts가 없다는 이유로 Phase 3 SC 검증을 건너뜀
-- "Playwright MCP는 웹 브라우저용이라 Electron 앱 직접 검증에는 적합하지 않습니다"라고 잘못 판단
-- 실제로는: (a) Electron dev server가 `localhost:5173`에서 렌더러 UI를 서빙 → Playwright MCP `browser_navigate`로 접근 가능, (b) 이전 F003/F004 verify에서 Playwright UI 검증을 성공적으로 수행한 기록이 sdd-state.md에 있음 (F003: "Playwright UI ✅ (4 sub-pages, 0 errors)", F004: "Playwright UI ✅ (33 switches, provider list, edit panel)")
-- 이전 Feature 경험을 참조하지 않고 독립적으로 "불가능하다"고 판단
-
-**3. 데모 스크립트 실제 실행 미검증**
-- `demos/F005-chat-conversation.sh` 파일을 생성했지만 실제 실행하여 동작 확인하지 않음
-- Phase 4 Demo 결과를 "✅ Script created"로만 보고 — 파일 존재 ≠ 실행 가능
-
-**근본 원인 분석**:
-- verify-phases.md에 "Playwright 미설정 시 BLOCKING" 규칙이 없어 에이전트가 skip 경로를 선택
-- 에이전트가 "build ✅ + TS ✅ + 프로세스 시작됨"을 "feature works"로 동치시킴
-- sdd-state.md의 이전 Feature verify 기록을 참조하는 규칙이 없어 학습된 패턴이 전달되지 않음
-- implement → verify 전환 시 "implement agent의 검증"과 "verify의 검증"이 동일한 수준 (build only)
+- `injection/implement.md`: "Build passes" 외에 **런타임 렌더링 확인 규칙 부재** → 40+ 파일 생성했으나 TipTap crash로 전혀 렌더링 안 됨
+- `verify-phases.md`: Playwright 설정 부재 시 **자동 생성/BLOCKING 규칙 부재** → "설정 없으니 skip" 경로 선택
+- `SKILL.md` Prerequisites: Electron에서 Playwright MCP 접근 가능성이 **명시적이지 않음** → "웹 전용" 가정
+- `verify-phases.md` Phase 4: 데모 스크립트 **실제 실행 규칙 부재** → "파일 존재 = 완료" 판정
+- `verify-phases.md`: 이전 Feature verify 경험 **참조 규칙 부재** → F003/F004에서 성공한 Playwright 접근 방식이 전달 안 됨
 
 ### Expected
 1. **implement 완료 기준**에 "최소 1회 앱 실행 + 해당 Feature UI 렌더링 확인" 추가
@@ -1751,30 +1735,9 @@ Cherry-studio의 HomePage는 동적 패널 시스템(topicPosition left/right �
 - **Line**: implement.md L63-80
 
 ### Problem
-implement agent가 cherry-studio 소스 파일을 전혀 읽지 않고 독자적으로 UI를 구현했다:
+`injection/implement.md` § Source Reference Injection에 "Read Source Path → Resolve each file → inject as reference context" 규칙이 존재하지만, **실행 강제 게이트가 없어** 에이전트가 source 파일을 한 번도 읽지 않고 FR 목록만으로 독자적 UI를 구현했다.
 
-**핵심 차이점**:
-| 항목 | Cherry-studio | Angdu-studio (현재) |
-|------|---------------|---------------------|
-| 레이아웃 패러다임 | 동적 (settings-driven, 4개 boolean) | 고정 3-panel |
-| 좌측 사이드바 | Assistants↔Topics 탭 전환 (topicPosition에 따라) | Assistants만 고정 |
-| 모델 선택 | SelectModelPopup 전체 컴포넌트 | **없음** (텍스트만 표시) |
-| ChatNavbar | 풍부 (AssistantSettingsPopup, ModelSelector, Tools) | 최소 (이름+토글 버튼만) |
-| 애니메이션 | Framer Motion (motion.div + AnimatePresence) | CSS transition만 |
-| 네비게이션 통합 | Navbar가 HomePage에 position-aware로 렌더링 | Navbar 없음 |
-| 반응형 | NarrowLayout, 미디어 쿼리 | 없음 |
-
-**누락된 핵심 기능**:
-1. **FR-003 Model Selector**: ChatHeader에 모델 선택 드롭다운이 없어 채팅 자체가 불가능 (모델 미선택 → ai:chat에 model=undefined → 응답 없음)
-2. **FR-009 Assistant Editor**: 모델 필드가 폼에 없어 어시스턴트 생성/편집 시 모델 바인딩 불가
-3. **FR-036 Multi-model @mention**: 미구현
-4. **FR-029/034 File attachment**: 핸들러만 있고 실제 파일 전송 미구현
-
-**근본 원인**:
-- injection/implement.md § Source Reference Injection 규칙이 있지만, 실행 여부를 강제하는 게이트가 없음
-- implement agent가 spec/plan의 FR 목록만 보고 "이 기능이 필요하겠다"고 자의적 해석
-- Cherry-studio의 실제 코드(HomePage.tsx, Chat.tsx, Navbar.tsx, SelectModelPopup)를 한 번도 읽지 않음
-- 특히 SelectModelPopup은 cherry-studio에서 70+줄 팝업 컴포넌트인데, angdu-studio에는 아예 파일이 없음
+결과: cherry-studio의 동적 패널 시스템(topicPosition 전환, 탭 전환, Navbar position, Framer Motion, SelectModelPopup)이 고정 3-panel + 최소 ChatHeader로 대체됨. 특히 SelectModelPopup(70+줄)이 아예 없어 모델 선택 자체가 불가능했음.
 
 ### Expected
 1. **implement 시작 전 Source Reference Gate** (BLOCKING):
@@ -1835,19 +1798,9 @@ implement agent가 cherry-studio 소스 파일을 전혀 읽지 않고 독자적
 - **Line**: N/A
 
 ### Problem
-spec.md FR-003은 "model selector dropdown"을 명시하지만:
-1. **plan.md**에 SelectModelPopup 컴포넌트가 파일 구조에 없음
-2. **tasks.md**에 ModelSelector 구현 태스크가 없음
-3. **Interaction Chains**에 "Click model selector → change model" 체인이 없음
-4. **결과**: ChatHeader에 모델 이름이 텍스트로만 표시되고, 클릭해도 아무 일도 안 생김
+`injection/analyze.md` § Coverage Severity Rules가 **FR 단위로만 매핑**하고 FR 내부의 **기능적 요소 단위로 분해하지 않음**. FR-003은 "assistant name, model selector **dropdown**, topic info" 3개 요소를 포함하지만, analyze는 "ChatHeader 태스크가 FR-003을 언급함" = covered로 판정.
 
-이 문제는 plan → tasks → implement 파이프라인 전체에 걸친 FR 누락이다:
-- plan 단계에서 SelectModelPopup을 architecture에 포함하지 않음
-- tasks 단계에서 model selector 태스크를 생성하지 않음
-- implement 단계에서 당연히 구현되지 않음
-- analyze 단계에서 FR-003 → task mapping을 확인했지만 "ChatHeader includes model" 정도로 통과시킴
-
-**근본 원인**: analyze의 FR→Task coverage가 "태스크가 FR을 언급하는가"만 검사하고, "태스크가 FR의 모든 기능적 요소를 커버하는가"는 검사하지 않음. FR-003은 "model selector **dropdown**"이지만, ChatHeader 태스크는 "model **display**"만 커버.
+결과: plan→tasks→implement 전체에서 model selector가 누락됨 — plan에 파일 없음, tasks에 태스크 없음, Interaction Chains에 체인 없음. 채팅의 핵심 기능인 모델 선택이 불가능해짐.
 
 ### Expected
 1. **analyze 단계의 FR→Task 매핑이 기능적 요소 단위로 분해**되어야 함:
