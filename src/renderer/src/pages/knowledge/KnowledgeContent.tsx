@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, type DragEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   File,
@@ -31,6 +31,54 @@ interface KnowledgeContentProps {
 export function KnowledgeContent({ base }: KnowledgeContentProps) {
   const { t } = useTranslation()
   const [activeTab, setActiveTab] = useState<TabKey>('files')
+  const [isDragging, setIsDragging] = useState(false)
+
+  const handleDragOver = useCallback((e: DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(true)
+  }, [])
+
+  const handleDragLeave = useCallback((e: DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(false)
+  }, [])
+
+  const handleDrop = useCallback(async (e: DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(false)
+
+    const files = Array.from(e.dataTransfer.files)
+    if (files.length === 0) return
+
+    // Get file paths — in Electron, use webUtils.getPathForFile or fallback to .path
+    const filePaths: string[] = []
+    for (const file of files) {
+      // Electron exposes path via webUtils in preload
+      const path = (file as any).path || file.name
+      if (path && path !== file.name) {
+        filePaths.push(path)
+      }
+    }
+
+    if (filePaths.length === 0) {
+      console.warn('[KnowledgeContent] Could not get file paths from dropped files')
+      return
+    }
+
+    try {
+      const items = await window.api.invoke['kb:addFiles'](base.id, filePaths)
+      const store = useKnowledgeStore.getState()
+      for (const item of items) {
+        store.addItem(base.id, item)
+      }
+      setActiveTab('files')
+    } catch (err) {
+      console.error('[KnowledgeContent] Drop add files failed:', err)
+    }
+  }, [base.id])
 
   const handleDelete = useCallback(async () => {
     if (!confirm(t('knowledge.deleteConfirm', 'Are you sure you want to delete this knowledge base?'))) {
@@ -50,7 +98,20 @@ export function KnowledgeContent({ base }: KnowledgeContentProps) {
   }, [base.id, t])
 
   return (
-    <div className="flex h-full flex-col">
+    <div
+      className={`flex h-full flex-col ${isDragging ? 'ring-2 ring-primary ring-inset bg-primary/5' : ''}`}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
+      {/* Drag overlay */}
+      {isDragging && (
+        <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-primary/10">
+          <div className="rounded-lg bg-background p-4 shadow-lg">
+            <p className="text-sm font-medium">{t('knowledge.dropFiles', 'Drop files to add to knowledge base')}</p>
+          </div>
+        </div>
+      )}
       {/* Header */}
       <div className="flex items-center justify-between border-b px-4 py-3">
         <div>
