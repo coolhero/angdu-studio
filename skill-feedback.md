@@ -2512,3 +2512,117 @@ implement → Source-First: read lifecycle-related source code BEFORE implementi
 1. `reverse-spec/commands/analyze.md` Phase 2에: "Manage/Add/Remove 패턴 컴포넌트 발견 시 → 해당 엔티티의 lifecycle 패러다임(opt-in/opt-out, CRUD 순서)을 pre-context § Data Lifecycle에 기록"
 2. `injection/plan.md`에: Source Component Mapping 옆에 "## Data Lifecycle Mapping" 섹션 추가 — `| Entity | Source Pattern | Target Pattern | Justification |` 형식
 3. `injection/implement.md`에: "데이터 추가/삭제/활성화 로직 구현 시 source의 동일 흐름 코드를 BLOCKING으로 읽어야 함"
+
+## [SKF-046] Verify Phase 3가 실제 기능 검증 없이 페이지 네비게이션만 확인 — "cosmetic verify" 문제
+
+- **Trigger**: B (사용자 지적)
+- **Phase**: smart-sdd verify Phase 3 (F006)
+- **Category**: MISSING_RULE
+- **Severity**: Critical (pipeline 중단)
+- **Timestamp**: 2026-03-19 17:30
+
+### Skill Trace
+- **File**: `commands/verify-phases.md`
+- **Rule**: Phase 3에서 "SC-level UI verification: Automatically execute UI Action sequences from Coverage header via CLI test runner or MCP tools"라고 기술되어 있으나, **구체적으로 어떤 수준의 기능 검증을 해야 하는지, 무엇이 cosmetic verify이고 무엇이 functional verify인지 구분하는 규칙이 없음**
+- **Line**: verify-phases.md Phase 3 section
+
+### Problem
+에이전트가 F006 verify Phase 3에서 Playwright E2E 테스트를 5개 작성했으나, 모두 **페이지 네비게이션** 수준에 머물렀음:
+1. "KB 페이지 해시 네비게이션으로 접근 가능" — 페이지가 렌더링되는지만 확인
+2. "Memory 설정 페이지 접근 가능" — 페이지 존재 여부만 확인
+3. "Cross-feature regression — 0 에러" — console error만 확인
+4. "Page stability" — 크래시 없음만 확인
+5. "Demo CI 확인" — 상수 true 반환
+
+**실제 검증하지 않은 것들:**
+- KB 생성 버튼 클릭 → 팝업 열림 → 폼 작성 → 생성 완료 (SC-001)
+- 파일 추가 → 임베딩 파이프라인 실행 → 상태 변화 (SC-003)
+- 채팅 입력바에 KB 버튼 존재 여부 (FR-031)
+- Memory 설정 토글 동작 (SC-007)
+
+이는 verify가 "앱이 크래시하지 않는다"만 확인하고 "기능이 동작한다"는 확인하지 않은 것임.
+
+### Expected
+Verify Phase 3에서 spec.md SC-001~SC-012 각각에 대해:
+1. SC의 사전 조건 설정 (예: KB 생성 → 파일 추가)
+2. SC의 동작 실행 (예: 검색 쿼리 전송)
+3. SC의 기대 결과 확인 (예: citation 뱃지 표시)
+
+최소한 P1 SC (SC-001~SC-005)는 Playwright로 자동 검증해야 했음.
+
+### Workaround
+없음 — 사용자가 수동으로 앱을 실행하여 기능 미동작을 발견함
+
+### Suggested Fix
+`commands/verify-phases.md` Phase 3에 다음 규칙 추가:
+
+1. **Functional SC Gate (🚫 BLOCKING)**:
+   ```
+   Phase 3에서 작성하는 Playwright 테스트는 반드시 spec.md SC-### 기반이어야 한다.
+   - 각 P1 SC에 대해 최소 1개의 functional E2E 테스트 필수
+   - "페이지가 존재한다" 수준의 테스트는 SC 검증으로 인정하지 않음
+   - SC의 Given/When/Then을 Playwright action으로 변환해야 함
+   ```
+
+2. **Cosmetic Verify 금지 규칙**:
+   ```
+   다음 패턴의 테스트는 SC 검증으로 인정하지 않는다:
+   - page.evaluate(() => window.location.hash = '#/route') → "페이지 접근 가능"
+   - expect(await page.textContent('body')).toContain('keyword')
+   - expect(true).toBeTruthy()
+
+   SC 검증에 인정되는 테스트 최소 요건:
+   - 사용자 액션 (click, fill, select) 최소 1회
+   - 상태 변화 확인 (새 요소 생성, 텍스트 변경, 상태 아이콘 변화) 최소 1회
+   ```
+
+3. **SC Coverage Checklist** (Phase 3 시작 시):
+   ```
+   Phase 3 시작 전 SC-### 목록을 표시하고 각각에 대해:
+   - [ ] SC-001: 테스트 작성 여부 + 검증 방법
+   - [ ] SC-002: 테스트 작성 여부 + 검증 방법
+   ...
+   P1 SC 중 검증되지 않은 항목이 있으면 Phase 3 종료 불가
+   ```
+
+## [SKF-047] Implement 후 cross-feature wiring이 실제로 동작하는지 런타임 검증 부재
+
+- **Trigger**: B (사용자 지적)
+- **Phase**: smart-sdd implement Phase 11 (F006)
+- **Category**: MISSING_RULE
+- **Severity**: Major (결과물 품질 저하)
+- **Timestamp**: 2026-03-19 17:30
+
+### Skill Trace
+- **File**: `reference/injection/implement.md`
+- **Rule**: "Per-Task Runtime Verify" 규칙은 있으나, cross-feature wiring 태스크(예: T037 "Wire KB search into F005 chat flow")에 대한 **런타임 검증 의무가 명시적이지 않음**
+- **Line**: implement.md § Cross-Feature rows
+
+### Problem
+Phase 11 cross-feature wiring 태스크들 (T067: sidebar KB 아이콘, T037: chat inputbar KB 버튼 연결)이 코드로 작성되었지만, **실제로 앱에서 보이는지 런타임 확인을 하지 않음**. 결과적으로:
+- 채팅 입력바에 KB 버튼이 보이지 않음 (T033 KBButton 컴포넌트는 생성되었으나, F005의 Inputbar에 실제 import/렌더링이 안 됨)
+- Sidebar에 Knowledge 아이콘이 추가되었는지 불확실
+
+이는 "파일을 생성했으나 기존 코드에 실제로 연결하지 않은" 전형적인 cross-feature wiring 실패 패턴임.
+
+### Expected
+Cross-feature wiring 태스크 완료 후:
+1. 앱을 실행하여 해당 UI 요소가 보이는지 확인
+2. 클릭/인터랙션이 동작하는지 확인
+3. 안 보이면 기존 파일을 읽고 정확한 삽입 위치를 찾아 수정
+
+### Workaround
+없음 — 사용자가 직접 확인
+
+### Suggested Fix
+`reference/injection/implement.md`에 추가:
+```
+## Cross-Feature Wiring Runtime Gate (🚫 BLOCKING)
+
+cross-feature Interaction Chain 행이 있는 경우, 해당 태스크 완료 후 반드시:
+1. 앱 실행 (or Playwright snapshot)
+2. 대상 Feature의 UI에서 새 요소가 보이는지 확인
+3. 보이지 않으면 → 기존 파일 읽기 → import/렌더링 위치 확인 → 수정 → 재확인
+
+"파일 생성 + import 작성"만으로 wiring 완료로 간주하지 않는다.
+```

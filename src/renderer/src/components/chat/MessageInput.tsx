@@ -9,6 +9,8 @@ import { useChatStore, useIsStreaming } from '@renderer/stores/useChatStore'
 import { useSettingsStore } from '@renderer/stores/useSettingsStore'
 import { useDraftStore } from '@renderer/stores/useDraftStore'
 import { useTopicStore } from '@renderer/stores/useTopicStore'
+import KBButton from '@renderer/components/chat/KBButton'
+import KBInputDisplay from '@renderer/components/chat/KBInputDisplay'
 
 interface MessageInputProps {
   editText?: string
@@ -179,6 +181,7 @@ export function MessageInput({ editText, editMessageId, onCancelEdit }: MessageI
           </Button>
         </div>
       )}
+      <KBInputDisplay />
       <div className="flex items-end gap-2 rounded-lg border border-border bg-background">
         <Button
           variant="ghost"
@@ -189,6 +192,7 @@ export function MessageInput({ editText, editMessageId, onCancelEdit }: MessageI
         >
           <Paperclip className="h-4 w-4" />
         </Button>
+        <KBButton />
         <div className="min-w-0 flex-1">
           <EditorContent editor={editor} />
         </div>
