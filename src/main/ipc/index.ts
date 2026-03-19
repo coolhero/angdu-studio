@@ -12,6 +12,8 @@ import { registerStartupHandlers } from './startup'
 import { registerProviderHandlers } from './provider'
 import { registerChatHandlers } from './chat-handlers'
 import { registerAssistantHandlers } from './assistant-handlers'
+import { registerKnowledgeHandlers } from './knowledge-handlers'
+import { registerMemoryHandlers } from './memory-handlers'
 
 export function registerAllHandlers(): void {
   registerConfigHandlers()
@@ -28,4 +30,6 @@ export function registerAllHandlers(): void {
   registerProviderHandlers()
   registerChatHandlers()
   registerAssistantHandlers()
+  registerKnowledgeHandlers()
+  registerMemoryHandlers()
 }

@@ -5,6 +5,7 @@ import type { ChatMessage, ChatOptions, ConnectionTestResult, ModelFetchResult, 
 import type { Message, MessageBlock } from './message'
 import type { Topic } from './topic'
 import type { Assistant } from './assistant'
+import type { KnowledgeBase, KnowledgeItem, ItemType, ItemStatus, VectorRecord, MemoryItem, MemoryConfig, MemoryHistoryItem } from './knowledge'
 
 // --- Invoke Channels (request/response) ---
 
@@ -120,6 +121,49 @@ export interface InvokeChannelMap {
   'assistant:delete': { args: [id: string]; return: void }
   'assistant:import': { args: [data: string]; return: Assistant[] }
   'assistant:export': { args: [ids: string[]]; return: string }
+
+  // Knowledge Base (F006)
+  'kb:create': {
+    args: [params: {
+      name: string
+      model: KnowledgeBase['model']
+      dimensions?: number
+      documentCount?: number
+      chunkSize?: number
+      chunkOverlap?: number
+      threshold?: number
+    }]
+    return: KnowledgeBase
+  }
+  'kb:delete': { args: [id: string]; return: void }
+  'kb:reset': { args: [id: string]; return: void }
+  'kb:update': { args: [kb: Partial<KnowledgeBase> & { id: string }]; return: KnowledgeBase }
+  'kb:list': { args: []; return: KnowledgeBase[] }
+  'kb:addItem': { args: [baseId: string, type: ItemType, content: string, remark?: string]; return: KnowledgeItem }
+  'kb:removeItem': { args: [baseId: string, itemId: string]; return: void }
+  'kb:addFiles': { args: [baseId: string, files: string[]]; return: KnowledgeItem[] }
+  'kb:retryItem': { args: [baseId: string, itemId: string]; return: void }
+  'kb:search': { args: [kbIds: string[], query: string, limit?: number, threshold?: number]; return: Array<VectorRecord & { similarity: number }> }
+  'kb:rerank': { args: [results: Array<VectorRecord & { similarity: number }>, query: string, rerankModel?: Model]; return: Array<VectorRecord & { similarity: number }> }
+  'kb:saveContent': { args: [targetKBId: string, content: string, type: ItemType, remark?: string]; return: KnowledgeItem }
+  'kb:closeAll': { args: []; return: void }
+
+  // Embedding (F006)
+  'ai:embed': { args: [providerId: string, modelId: string, texts: string[], dimensions?: number]; return: number[][] }
+
+  // Memory (F006)
+  'memory:list': { args: [userId: string, page?: number, pageSize?: number, search?: string]; return: { items: MemoryItem[]; total: number } }
+  'memory:add': { args: [userId: string, content: string, metadata?: Record<string, unknown>]; return: MemoryItem }
+  'memory:update': { args: [id: string, content: string]; return: MemoryItem | null }
+  'memory:delete': { args: [id: string]; return: void }
+  'memory:search': { args: [userId: string, query: string, limit?: number]; return: MemoryItem[] }
+  'memory:get': { args: [id: string]; return: { memory: MemoryItem; history: MemoryHistoryItem[] } | null }
+  'memory:deleteAllForUser': { args: [userId: string]; return: void }
+  'memory:getUsersList': { args: []; return: Array<{ userId: string; count: number }> }
+  'memory:extractFacts': { args: [userId: string, messages: Array<{ role: string; content: string }>, config?: MemoryConfig]; return: MemoryItem[] }
+  'memory:searchRelevant': { args: [userId: string, query: string, limit?: number]; return: MemoryItem[] }
+  'memory:getConfig': { args: []; return: MemoryConfig }
+  'memory:updateConfig': { args: [partial: Partial<MemoryConfig>]; return: MemoryConfig }
 }
 
 // --- Event Channels (main → renderer) ---
@@ -140,6 +184,17 @@ export interface EventChannelMap {
   'ai:stream-chunk': { payload: { requestId: string; chunk: NormalizedChunk } }
   'ai:stream-complete': { payload: { requestId: string; usage?: TokenUsage } }
   'ai:stream-error': { payload: { requestId: string; error: SerializedError } }
+
+  // Knowledge Base item progress (F006)
+  'kb:itemProgress': {
+    payload: {
+      baseId: string
+      itemId: string
+      status: ItemStatus
+      progress: number
+      error?: string
+    }
+  }
 }
 
 // --- Type utilities ---

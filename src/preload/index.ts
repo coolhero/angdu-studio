@@ -32,13 +32,24 @@ const INVOKE_CHANNELS: InvokeChannel[] = [
   'chat:generateTopicName',
   // F005 — Assistant
   'assistant:getAll', 'assistant:add', 'assistant:update', 'assistant:delete',
-  'assistant:import', 'assistant:export'
+  'assistant:import', 'assistant:export',
+  // F006 — Knowledge Base
+  'kb:create', 'kb:delete', 'kb:reset', 'kb:update', 'kb:list',
+  'kb:addItem', 'kb:removeItem', 'kb:addFiles', 'kb:retryItem',
+  'kb:search', 'kb:rerank', 'kb:saveContent', 'kb:closeAll',
+  'ai:embed',
+  // F006 — Memory
+  'memory:list', 'memory:add', 'memory:update', 'memory:delete',
+  'memory:search', 'memory:get', 'memory:deleteAllForUser', 'memory:getUsersList',
+  'memory:extractFacts', 'memory:searchRelevant', 'memory:getConfig', 'memory:updateConfig'
 ]
 
 const EVENT_CHANNELS: EventChannel[] = [
   'theme:changed', 'window:focus', 'window:blur', 'window:state-changed',
   'update:available', 'update:progress', 'update:ready', 'deep-link:received',
-  'ai:stream-chunk', 'ai:stream-complete', 'ai:stream-error'
+  'ai:stream-chunk', 'ai:stream-complete', 'ai:stream-error',
+  // F006 — Knowledge Base
+  'kb:itemProgress'
 ]
 
 function createInvoke() {

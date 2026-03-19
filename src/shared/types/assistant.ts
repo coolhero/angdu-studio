@@ -32,6 +32,8 @@ export interface Assistant {
   category?: string
   mcpMode?: 'auto' | 'manual' | 'off'
   mcpServers?: string[]
+  knowledge_bases?: string[]
+  enableMemory?: boolean
   isDefault?: boolean
   createdAt: string
   updatedAt: string

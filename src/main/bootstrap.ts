@@ -10,6 +10,8 @@ import { powerService } from './services/PowerService'
 import { registerAllHandlers } from './ipc'
 import { ProviderService } from './services/ProviderService'
 import { AssistantService } from './services/AssistantService'
+import { KnowledgeService } from './services/KnowledgeService'
+import { MemoryService } from './services/MemoryService'
 import { initializeDatabase } from './db'
 
 export async function initializeServices(): Promise<void> {
@@ -27,6 +29,12 @@ export async function initializeServices(): Promise<void> {
 
   // Phase 1c: Initialize assistant service (F005)
   AssistantService.getInstance().initialize()
+
+  // Phase 1d: Initialize knowledge service (F006)
+  await KnowledgeService.getInstance().initialize()
+
+  // Phase 1e: Initialize memory service (F006)
+  MemoryService.getInstance().initialize()
 
   // Phase 2: Register all IPC handlers BEFORE window loads content
   registerAllHandlers()
