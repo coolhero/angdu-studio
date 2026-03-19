@@ -61,3 +61,11 @@
 |----------|---------|
 | Constitution Version | 1.0.0 |
 | Key Modifications | Accepted as-is |
+
+---
+
+## [2026-03-19] /smart-sdd reset
+
+| Feature | Reset from | Previous Status | Dependents Affected |
+|---------|-----------|-----------------|---------------------|
+| F006-knowledge-memory | specify | in_progress (all steps 🔀) | none |

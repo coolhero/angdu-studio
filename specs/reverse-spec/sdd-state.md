@@ -82,7 +82,7 @@ Foundation Verified: 2026-03-16 | PASS | Build ✅, Toolchain ✅, Platform N/A
 | F003 | settings | T1 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | completed |
 | F004 | model-provider | T1 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | completed |
 | F005 | chat-conversation | T1 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-17 | ✅ 03-17 | completed |
-| F006 | knowledge-memory | T2 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | deferred |
+| F006 | knowledge-memory | T2 | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | pending |
 | F007 | mcp-tools | T2 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | deferred |
 | F008 | content-management | T2 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | deferred |
 | F009 | web-search | T3 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | deferred |
