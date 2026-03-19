@@ -82,7 +82,7 @@ Foundation Verified: 2026-03-16 | PASS | Build ✅, Toolchain ✅, Platform N/A
 | F003 | settings | T1 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | completed |
 | F004 | model-provider | T1 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | completed |
 | F005 | chat-conversation | T1 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-16 | ✅ 03-17 | ✅ 03-17 | completed |
-| F006 | knowledge-memory | T2 | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | pending |
+| F006 | knowledge-memory | T2 | ✅ 03-19 | ✅ 03-19 | ✅ 03-19 | ✅ 03-19 | ⬜ | ⬜ | ⬜ | in_progress |
 | F007 | mcp-tools | T2 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | deferred |
 | F008 | content-management | T2 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | deferred |
 | F009 | web-search | T3 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | deferred |
@@ -148,6 +148,15 @@ Foundation Verified: 2026-03-16 | PASS | Build ✅, Toolchain ✅, Platform N/A
 | implement | completed | 2026-03-16T20:15:00 | 2026-03-16T22:00:00 | 40+ new files, 6 modified files, build ✅. 6 stores, 3 services, 8 block components, 8 chat components, 4 page components. TipTap editor, Shiki highlighting, @tanstack/react-virtual. Demo script created |
 | verify | completed | 2026-03-16T22:00:00 | 2026-03-17T05:00:00 | Build ✅, TS ✅, Playwright E2E 6/6+4/4 pass. 채팅 동작 확인 (사용자 환경). Fixed: TipTap crash, ModelSelector 추가, HomeSidebar 탭 전환, AI SDK .chat() API, baseURL /v1, provider hydrate, block upsert, min-h-0 레이아웃. SKF-037~041 기록 |
 
+### F006-knowledge-memory
+
+| Step | Status | Started | Completed | Notes |
+|------|--------|---------|-----------|-------|
+| specify | completed | 2026-03-19T14:00:00 | 2026-03-19T14:30:00 | 46 FRs, 12 SCs, 8 user stories, 35 SBI mapped (B161-B195). 10 entry points covered. S1 8/8. |
+| plan | completed | 2026-03-19T14:30:00 | 2026-03-19T15:00:00 | 7 entities, 24 IPC channels, 11 phases, 8 pattern constraints, 23 component mappings, 8-stage citation pipeline, 25 interaction chains |
+| tasks | completed | 2026-03-19T15:00:00 | 2026-03-19T15:15:00 | 78 tasks, 11 phases, 8 user stories, 10 cross-feature modifications |
+| analyze | completed | 2026-03-19T15:15:00 | 2026-03-19T15:30:00 | 0 critical, 3 HIGH (resolved: REFERENCE_PROMPT, memory tool contract, lifecycle hooks), 2 MEDIUM (resolved: fact prompt, shortcut). 46/46 FR coverage |
+
 ---
 
 ## Feature Mapping
@@ -159,7 +168,7 @@ Foundation Verified: 2026-03-16 | PASS | Build ✅, Toolchain ✅, Platform N/A
 | F003 | 003-settings | specs/003-settings/ | 003-settings | ✅ |
 | F004 | 004-model-provider | specs/004-model-provider/ | 004-model-provider | ✅ |
 | F005 | 005-chat-conversation | specs/005-chat-conversation/ | 005-chat-conversation | |
-| F006 | | | | |
+| F006 | 006-knowledge-memory | specs/006-knowledge-memory/ | 006-knowledge-memory | |
 | F007 | | | | |
 | F008 | | | | |
 | F009 | | | | |

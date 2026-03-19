@@ -125,6 +125,8 @@ SKF 항목은 **spec-kit-skills의 구조적 문제**에 초점을 맞춘다:
 - Zustand persist (localStorage) for provider configs + model cache. API keys encrypted via Electron safeStorage. (004-model-provider)
 - TypeScript 5.8+ (strict mode) + @tiptap/react, @tiptap/starter-kit, @tiptap/extension-placeholder, @tiptap/extension-mention, react-markdown, remark-gfm, rehype-raw, shiki, @tanstack/react-virtual, Zustand, React 19, Zod, shadcn/ui (005-chat-conversation)
 - better-sqlite3 via Drizzle ORM (messages, topics, blocks — main process); Zustand persist to localStorage (assistants, drafts, UI state — renderer) (005-chat-conversation)
+- TypeScript 5.8+ (strict mode) + better-sqlite3, Zustand, React 19, shadcn/ui, Tailwind CSS 4, Vercel AI SDK (via F004) (006-knowledge-memory)
+- better-sqlite3 (vector store, memory store — main process), Zustand persist (KB metadata — renderer) (006-knowledge-memory)
 
 ## Recent Changes
 (clean restart — no implementation yet)
