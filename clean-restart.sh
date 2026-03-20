@@ -110,6 +110,44 @@ echo "  Remaining files:"
 find . -not -path './.git/*' -not -path './.git' -not -name '.' | sort | head -30
 echo ""
 
+# ─── Delete feature branches (local + remote) ──────────────────
+
+echo "  Cleaning up feature branches..."
+
+MAIN_BRANCH="$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@')"
+MAIN_BRANCH="${MAIN_BRANCH:-main}"
+CURRENT_BRANCH="$(git branch --show-current)"
+
+# Switch to main if on a feature branch
+if [[ "$CURRENT_BRANCH" != "$MAIN_BRANCH" ]]; then
+  echo "  Switching from $CURRENT_BRANCH to $MAIN_BRANCH..."
+  git checkout "$MAIN_BRANCH"
+fi
+
+# Delete local branches (everything except main)
+LOCAL_BRANCHES=$(git branch --format='%(refname:short)' | grep -v "^${MAIN_BRANCH}$" || true)
+if [[ -n "$LOCAL_BRANCHES" ]]; then
+  echo "$LOCAL_BRANCHES" | while read -r branch; do
+    git branch -D "$branch"
+    echo "    Deleted local: $branch"
+  done
+else
+  echo "    (no local branches to delete)"
+fi
+
+# Delete remote branches (everything except main and HEAD)
+git fetch --prune origin 2>/dev/null || true
+REMOTE_BRANCHES=$(git branch -r --format='%(refname:short)' | sed 's@^origin/@@' | grep -v "^${MAIN_BRANCH}$" | grep -v "^HEAD$" || true)
+if [[ -n "$REMOTE_BRANCHES" ]]; then
+  echo "$REMOTE_BRANCHES" | while read -r branch; do
+    git push origin --delete "$branch" 2>/dev/null && echo "    Deleted remote: $branch" || echo "    Skip remote: $branch (already gone)"
+  done
+else
+  echo "    (no remote branches to delete)"
+fi
+
+echo ""
+
 # ─── Commit and push ─────────────────────────────────────────────
 
 echo "  Staging, committing, and pushing..."
@@ -130,7 +168,7 @@ Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 EOF
 )"
 
-git push
+git push --force
 
 echo ""
 echo "  ✅ Clean restart committed and pushed."
